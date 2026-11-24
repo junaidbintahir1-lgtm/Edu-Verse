@@ -5094,6 +5094,73 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   #knovoLiveModal .klError{padding:22px;text-align:center;color:#fca5a5;font-size:.9rem;line-height:1.7}
   #knovoLiveModal text{font-family:'Caveat','Patrick Hand',cursive}
   @media(max-width:640px){#knovoLiveModal .klHead h3{white-space:normal}#knovoLiveModal .klBoardbar{padding:7px 10px;gap:5px}#knovoLiveModal .klBoardbar button{min-height:40px;padding:6px 9px}#knovoLiveModal .klNote{right:12px;top:12px}#knovoLiveModal .klStage{min-height:180px;padding:8px}#knovoLiveModal .klControls{padding:8px 10px;gap:7px}#knovoLiveModal .klControls button{padding:8px 10px;min-height:44px}#knovoLiveModal .klReplayMeter{order:5;flex-basis:100%;max-width:none}#knovoLiveModal .klAsk{min-width:180px}}
+  /* ---- Live Lesson v2 ---- */
+  #knovoLiveModal .klHead h3{text-align:center}
+  #knovoLiveModal .klStepPill{padding:6px 11px;border:1px solid rgba(52,211,153,.45);border-radius:999px;background:rgba(52,211,153,.08);color:#6ee7b7;font-size:.72rem;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+  #knovoLiveModal .klIconBtn{border:1px solid #334155;background:#16223a;color:#e2e8f0;border-radius:10px;padding:7px 11px;cursor:pointer;font-size:.76rem;font-weight:700;white-space:nowrap}
+  #knovoLiveModal .klIconBtn:hover,#knovoLiveModal .klIconBtn[aria-expanded="true"]{border-color:#38bdf8;color:#7dd3fc}
+  #knovoLiveModal .klAvatar .klWave{position:absolute;right:-4px;bottom:-3px;display:none;gap:2px;align-items:flex-end;height:12px;padding:2px 3px;border-radius:6px;background:#0b1220}
+  #knovoLiveModal .klAvatar.talking .klWave{display:flex}
+  #knovoLiveModal .klWave b{display:block;width:2px;height:4px;border-radius:2px;background:#38bdf8;animation:klWave .9s ease-in-out infinite}
+  #knovoLiveModal .klWave b:nth-child(2){animation-delay:.15s}#knovoLiveModal .klWave b:nth-child(3){animation-delay:.3s}
+  @keyframes klWave{0%,100%{height:3px}50%{height:10px}}
+  #knovoLiveModal .klVoicePanel{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid #1e293b;background:#0d1628;color:#cbd5e1;font-size:.76rem}
+  #knovoLiveModal .klVoicePanel[hidden]{display:none}
+  #knovoLiveModal .klVoicePanel label{display:flex;align-items:center;gap:8px;font-weight:700}
+  #knovoLiveModal .klVoicePanel select{max-width:260px;padding:6px 8px;border:1px solid #334155;border-radius:8px;background:#0f1b30;color:#f1f5f9;font-size:.76rem}
+  #knovoLiveModal .klVoicePanel input[type=range]{width:120px;accent-color:#38bdf8}
+  #knovoLiveModal .klVoicePanel button{border:1px solid #334155;background:#16223a;color:#e2e8f0;border-radius:8px;padding:6px 11px;cursor:pointer;font-size:.74rem;font-weight:700}
+  #knovoLiveModal .klMain{flex:1;min-height:0;display:flex;gap:0}
+  #knovoLiveModal .klMain .klStage{min-width:0}
+  #knovoLiveModal .klSide{flex:0 0 300px;display:flex;flex-direction:column;min-height:0;border-left:1px solid #1e293b;background:#0b1220}
+  #knovoLiveModal.klNotesOff .klSide{display:none}
+  #knovoLiveModal .klSideHead{padding:10px 14px 6px;color:#94a3b8;font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  #knovoLiveModal .klPlan{list-style:none;margin:0;padding:0 8px 8px;max-height:40%;overflow-y:auto;flex:0 0 auto}
+  #knovoLiveModal .klPlan li button{display:flex;align-items:flex-start;gap:9px;width:100%;padding:7px 8px;border:1px solid transparent;border-radius:9px;background:none;color:#cbd5e1;font-size:.78rem;line-height:1.35;text-align:left;cursor:pointer}
+  #knovoLiveModal .klPlan li button:hover{border-color:#334155;background:#111c31}
+  #knovoLiveModal .klPlanNum{display:grid;place-items:center;flex:0 0 20px;height:20px;border-radius:50%;border:1px solid #334155;color:#94a3b8;font-size:.64rem;font-weight:800}
+  #knovoLiveModal .klPlan li.done .klPlanNum{border-color:#34d399;background:rgba(52,211,153,.15);color:#6ee7b7}
+  #knovoLiveModal .klPlan li.now button{border-color:rgba(56,189,248,.5);background:rgba(56,189,248,.08);color:#f1f5f9}
+  #knovoLiveModal .klPlan li.now .klPlanNum{border-color:#38bdf8;background:#38bdf8;color:#0b1220}
+  #knovoLiveModal .klPlanGhost{padding:7px 10px;color:#64748b;font-size:.76rem}
+  #knovoLiveModal .klLog{flex:1;min-height:80px;overflow-y:auto;padding:4px 12px 12px;display:flex;flex-direction:column;gap:8px}
+  #knovoLiveModal .klLogHint{margin:0;color:#64748b;font-size:.74rem;line-height:1.55}
+  #knovoLiveModal .klLogItem{padding:8px 10px;border-radius:10px;font-size:.78rem;line-height:1.5;color:#e2e8f0}
+  #knovoLiveModal .klLogItem b{display:block;margin-bottom:2px;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase}
+  #knovoLiveModal .klLogItem.you{align-self:flex-end;max-width:92%;background:#16223a;border:1px solid #334155}
+  #knovoLiveModal .klLogItem.you b{color:#fbbf24}
+  #knovoLiveModal .klLogItem.knovo{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.25)}
+  #knovoLiveModal .klLogItem.knovo b{color:#7dd3fc}
+  #knovoLiveModal .klLogItem.err{border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.06)}
+  #knovoLiveModal .klLogItem.sys{padding:2px 4px;color:#64748b;font-size:.7rem}
+  #knovoLiveModal .klLoading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#cbd5e1;text-align:center;pointer-events:none}
+  #knovoLiveModal .klLoading b{font-size:1rem}
+  #knovoLiveModal .klLoading small{color:#94a3b8;font-size:.78rem}
+  #knovoLiveModal .klSpinner{width:34px;height:34px;border-radius:50%;border:3px solid rgba(56,189,248,.2);border-top-color:#38bdf8;animation:klSpin 1s linear infinite}
+  @keyframes klSpin{to{transform:rotate(360deg)}}
+  #knovoLiveModal .klSub{font-size:1rem}
+  #knovoLiveModal .klCapPrev{color:#64748b}
+  #knovoLiveModal .klCapNow{color:#f1f5f9}
+  #knovoLiveModal .klRetry{margin-left:8px;border:1px solid #38bdf8;background:#16223a;color:#7dd3fc;border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:800}
+  #knovoLiveModal .klControls button:disabled,#knovoLiveModal .klReplayTrack:disabled{opacity:.4;cursor:default}
+  #knovoLiveModal .klPrimary{min-width:104px;border-color:#38bdf8!important;color:#7dd3fc!important}
+  #knovoLiveModal .klMicBtn{padding:8px 11px!important}
+  #knovoLiveModal .klMicBtn.on{border-color:#f472b6!important;background:#3b1930!important;animation:klPulseMic 1.1s ease-in-out infinite}
+  @keyframes klPulseMic{50%{box-shadow:0 0 0 6px rgba(244,114,182,.18)}}
+  #knovoLiveModal .klSay{max-height:calc(100% - 52px);overflow-y:auto}
+  #knovoLiveModal .klSay .klSayTxt::after{content:none}
+  #knovoLiveModal .klSaySent{color:#cbd5e1;transition:color .2s}
+  #knovoLiveModal .klSaySent.said{color:#94a3b8}
+  #knovoLiveModal .klSaySent.now{color:#fff;background:rgba(56,189,248,.14);border-radius:4px}
+  #knovoLiveModal .klSayQ{display:block;color:#fde68a;margin-bottom:8px}
+  #knovoLiveModal .klSayX{position:absolute;top:8px;right:8px;width:26px;height:26px;border:0;border-radius:7px;background:transparent;color:#94a3b8;cursor:pointer}
+  #knovoLiveModal .klSayX:hover{background:#16223a;color:#f1f5f9}
+  #knovoLiveModal .klThinking{display:inline-flex;align-items:center;gap:4px;color:#7dd3fc;font-family:Inter,'Segoe UI',sans-serif;font-size:.78rem}
+  #knovoLiveModal .klThinking i{width:6px;height:6px;border-radius:50%;background:#38bdf8;animation:klDot 1s ease-in-out infinite}
+  #knovoLiveModal .klThinking i:nth-child(2){animation-delay:.15s}#knovoLiveModal .klThinking i:nth-child(3){animation-delay:.3s;margin-right:6px}
+  @keyframes klDot{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+  @media(max-width:900px){#knovoLiveModal .klMain{flex-direction:column}#knovoLiveModal .klSide{flex:0 0 auto;max-height:34vh;border-left:0;border-top:1px solid #1e293b}#knovoLiveModal .klPlan{max-height:none}#knovoLiveModal .klHead{gap:8px;padding:10px 12px}#knovoLiveModal .klHead h3{order:9;flex-basis:100%;text-align:left}}
+  @media(max-width:640px){#knovoLiveModal .klBoardbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}#knovoLiveModal .klBoardbar>*{flex:0 0 auto}#knovoLiveModal .klBoardLabel{display:none}#knovoLiveModal .klBack5{display:none}#knovoLiveModal .klControls .klPrimary{min-width:92px}#knovoLiveModal .klBadge{display:none}#knovoLiveModal .klAsk{order:6;flex-basis:100%}#knovoLiveModal .klSay{left:10px;right:10px;bottom:10px;max-width:none;font-size:1rem}#knovoLiveModal .klSub{font-size:.9rem;padding:10px 14px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -5103,9 +5170,11 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   var SUPA_URL="https://yazzyldmohngmotiozlj.supabase.co";
   var SUPA_KEY="sb_publishable_1p58DjFzc2m-VsPOO1thuA_gjemaUpq";
   var CHAT_SYS="You are Knovo, an all-around study tutor at EduVerse. Help every student with any qualification, exam board or subject: explain concepts clearly and step by step, break down past-paper questions, and help organise study plans.";
-  var LESSON_SYS="You are Knovo, a warm human tutor giving a one-to-one whiteboard lesson for EduVerse. Return valid JSON only — no markdown code fences, no commentary — in this exact structure: {\"title\":\"Topic Title\",\"steps\":[{\"voice\":\"What you say aloud while drawing this step...\",\"svgElements\":\"<circle cx='200' cy='180' r='80' stroke='#38bdf8' stroke-width='3' fill='none'/><text x='160' y='280' fill='#f8fafc' font-family='Caveat' font-size='26'>Label</text>\"}]}. Create 7-10 detailed steps that teach like a real tutor at a whiteboard: step 1 greets the student warmly and poses the key question; the middle steps build the idea with a diagram plus short handwritten labels, then walk through at least one fully worked example with real figures, intermediate calculations and exam-specific detail; draw the emphasis marks a human tutor would draw — an underline beneath a key term, a circle or box around the final result, small arrows linking cause to effect; the final step recaps the single key takeaway and asks the student one quick check question. voice = the natural spoken sentences you would say WHILE drawing that step — conversational, encouraging, first-person (\"Alright, let's start with...\", \"Watch what happens when...\", \"So here's the bit exams love...\"). Each voice should be 55-90 words: explain why each item is used, what happens next and one useful exam detail; do not give vague one-sentence summaries. svgElements is one string of SVG elements only (circle, ellipse, rect, line, path, polyline, polygon, text). STRICT VISUAL RULES: every single step MUST contain BOTH (a) at least one vector shape (path, circle, ellipse, rect, line or polyline) that draws a real, recognisable part of the diagram or illustration — axes, curves, apparatus, cells, circuits, vectors, containers — never decorative dots alone — AND (b) short handwritten <text> labels and, where useful, equations or table rows. For accounting lessons, draw the actual statement formats with headings such as Revenue, Cost of Sales, Gross Profit, Non-current Assets, Capital and Liabilities; never substitute generic pictures. A step with only text, or only shapes with no label, is INVALID. The canvas is viewBox 0 0 800 500 on a dark background: keep EVERY coordinate strictly inside x: 60-740 and y: 60-440 so nothing is clipped. Use strokes #38bdf8 (main), #f472b6, #fbbf24, #34d399, stroke-width 3, fill none for shapes; text fill #8fafc, font-family Caveat, font-size 26. Build left-to-right and top-to-bottom so later steps never overlap earlier content.";
-  /* fix a typo guard: ensure colour token is valid */
-  LESSON_SYS=LESSON_SYS.replace("#8fafc","#f8fafc");
+  var LESSON_SYS="You are Knovo, a warm, expert human tutor giving a one-to-one LIVE whiteboard lesson for EduVerse. You speak while you draw. Return valid JSON only — no markdown code fences, no commentary — in exactly this structure: {\"title\":\"Topic Title\",\"steps\":[{\"title\":\"Short step heading\",\"voice\":\"What you say aloud while drawing this step.\",\"svgElements\":\"<circle cx='200' cy='180' r='80' stroke='#38bdf8' stroke-width='3' fill='none'/><text x='160' y='280' fill='#f8fafc' font-family='Caveat' font-size='26'>Label</text>\"}]}. "+
+    "LESSON SHAPE: 6-8 steps that flow like one continuous conversation, not separate slides. Step 1 greets the student briefly, poses the key question and says in one sentence what the lesson will cover. The middle steps build the idea one piece at a time with a diagram plus short handwritten labels, then walk through at least one fully worked example with real figures, intermediate working and the exam-specific detail examiners reward, and point out one common mistake. Draw the emphasis marks a human tutor would draw — an underline beneath a key term, a circle or box around the final result, small arrows linking cause to effect. The final step recaps the single key takeaway and asks ONE quick check question, inviting the student to type or say their answer. "+
+    "title = a 2-6 word heading for the step. "+
+    "voice = the natural sentences you say WHILE drawing that step: 3-5 short spoken sentences, 40-75 words in total. Conversational, first person, with contractions (\"Alright, watch this arrow...\", \"Here's the bit examiners love...\", \"Notice what happens when...\"). Refer to what you are drawing (\"this curve I've just drawn\") and link each step to the one before, so the lesson sounds like one teacher talking. Vary how steps begin; never open two steps the same way. Write maths and symbols the way you would say them aloud (x squared, divided by, leads to). No lists, markdown or emojis in voice. "+
+    "svgElements = one string of SVG elements only (circle, ellipse, rect, line, path, polyline, polygon, text), at most 10 per step. Use SINGLE quotes for every attribute and never put double quotes or line breaks inside any JSON string value. STRICT VISUAL RULES: every single step MUST contain BOTH (a) at least one vector shape (path, circle, ellipse, rect, line or polyline) that draws a real, recognisable part of the diagram or illustration — axes, curves, apparatus, cells, circuits, vectors, containers — never decorative dots alone — AND (b) short handwritten <text> labels and, where useful, equations or table rows. For accounting lessons, draw the actual statement formats with headings such as Revenue, Cost of Sales, Gross Profit, Non-current Assets, Capital and Liabilities; never substitute generic pictures. A step with only text, or only shapes with no label, is INVALID. The canvas is viewBox 0 0 800 500 on a dark background: keep EVERY coordinate strictly inside x: 60-740 and y: 60-440 so nothing is clipped. Use strokes #38bdf8 (main), #f472b6, #fbbf24, #34d399, stroke-width 3, fill none for shapes; text fill #f8fafc, font-family Caveat, font-size 26. Build left-to-right and top-to-bottom so later steps never overlap earlier content.";
 
   /* ---------------- Supabase session (with silent refresh) ---------------- */
   var supa=null;
@@ -5150,17 +5219,6 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     if(supa&&a.refresh){ try{ await supa.auth.setSession({access_token:a.access,refresh_token:a.refresh}); }catch(e){} }
     return {access_token:a.access};
   }
-  /* Edge Function call with apikey header + one forced token refresh & retry on 401 */
-  async function edgeFetch(body,tok){
-    var H=function(t){ return {"Content-Type":"application/json","apikey":SUPA_KEY,"Authorization":"Bearer "+t}; };
-    var r=await fetch(EDGE,{method:"POST",headers:H(tok),body:JSON.stringify(body)});
-    if(r.status===401){
-      var rs=await refreshStoredSession();
-      if(rs){ if(L)L.token=rs.access_token; r=await fetch(EDGE,{method:"POST",headers:H(rs.access_token),body:JSON.stringify(body)}); }
-    }
-    return r;
-  }
-
   /* ---------------- anonymous usage logging for the owner analytics ---------------- */
   window.knovoLogUsage=async function(kind){
     try{
@@ -5332,119 +5390,420 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   function liveRecord(){try{localStorage.setItem("knovo_live_usage",JSON.stringify(liveUsage().concat([Date.now()])));}catch(e){} }
   function liveWait(){var u=liveUsage();if(!u.length)return "";var ms=u[0]+LIVE_WINDOW-Date.now();return fmtWait(ms);}
 
-  /* ---------------- speech helpers ---------------- */
-  function pickVoice(){
-    try{var vs=speechSynthesis.getVoices().filter(function(v){return /^en/i.test(v.lang);});
-      return vs.find(function(v){return /Google (UK|US) English|Natural/i.test(v.name);})||vs[0]||null;}catch(e){return null;}
-  }
-  function speak(text,onend){
-    var done=false;function fin(){if(!done){done=true;tutorTalking(false);if(onend)onend();}}
-    /* Safety timer: if speech is blocked or unavailable the lesson still advances. */
-    var fb=setTimeout(fin,Math.min(45000,1800+String(text).length*60));
-    function wrapped(){clearTimeout(fb);fin();}
-    tutorTalking(true);
-    if(!("speechSynthesis" in window))return;
-    try{
-      speechSynthesis.cancel();
-      var u=new SpeechSynthesisUtterance(text);u.rate=1;u.pitch=1;
-      var v=pickVoice();if(v)u.voice=v;
-      u.onend=wrapped;u.onerror=wrapped;
-      speechSynthesis.speak(u);
-    }catch(e){ /* timed fallback keeps the lesson moving */ }
-  }
+  /* ================================================================
+     LIVE LESSON v2
+     - KV: sentence-by-sentence voice engine (no Chrome 15-second cut-off,
+       pause/resume that never loses its place, stale callbacks ignored)
+     - lesson playback state machine with a run token per navigation
+     - raise-hand Q&A that remembers the whole lesson and earlier answers
+     ================================================================ */
+  var KV=(function(){
+    var synth=("speechSynthesis" in window)?window.speechSynthesis:null;
+    var prefs={voice:"",rate:1,muted:false};
+    try{var p=JSON.parse(localStorage.getItem("knovo_live_voice_prefs")||"{}");if(p&&typeof p==="object"){prefs.voice=String(p.voice||"");prefs.rate=Math.max(.75,Math.min(1.35,Number(p.rate)||1));prefs.muted=!!p.muted;}}catch(e){}
+    function save(){try{localStorage.setItem("knovo_live_voice_prefs",JSON.stringify(prefs));}catch(e){}}
+    function voices(){try{return synth?synth.getVoices().filter(function(v){return /^en([-_]|$)/i.test(v.lang||"");}):[];}catch(e){return [];}}
+    /* Most natural-sounding voices first: Edge/Windows neural, then Google, then Apple. */
+    var RANK=[/(Natural|Neural)/i,/Google UK English Female/i,/Google US English/i,/(Samantha|Serena|Karen|Moira|Tessa|Daniel|Arthur|Martha)/i,/Microsoft (Aria|Jenny|Libby|Sonia|Guy|Ryan|Hazel|Susan)/i,/Google/i];
+    function best(){
+      var vs=voices();if(!vs.length)return null;
+      if(prefs.voice){for(var k=0;k<vs.length;k++)if(vs[k].name===prefs.voice)return vs[k];}
+      for(var i=0;i<RANK.length;i++){for(var j=0;j<vs.length;j++)if(RANK[i].test(vs[j].name))return vs[j];}
+      for(var d=0;d<vs.length;d++)if(vs[d].default)return vs[d];
+      return vs[0];
+    }
+    /* What the ear hears: symbols read as words, no markdown. Captions keep the original. */
+    function clean(t){
+      return String(t||"").replace(/\*\*|__|`|#{1,6}\s/g,"").replace(/<[^>]+>/g," ")
+        .replace(/\s*(→|⇒|->)\s*/g," leads to ").replace(/\s*←\s*/g," comes from ").replace(/\s*×\s*/g," times ").replace(/\s*÷\s*/g," divided by ")
+        .replace(/\s*≈\s*/g," is about ").replace(/\s*≠\s*/g," is not equal to ").replace(/\s*≤\s*/g," is less than or equal to ").replace(/\s*≥\s*/g," is greater than or equal to ")
+        .replace(/\^2\b|²/g," squared").replace(/\^3\b|³/g," cubed").replace(/°C\b/g," degrees Celsius").replace(/°/g," degrees").replace(/\s*±\s*/g," plus or minus ")
+        .replace(/[✦✨✅⚠️👉🙂😊]/g,"").replace(/\s+/g," ").trim();
+    }
+    function sentences(t){
+      t=String(t||"").replace(/\*\*/g,"").replace(/\s+/g," ").trim();if(!t)return [];
+      var marked=t.replace(/\b(e\.g|i\.e|etc|vs|Mr|Mrs|Ms|Dr|approx|Fig|No)\./gi,function(m){return m.replace(/\./g,"\u0001");})
+                  .replace(/([.!?…]+["'”’)\]]*)\s+(?=\S)/g,"$1\u0002");
+      var raw=marked.split("\u0002").map(function(s){return s.replace(/\u0001/g,".").trim();}).filter(Boolean),out=[];
+      raw.forEach(function(s){
+        /* very long sentences are split at a comma/semicolon so no utterance runs too long */
+        while(s.length>210){
+          var cut=-1,mid=Math.floor(s.length/2);
+          for(var d=0;d<mid;d++){var a=mid+d,b=mid-d;if(/[,;:]/.test(s[a])&&s[a+1]===" "){cut=a;break;}if(b>0&&/[,;:]/.test(s[b])&&s[b+1]===" "){cut=b;break;}}
+          if(cut<0)break;out.push(s.slice(0,cut+1));s=s.slice(cut+2);
+        }
+        out.push(s);
+      });
+      /* merge tiny fragments ("Right.") into the next sentence for a smoother flow */
+      var merged=[];
+      out.forEach(function(s){if(merged.length&&merged[merged.length-1].length<16)merged[merged.length-1]+=" "+s;else merged.push(s);});
+      return merged;
+    }
+    function gapAfter(s){var e=String(s).trim().slice(-1);return (e==="?"?430:e==="!"||e==="."?260:140)/prefs.rate;}
+    var active=null,tokSeq=0,lastCancel=0,onTalk=function(){};
+    function cancelEngine(){if(!synth)return;try{synth.cancel();lastCancel=Date.now();}catch(e){}}
+    function run(h){
+      if(h!==active||h.paused||h.done)return;
+      if(h.i>=h.list.length){h.done=true;active=null;onTalk(false);if(h.o.onEnd)h.o.onEnd();return;}
+      var idx=h.i,s=h.list[idx],tok=h.tok=++tokSeq,moved=false;
+      if(h.o.onSentence)try{h.o.onSentence(idx,h.list);}catch(e){}
+      onTalk(true);
+      var words=String(s).split(/\s+/).length,est=words/2.6/prefs.rate*1000,t0=Date.now();
+      function next(){
+        if(moved||tok!==h.tok)return;moved=true;clearTimeout(h.wd);
+        if(h!==active||h.paused||h.done)return;
+        /* an engine that "finishes" instantly (failed synthesis) must not rush the captions */
+        var spent=Date.now()-t0,hold=spent<est*.35?est*.9-spent:0;
+        h.i=idx+1;h.gap=setTimeout(function(){run(h);},gapAfter(s)+hold);
+      }
+      if(!synth||prefs.muted){h.wd=setTimeout(next,Math.max(1200,est*1.08));return;} /* silent mode: reading pace */
+      var go=function(){
+        if(tok!==h.tok||h!==active||h.paused)return;
+        try{
+          var u=new SpeechSynthesisUtterance(clean(s)),v=best();
+          if(v){u.voice=v;u.lang=v.lang;}else u.lang="en-GB";
+          u.rate=prefs.rate;u.pitch=1;u.volume=1;
+          var started=false;
+          u.onstart=function(){started=true;};
+          u.onend=next;
+          u.onerror=function(ev){if(ev&&(ev.error==="interrupted"||ev.error==="canceled"))return;next();};
+          h.u=u;synth.speak(u);
+          try{if(synth.paused)synth.resume();}catch(e){}
+          /* watchdog: if the engine never reports back, keep the lesson moving */
+          h.wd=setTimeout(next,est*2+4500);
+          /* engine silently blocked (no voices, autoplay rules): fall back to reading pace */
+          setTimeout(function(){if(!started&&!moved&&tok===h.tok){clearTimeout(h.wd);h.wd=setTimeout(next,Math.max(0,est*1.08-3500));}},3500);
+        }catch(e){h.wd=setTimeout(next,Math.max(1200,est));}
+      };
+      /* Chrome can drop an utterance queued in the same tick as cancel() */
+      var since=Date.now()-lastCancel;if(since<140)setTimeout(go,140-since);else go();
+    }
+    function play(text,o){
+      stop();
+      var list=Array.isArray(text)?text.filter(Boolean):sentences(text);
+      var h={list:list,i:Math.max(0,Math.min(list.length,(o&&o.from)||0)),o:o||{},paused:false,done:false,tok:0};
+      active=h;run(h);return h;
+    }
+    function pause(){var h=active;if(!h||h.paused||h.done)return false;h.paused=true;h.tok=++tokSeq;clearTimeout(h.wd);clearTimeout(h.gap);cancelEngine();onTalk(false);return true;}
+    function resume(){var h=active;if(!h||!h.paused)return false;h.paused=false;run(h);return true;} /* re-speaks the interrupted sentence */
+    function stop(){var h=active;active=null;if(h){h.done=true;h.tok=++tokSeq;clearTimeout(h.wd);clearTimeout(h.gap);}cancelEngine();onTalk(false);}
+    function unlock(){ /* iOS/Safari only allow speech that starts inside a tap */
+      if(!synth)return;try{var u=new SpeechSynthesisUtterance(" ");u.volume=0;synth.speak(u);}catch(e){}
+    }
+    function warm(){if(synth)try{synth.getVoices();}catch(e){}}
+    warm();if(synth){try{synth.addEventListener("voiceschanged",warm);}catch(e){}}
+    return {play:play,pause:pause,resume:resume,stop:stop,unlock:unlock,sentences:sentences,clean:clean,voices:voices,best:best,prefs:prefs,save:save,
+      hasActive:function(){return !!(active&&!active.done);},isPaused:function(){return !!(active&&active.paused);},
+      onTalk:function(f){onTalk=f||function(){};},supported:!!synth};
+  })();
 
   /* ---------------- Live Lesson studio ---------------- */
   var L=null; /* current session state */
+  var TUTOR_SYS="You are Knovo, a warm, expert one-to-one tutor in the middle of a LIVE spoken whiteboard lesson for EduVerse. The student has just raised their hand. Reply with JSON only, no code fences: {\"say\":\"...\",\"board\":\"\",\"action\":\"wait\"}. "+
+    "say = exactly what you say out loud: natural and conversational, first person, 2-5 short sentences (under 90 words), plain spoken English, no markdown, no bullet points, no emojis; write symbols as words when spoken. Answer the student's actual question directly first, then link it back to the step you were teaching. Remember everything already said in this lesson and refer back to it (for example 'like the arrow I drew earlier'). If the student is answering your check question, say clearly whether they are right and why, kindly correcting any mistake. If the question is off-topic, answer briefly and steer back to the lesson. Never say you cannot draw or that you are text-only. "+
+    "board = an empty string unless a quick sketch genuinely helps; if it does, give at most 6 SVG elements (path, line, circle, ellipse, rect, polyline, text) using single quotes for attributes, stroke-width 3, fill none for shapes, colours #fbbf24 or #f472b6, text fill #f8fafc font-family Caveat font-size 24, every coordinate inside x 60-740 and y 60-440. "+
+    "action = 'resume' only when the student says they understand or asks you to continue, 'repeat' when they ask to hear the step again, 'next' when they ask to skip ahead, 'back' when they ask to go back a step, otherwise 'wait'.";
+  var LESSON_COMPACT="\n\nIMPORTANT: the previous attempt could not be read. Return a SHORTER lesson as compact valid JSON on a single line: exactly 5 steps, each voice 35-55 words, at most 6 SVG elements per step, single quotes inside svgElements, no double quotes or line breaks inside any string.";
+
   function closeLive(msg){
     if(!L)return;
-    try{speechSynthesis.cancel();}catch(e){}
-    clearInterval(L.timerInt);clearInterval(L.clockInt);L=null;
+    KV.stop();
+    try{if(L.rec)L.rec.abort();}catch(e){}
+    clearInterval(L.timerInt);clearInterval(L.clockInt);clearTimeout(L.advT);clearTimeout(L.autoT);
+    L=null;
     var m=document.getElementById("knovoLiveModal");if(m)m.remove();
+    document.removeEventListener("visibilitychange",liveVisibility);
     if(msg&&window.toast)toast(msg);
   }
   window.knovoCloseLive=closeLive;
+  function liveVisibility(){ /* a hidden tab mutes speech in most browsers — pause instead of skipping ahead */
+    if(document.hidden&&L&&L.state==="teaching")pauseLesson("paused while you were away — tap ▶ Play to continue");
+  }
+
+  function liveChatContext(topic){
+    try{
+      var st=window.KNOVO_STATE||{};
+      if(st.lastAssistantReply&&(!st.currentTopic||String(st.currentTopic).trim()===topic))return String(st.lastAssistantReply).replace(/\s+/g," ").slice(0,700);
+    }catch(e){}
+    return "";
+  }
 
   async function startLive(topic){
     /* The deployed server is authoritative for allowances; local counters are display-only. */
-    topic=String(topic||"").trim().slice(0,300);
+    topic=String(topic||"").replace(/\s+/g," ").trim().slice(0,300);
     if(!topic){if(window.toast)toast("Type or send a question first, then tap ✨ Live Lesson.");return;}
+    closeLive();
+    KV.unlock(); /* must run inside the tap, before any await */
     var s=await getSession();if(!s){openSignin();return;}
     closeLive();
     var modal=document.createElement("div");modal.id="knovoLiveModal";
+    modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");modal.setAttribute("aria-label","Knovo Live Lesson");
     modal.innerHTML=
-      "<div class='klHead'><div class='klTutor'><span class='klAvatar' id='klAvatar'>✦</span><span class='klWho'><b>Knovo · Live Tutor</b><i id='klStatus'>preparing your lesson…</i></span></div><h3 id='klTitle' style='text-align:right'>✨ Live Lesson</h3><span class='klBadge' id='klBadge'>"+(ownerUnlimited()?"👑 Owner · Unlimited":isPro()?"Knovo Pro ✨":"✨ Server-managed access")+"</span><span class='klTimer' id='klTimer'>60:00</span><button class='klClose' id='klClose'>✕ Close</button></div>"+
+      "<div class='klHead'><div class='klTutor'><span class='klAvatar' id='klAvatar'>✦<i class='klWave'><b></b><b></b><b></b></i></span><span class='klWho'><b>Knovo · Live Tutor</b><i id='klStatus'>preparing your lesson…</i></span></div><h3 id='klTitle'>✨ Live Lesson</h3><span class='klStepPill' id='klStepPill'>Getting ready</span><span class='klBadge' id='klBadge'>"+(ownerUnlimited()?"👑 Owner · Unlimited":isPro()?"Knovo Pro ✨":"✨ Server-managed access")+"</span><span class='klTimer' id='klTimer'>60:00</span><button class='klIconBtn' id='klNotesBtn' title='Show or hide lesson notes' aria-pressed='true'>📝 Notes</button><button class='klIconBtn' id='klVoiceBtn' title='Voice and speed' aria-expanded='false'>🔊 Voice</button><button class='klClose' id='klClose'>✕ Close</button></div>"+
+      "<div class='klVoicePanel' id='klVoicePanel' hidden><label>Voice <select id='klVoiceSel'></select></label><label>Speed <input type='range' id='klRate' min='0.75' max='1.35' step='0.05'><span id='klRateVal'></span></label><label class='klMute'><input type='checkbox' id='klMute'> Captions only (mute)</label><button id='klVoiceTest'>▶ Test voice</button></div>"+
       "<div class='klBoardbar'><span class='klBoardLabel'>Board tools</span><button id='klZoomOut' title='Zoom out'>−</button><button id='klZoomReset' title='Reset zoom'><span class='klZoomValue' id='klZoomValue'>100%</span></button><button id='klZoomIn' title='Zoom in'>+</button><button id='klEraser' title='Click board items to erase them'>Eraser: Off</button><button id='klClearBoard' title='Clear the current board'>Clear Board</button><button class='klClean' id='klCleanLayout'>Clean Layout</button><button id='klUndo'>↶ Undo</button><button id='klExport'>Export SVG</button></div>"+
-      "<div class='klStage' id='klStage'><svg class='klCanvas' id='klSvg' viewBox='0 0 800 500' preserveAspectRatio='xMidYMid meet'><g id='klSteps'></g><g class='klPen' id='klPen' transform='translate(60,440)'><circle r='9' fill='#38bdf8' opacity='.35'/><circle r='4' fill='#7dd3fc'/><text x='6' y='-8' font-size='26'>✍️</text></g></svg></div>"+
-      "<div class='klSub' id='klSub'><b>Knovo:</b> setting up the board and sketching a plan for your lesson…</div>"+
-      "<div class='klControls'><button id='klPlayPause'>⏸ Pause</button><button class='klRewind' id='klBack5' title='Rewind 5 seconds'>−5s</button><button class='klRewind' id='klBack10' title='Rewind 10 seconds'>−10s</button><button id='klReplay'>↺ Replay Step</button><div class='klReplayMeter'><input class='klReplayTrack' id='klReplayTrack' type='range' min='0' max='0' step='0.1' value='0' aria-label='Lesson replay position'><span class='klReplayTime' id='klReplayTime'>0:00 / 0:00</span></div><div class='klAsk'><input id='klQ' placeholder='✋ Ask a Question — interrupt the lesson anytime'><button id='klAskBtn'>Ask</button></div><button class='klResume' id='klResume' style='display:none'>▶ Resume Lesson</button></div>";
+      "<div class='klMain'><div class='klStage' id='klStage'><svg class='klCanvas' id='klSvg' viewBox='0 0 800 500' preserveAspectRatio='xMidYMid meet'><g id='klSteps'></g><g class='klPen' id='klPen' transform='translate(60,440)'><circle r='9' fill='#38bdf8' opacity='.35'/><circle r='4' fill='#7dd3fc'/><text x='6' y='-8' font-size='26'>✍️</text></g></svg><div class='klLoading' id='klLoading'><span class='klSpinner'></span><b>Knovo is planning your lesson…</b><small id='klLoadingTip'>Sketching the board and choosing a worked example.</small></div></div>"+
+      "<aside class='klSide' id='klSide'><div class='klSideHead'>Lesson plan</div><ol class='klPlan' id='klPlan'><li class='klPlanGhost'>Planning steps…</li></ol><div class='klSideHead'>Questions &amp; answers</div><div class='klLog' id='klLog'><p class='klLogHint'>✋ Interrupt any time — Knovo pauses, answers, remembers what you asked, and carries on from the same spot.</p></div></aside></div>"+
+      "<div class='klSub' id='klSub' aria-live='polite'><b>Knovo:</b> setting up the board and sketching a plan for your lesson…</div>"+
+      "<div class='klControls'><button id='klPrev' title='Previous step'>⏮</button><button id='klPlayPause' class='klPrimary'>⏸ Pause</button><button id='klNext' title='Next step'>⏭</button><button id='klReplay'>↺ Replay Step</button><button class='klRewind klBack5' id='klBack5' title='Rewind 5 seconds'>−5s</button><button class='klRewind' id='klBack10' title='Rewind 10 seconds'>−10s</button><div class='klReplayMeter'><input class='klReplayTrack' id='klReplayTrack' type='range' min='0' max='0' step='0.1' value='0' aria-label='Lesson replay position'><span class='klReplayTime' id='klReplayTime'>0:00 / 0:00</span></div>"+
+      "<div class='klAsk'><input id='klQ' maxlength='500' autocomplete='off' placeholder='✋ Ask a question — Knovo pauses and answers' aria-label='Ask Knovo a question'><button id='klMic' class='klMicBtn' title='Ask with your voice'>🎤</button><button id='klAskBtn'>Ask</button></div><button class='klResume' id='klResume' style='display:none'>▶ Continue lesson</button></div>";
     document.body.appendChild(modal);
-    L={step:0,steps:[],playing:false,paused:false,questionMode:false,seconds:3600,groups:[],token:s.access_token,topic:topic,timeline:[],totalTime:0,replayTime:0,needsResume:false,zoom:1,eraseMode:false,history:[]};
-    document.getElementById("klClose").onclick=function(){closeLive("Live Lesson ended.");};
-    document.getElementById("klZoomOut").onclick=function(){setWhiteboardZoom(L.zoom-.25);};
-    document.getElementById("klZoomIn").onclick=function(){setWhiteboardZoom(L.zoom+.25);};
-    document.getElementById("klZoomReset").onclick=function(){setWhiteboardZoom(1);};
-    document.getElementById("klEraser").onclick=toggleWhiteboardEraser;
-    document.getElementById("klClearBoard").onclick=clearWhiteboard;
-    document.getElementById("klUndo").onclick=undoWhiteboard;
-    document.getElementById("klExport").onclick=exportWhiteboardSVG;
-    document.getElementById("klStage").addEventListener("wheel",function(e){if(!L)return;e.preventDefault();setWhiteboardZoom(L.zoom+(e.deltaY<0?.1:-.1));},{passive:false});
-    document.getElementById("klPlayPause").onclick=togglePause;
-    document.getElementById("klBack5").onclick=function(){rewindReplay(5);};
-    document.getElementById("klBack10").onclick=function(){rewindReplay(10);};
-    document.getElementById("klCleanLayout").onclick=cleanWhiteboardLayout;
-    document.getElementById("klReplayTrack").addEventListener("input",function(){seekReplay(Number(this.value)||0);});
-    document.getElementById("klReplay").onclick=replayStep;
-    document.getElementById("klAskBtn").onclick=askQuestion;
-    document.getElementById('klQ').addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();askQuestion();}});
-    document.getElementById("klResume").onclick=resumeLesson;
+    L={step:0,steps:[],state:"loading",run:0,askSeq:0,sentence:0,stepSpoken:false,seconds:3600,groups:[],topic:topic,context:liveChatContext(topic),chat:[],
+       timeline:[],totalTime:0,replayTime:0,needsResume:false,seekSentence:0,zoom:1,eraseMode:false,history:[],title:topic};
+    KV.onTalk(tutorTalking);
+    var $=function(id){return document.getElementById(id);};
+    $("klClose").onclick=function(){closeLive("Live Lesson ended.");};
+    $("klZoomOut").onclick=function(){setWhiteboardZoom(L.zoom-.25);};
+    $("klZoomIn").onclick=function(){setWhiteboardZoom(L.zoom+.25);};
+    $("klZoomReset").onclick=function(){setWhiteboardZoom(1);};
+    $("klEraser").onclick=toggleWhiteboardEraser;
+    $("klClearBoard").onclick=clearWhiteboard;
+    $("klUndo").onclick=undoWhiteboard;
+    $("klExport").onclick=exportWhiteboardSVG;
+    $("klStage").addEventListener("wheel",function(e){if(!L||!e.ctrlKey)return; /* pinch / ctrl+wheel zooms; plain wheel still scrolls */e.preventDefault();setWhiteboardZoom(L.zoom+(e.deltaY<0?.1:-.1));},{passive:false});
+    $("klPlayPause").onclick=togglePause;
+    $("klPrev").onclick=function(){if(L&&L.steps.length)goStep(L.step-1);};
+    $("klNext").onclick=function(){if(L&&L.steps.length)goStep(L.step+1);};
+    $("klBack5").onclick=function(){rewindReplay(5);};
+    $("klBack10").onclick=function(){rewindReplay(10);};
+    $("klCleanLayout").onclick=cleanWhiteboardLayout;
+    $("klReplayTrack").addEventListener("input",function(){seekReplay(Number(this.value)||0);});
+    $("klReplay").onclick=replayStep;
+    $("klAskBtn").onclick=function(){askQuestion();};
+    $("klMic").onclick=micAsk;
+    $("klQ").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.isComposing){e.preventDefault();askQuestion();}});
+    $("klResume").onclick=resumeLesson;
+    $("klNotesBtn").onclick=function(){var m=$("knovoLiveModal");var off=m.classList.toggle("klNotesOff");this.setAttribute("aria-pressed",off?"false":"true");};
+    if(window.innerWidth<900){modal.classList.add("klNotesOff");$("klNotesBtn").setAttribute("aria-pressed","false");}
+    initVoicePanel();
+    document.addEventListener("visibilitychange",liveVisibility);
     L.timerInt=setInterval(tick,1000);
     L.clockInt=setInterval(replayClock,200);
-
-    /* fetch the structured lesson — fresh session token, one refresh+retry on 401 */
-    var sub=document.getElementById("klSub");
-    try{
-      /* The deployed server owns the system prompt. Keep the structured lesson contract in user content. */
-      var body={mode:"whiteboard",contents:[{role:"user",parts:[{text:LESSON_SYS+"\n\nCreate a visual lesson about: "+topic}]}]};
-      var r=await edgeFetch(body,s.access_token);
-      var d=null;try{d=await r.json();}catch(e){}
-      if(!L)return;
-      if(r.status===401||r.status===403){ /* session really is dead — sign in again, never a raw 401 */
-        closeLive();clearAuth();openSignin();
-        if(window.toast)toast("Your session has expired — please sign in again to start your Live Lesson.");
-        return;
-      }
-      if(r.status===429&&d&&d.error==="LIMIT_REACHED"){
-        var wait=Number(d.msLeft)||0;
-        sub.innerHTML="<span class='klError'>⏳ Your Live Lesson allowance is used for now. "+(wait?"Please try again in <b>"+fmtWait(wait)+"</b>.":"Please retry shortly.")+" Knovo Pro includes unlimited lessons.</span>";return;
-      }
-      if(!r.ok)throw new Error((d&&d.error&&d.error.message)||("HTTP "+r.status));
-      var txt=d&&d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0]&&d.candidates[0].content.parts[0].text;
-      var lesson=parseLesson(txt);
-      L.steps=lesson.steps;buildLessonTimeline();liveRecord();updateBadge();
-      try{if(window.knovoLogUsage)window.knovoLogUsage("live_lesson");}catch(e){} /* owner analytics */
-      document.getElementById("klTitle").textContent="✨ "+lesson.title;
-      setStatus("your tutor is ready");
-      sub.innerHTML="<b>Knovo:</b> here we go — step 1 of "+L.steps.length+"…";
-      L.playing=true;playStep(0);
-    }catch(err){
-      if(!L)return;
-      sub.innerHTML="<span class='klError'>⚠️ Couldn't prepare the lesson ("+String(err.message||err)+"). Check your connection and try again.</span>";
-    }
+    updateControls();
+    loadLesson();
   }
   window.knovoLiveLesson=startLive;
 
+  /* ---------------- talking to the Edge Function ---------------- */
+  function replyText(d){
+    try{
+      var parts=(d&&d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts)||[];
+      /* join every text part and skip "thought" parts some models return first */
+      return parts.filter(function(p){return p&&typeof p.text==="string"&&!p.thought;}).map(function(p){return p.text;}).join("").trim();
+    }catch(e){return "";}
+  }
+  async function liveFetch(body,ms){
+    var attempt=0;
+    while(true){
+      var s=await getSession();
+      if(!s)return {auth:true};
+      var ctrl=("AbortController" in window)?new AbortController():null,timer=ctrl?setTimeout(function(){ctrl.abort();},ms||60000):null;
+      var H=function(t){return {"Content-Type":"application/json","apikey":SUPA_KEY,"Authorization":"Bearer "+t};};
+      try{
+        var r=await fetch(EDGE,{method:"POST",headers:H(s.access_token),body:JSON.stringify(body),signal:ctrl?ctrl.signal:undefined});
+        if(r.status===401){
+          var rs=await refreshStoredSession();
+          if(rs)r=await fetch(EDGE,{method:"POST",headers:H(rs.access_token),body:JSON.stringify(body),signal:ctrl?ctrl.signal:undefined});
+        }
+        clearTimeout(timer);
+        var d=null;try{d=await r.json();}catch(e){}
+        if(r.status===401||r.status===403)return {auth:true,status:r.status};
+        if(r.status===429)return {limit:true,status:429,msLeft:Number(d&&d.msLeft)||0,data:d};
+        if(r.status>=500&&attempt<1){attempt++;await new Promise(function(ok){setTimeout(ok,1200);});continue;}
+        if(!r.ok)return {error:(d&&d.error&&(d.error.message||d.error))||("HTTP "+r.status),status:r.status};
+        var txt=replyText(d);
+        if(!txt){if(attempt<1){attempt++;continue;}return {error:"empty reply"};}
+        return {text:txt,status:r.status};
+      }catch(e){
+        clearTimeout(timer);
+        if(attempt<1){attempt++;await new Promise(function(ok){setTimeout(ok,900);});continue;}
+        return {error:e&&e.name==="AbortError"?"timed out":"network",network:true};
+      }
+    }
+  }
+  function sessionExpired(){
+    closeLive();clearAuth();openSignin();
+    if(window.toast)toast("Your session has expired — please sign in again to keep learning.");
+  }
+
+  async function loadLesson(){
+    if(!L)return;
+    var sub=document.getElementById("klSub"),tips=["Sketching the board and choosing a worked example.","Picking the clearest diagram for this idea.","Writing a check question for the end.","Lining up the exam tips."],ti=0;
+    var loading=document.getElementById("klLoading");if(loading)loading.style.display="";
+    var tipInt=setInterval(function(){var t=document.getElementById("klLoadingTip");if(!t)return clearInterval(tipInt);ti=(ti+1)%tips.length;t.textContent=tips[ti];},2600);
+    L.state="loading";updateControls();setStatus("preparing your lesson…");
+    var lesson=null,lastErr="";
+    for(var attempt=0;attempt<2&&L&&!lesson;attempt++){
+      if(attempt)setStatus("tidying up the board…");
+      /* The deployed server owns the system prompt. Keep the structured lesson contract in user content. */
+      var prompt=LESSON_SYS+(attempt?LESSON_COMPACT:"")+"\n\nCreate a visual lesson about: "+L.topic+(L.context?"\n\nThe student was just discussing this in chat — tailor the lesson to it and build on it:\n"+L.context:"");
+      var res=await liveFetch({mode:"whiteboard",contents:[{role:"user",parts:[{text:prompt}]}]},90000);
+      if(!L){clearInterval(tipInt);return;}
+      if(res.auth){clearInterval(tipInt);sessionExpired();return;}
+      if(res.limit){
+        clearInterval(tipInt);if(loading)loading.style.display="none";L.state="error";updateControls();setStatus("allowance used");
+        sub.innerHTML="<span class='klError'>⏳ Your Live Lesson allowance is used for now. "+(res.msLeft?"Please try again in <b>"+fmtWait(res.msLeft)+"</b>.":"Please retry shortly.")+" Knovo Pro includes unlimited lessons.</span>";return;
+      }
+      if(res.error){lastErr=res.network?"I couldn't reach the lesson server":res.status?"the lesson server had a problem ("+String(res.error).slice(0,80)+")":String(res.error);if(res.network||res.status)break;continue;}
+      try{lesson=parseLesson(res.text);}catch(e){lastErr="the lesson came back garbled";lesson=null;}
+    }
+    clearInterval(tipInt);
+    if(!L)return;
+    if(!lesson){
+      if(loading)loading.style.display="none";
+      L.state="error";updateControls();setStatus("couldn't start");
+      sub.innerHTML="<span class='klError'>⚠️ Sorry — "+esc(lastErr||"something went wrong")+". Check your connection and try again.</span> <button class='klRetry' id='klRetry'>↻ Try again</button>";
+      var rb=document.getElementById("klRetry");if(rb)rb.onclick=function(){sub.innerHTML="<b>Knovo:</b> let's try that again…";loadLesson();};
+      return;
+    }
+    if(loading)loading.style.display="none";
+    L.steps=lesson.steps;L.title=lesson.title;
+    L.steps.forEach(function(st){st.__sent=KV.sentences(st.voice);});
+    buildLessonTimeline();liveRecord();updateBadge();
+    try{if(window.knovoLogUsage)window.knovoLogUsage("live_lesson");}catch(e){} /* owner analytics */
+    document.getElementById("klTitle").textContent="✨ "+lesson.title;
+    renderPlan();
+    logLine("sys","Lesson started: "+lesson.title+" · "+L.steps.length+" steps");
+    playStep(0);
+  }
+
   /* ---------------- tutor presence helpers ---------------- */
-  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
   function setStatus(t){var e=document.getElementById("klStatus");if(e)e.textContent=t;}
   function tutorTalking(on){var a=document.getElementById("klAvatar");if(a)a.classList.toggle("talking",!!on);}
+  function stepLabel(st,i){
+    var t=String(st.title||"").trim();
+    if(!t){var f=(st.__sent&&st.__sent[0])||String(st.voice||"");t=f.split(/\s+/).slice(0,6).join(" ").replace(/[,.;:!?]+$/,"");}
+    return t||("Step "+(i+1));
+  }
+  function renderPlan(){
+    var ol=document.getElementById("klPlan");if(!ol||!L)return;
+    ol.innerHTML=L.steps.map(function(st,i){return "<li><button data-step='"+i+"'><span class='klPlanNum'>"+(i+1)+"</span><span>"+esc(stepLabel(st,i))+"</span></button></li>";}).join("");
+    Array.prototype.forEach.call(ol.querySelectorAll("button[data-step]"),function(b){b.onclick=function(){goStep(Number(b.getAttribute("data-step")));};});
+    updatePlanUI();
+  }
+  function updatePlanUI(){
+    if(!L)return;
+    var ol=document.getElementById("klPlan");if(ol)Array.prototype.forEach.call(ol.querySelectorAll("li"),function(li,i){
+      li.classList.toggle("now",i===L.step&&L.state!=="done");li.classList.toggle("done",i<L.step||L.state==="done");
+    });
+    var pill=document.getElementById("klStepPill");
+    if(pill&&L.steps.length)pill.textContent=L.state==="done"?"✅ Complete":("Step "+(L.step+1)+" / "+L.steps.length);
+  }
+  function updateControls(){
+    if(!L)return;
+    var b=document.getElementById("klPlayPause"),ready=L.steps.length>0;
+    if(b){
+      b.textContent=L.state==="teaching"?"⏸ Pause":L.state==="done"?"↺ Restart":(L.state==="answering"||L.state==="waiting"||L.afterQ)?"▶ Continue":"▶ Play";
+      b.disabled=!ready;
+    }
+    ["klPrev","klNext","klReplay","klBack5","klBack10","klReplayTrack"].forEach(function(id){var e=document.getElementById(id);if(e)e.disabled=!ready;});
+    var p=document.getElementById("klPrev");if(p&&ready)p.disabled=L.step<=0;
+    var n=document.getElementById("klNext");if(n&&ready)n.disabled=L.state==="done";
+    var r=document.getElementById("klResume");if(r)r.style.display=(L.state==="waiting"||(L.state==="paused"&&L.afterQ))?"inline-block":"none";
+    updatePlanUI();
+  }
+  function caption(list,k,who){
+    var sub=document.getElementById("klSub");if(!sub)return;
+    var prev=k>0?list[k-1]:"";
+    sub.innerHTML="<b>"+(who||"Knovo")+":</b> "+(prev?"<span class='klCapPrev'>"+esc(prev)+"</span> ":"")+"<span class='klCapNow'>"+esc(list[k]||"")+"</span>";
+  }
+  function logLine(kind,text){
+    var log=document.getElementById("klLog");if(!log)return null;
+    var hint=log.querySelector(".klLogHint");if(hint&&kind!=="sys")hint.remove();
+    var p=document.createElement("div");p.className="klLogItem "+kind;
+    p.innerHTML=kind==="sys"?"<i>"+esc(text)+"</i>":"<b>"+(kind==="you"?"You":"Knovo")+"</b><span></span>";
+    if(kind!=="sys")p.querySelector("span").textContent=text;
+    log.appendChild(p);log.scrollTop=log.scrollHeight;return p;
+  }
 
+  /* ---------------- lesson parsing: tolerant of fences, stray quotes and cut-off replies ---------------- */
+  function repairJSON(t){
+    var out="",inStr=false,esc2=false,stack=[];
+    for(var i=0;i<t.length;i++){
+      var c=t[i];
+      if(inStr){
+        if(esc2){out+=c;esc2=false;continue;}
+        if(c==="\\"){out+=c;esc2=true;continue;}
+        if(c==="\""){
+          var j=i+1;while(j<t.length&&/\s/.test(t[j]))j++;
+          var nx=t[j];
+          if(nx===undefined||nx===","||nx==="}"||nx==="]"||nx===":"){inStr=false;out+=c;}
+          else out+="\\\""; /* a stray double quote inside a value (usually an SVG attribute) */
+          continue;
+        }
+        if(c==="\n"){out+="\\n";continue;}
+        if(c==="\r")continue;
+        if(c==="\t"){out+="\\t";continue;}
+        out+=c;continue;
+      }
+      if(c==="\""){inStr=true;out+=c;continue;}
+      if(c==="{"||c==="["){stack.push(c==="{"?"}":"]");out+=c;continue;}
+      if(c==="}"||c==="]"){out=out.replace(/,\s*$/,"");stack.pop();out+=c;if(!stack.length)break;continue;}
+      out+=c;
+    }
+    var truncated=inStr||stack.length>0;
+    if(inStr)out+="\"";
+    out=out.replace(/,\s*$/,"").replace(/:\s*$/,":\"\"");
+    while(stack.length){out=out.replace(/,\s*$/,"");out+=stack.pop();}
+    return {text:out,truncated:truncated};
+  }
   function parseLesson(txt){
-    var t=String(txt||"").trim().replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
-    var a=t.indexOf("{"),b=t.lastIndexOf("}");if(a>=0&&b>a)t=t.slice(a,b+1);
-    var j=JSON.parse(t);
-    if(!j||!Array.isArray(j.steps)||!j.steps.length)throw new Error("The lesson came back empty");
-    j.steps=j.steps.filter(function(s){return s&&(s.voice||s.svgElements);});
-    return {title:String(j.title||L.topic||"Live Lesson").slice(0,90),steps:j.steps};
+    var t=String(txt||"").replace(/^﻿/,"").replace(/```(?:json|JSON)?/g,"").trim();
+    var a=t.indexOf("{");if(a<0)throw new Error("no JSON");
+    t=t.slice(a);
+    var j=null,truncated=false;
+    try{var b=t.lastIndexOf("}");j=JSON.parse(t.slice(0,b+1));}catch(e){j=null;}
+    if(!j){var fx=repairJSON(t);truncated=fx.truncated;j=JSON.parse(fx.text);}
+    var raw=(j&&(j.steps||j.lesson||j.slides))||[];
+    if(!Array.isArray(raw))throw new Error("no steps");
+    var steps=raw.map(function(s){
+      if(!s||typeof s!=="object")return null;
+      return {title:String(s.title||s.heading||"").replace(/\s+/g," ").trim().slice(0,70),
+              voice:String(s.voice||s.say||s.narration||s.text||"").replace(/\s+/g," ").trim(),
+              svgElements:sanitizeSVG(String(s.svgElements||s.svg||s.board||""))};
+    }).filter(function(s){return s&&(s.voice||s.svgElements);});
+    if(truncated&&steps.length>2)steps.pop(); /* the last step of a cut-off reply is incomplete */
+    if(steps.length<2)throw new Error("The lesson came back empty");
+    return {title:String((j&&j.title)||L&&L.topic||"Live Lesson").slice(0,90),steps:steps.slice(0,12)};
+  }
+  /* Only plain drawing primitives reach the board: no scripts, links, images or event handlers. */
+  var KL_TAGS={g:1,circle:1,ellipse:1,rect:1,line:1,path:1,polyline:1,polygon:1,text:1,tspan:1};
+  var KL_ATTRS={x:1,y:1,x1:1,y1:1,x2:1,y2:1,cx:1,cy:1,r:1,rx:1,ry:1,width:1,height:1,d:1,points:1,fill:1,stroke:1,"stroke-width":1,"stroke-dasharray":1,"stroke-linecap":1,"stroke-linejoin":1,opacity:1,"fill-opacity":1,"stroke-opacity":1,"font-size":1,"font-family":1,"font-weight":1,"font-style":1,"text-anchor":1,"dominant-baseline":1,transform:1,dx:1,dy:1};
+  function darkColour(c){
+    c=String(c||"").trim().toLowerCase();
+    if(!c||c==="black"||c==="currentcolor")return true;
+    var m=/^#([0-9a-f]{3}|[0-9a-f]{6})$/.exec(c);if(!m)return false;
+    var h=m[1].length===3?m[1].replace(/./g,"$&$&"):m[1];
+    var r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+    return (r*299+g*587+b*114)/1000<70;
+  }
+  function sanitizeSVG(str){
+    if(!str||!/</.test(str))return "";
+    try{
+      var tpl=document.createElement("template");tpl.innerHTML="<svg xmlns='http://www.w3.org/2000/svg'>"+str+"</svg>";
+      var svg=tpl.content.querySelector("svg");if(!svg)return "";
+      (function walk(node){
+        Array.prototype.slice.call(node.children).forEach(function(el){
+          var tag=el.tagName.toLowerCase();
+          if(!KL_TAGS[tag]){el.remove();return;}
+          Array.prototype.slice.call(el.attributes).forEach(function(at){
+            var n=at.name.toLowerCase();
+            if(!KL_ATTRS[n]||/url\(|javascript:/i.test(at.value))el.removeAttribute(at.name);
+          });
+          if(tag==="text"||tag==="tspan"){
+            if(tag==="text"&&darkColour(el.getAttribute("fill")))el.setAttribute("fill","#f8fafc");
+            if(tag==="text"&&!el.getAttribute("font-size"))el.setAttribute("font-size","26");
+          }else if(tag!=="g"){
+            if(!el.hasAttribute("fill"))el.setAttribute("fill","none");
+            if(!el.getAttribute("stroke")||darkColour(el.getAttribute("stroke")))el.setAttribute("stroke","#38bdf8");
+            if(!el.getAttribute("stroke-width"))el.setAttribute("stroke-width","3");
+          }
+          walk(el);
+        });
+      })(svg);
+      return Array.prototype.map.call(svg.children,function(el){return el.outerHTML;}).join("");
+    }catch(e){return "";}
   }
 
   function tick(){
@@ -5453,7 +5812,6 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     var el=document.getElementById("klTimer");if(el)el.textContent=(m<10?"0":"")+m+":"+(s<10?"0":"")+s;
     if(L.seconds<=0)closeLive("⏱ Your 1-hour Live Lesson has ended. Start another anytime!");
   }
-
   /* ---------------- undo history and portable board export ---------------- */
   function klSaveHistory(){
     if(!L)return;var root=document.getElementById("klSteps");if(!root)return;
@@ -5462,8 +5820,8 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   function klRestoreBoard(html){
     var root=document.getElementById("klSteps");root.innerHTML=html;
     /* Keep replay/resume references attached to the restored DOM, including after Clear Board. */
-    L.groups=Array.prototype.slice.call(root.children);
-    L.groups.forEach(function(g){Array.prototype.slice.call(g.children).forEach(function(el){
+    L.groups=[];Array.prototype.forEach.call(root.children,function(g){var k=g.getAttribute("data-step");if(k!==null){L.groups[Number(k)]=g;g.__klDrawn=true;}});
+    Array.prototype.forEach.call(root.children,function(g){Array.prototype.slice.call(g.children).forEach(function(el){
       if(!el.getBBox)return;el.__klFullText=el.textContent||"";
       var t=el.getAttribute("transform")||"";
       if(el.getAttribute("data-kl-offset")==="1"){
@@ -5604,15 +5962,15 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     setStatus("layout cleaned — 24px minimum spacing");
   }
 
-  /* ---------------- exact timestamped lesson replay ---------------- */
+  /* ---------------- timestamped lesson replay ---------------- */
   function lessonStepDuration(step){
-    var voice=String(step.voice||""),speech=Math.min(45,1.8+voice.length*.06),draw=0;
+    var voice=String(step.voice||""),speech=Math.min(60,1.8+voice.length*.06/(KV.prefs.rate||1)),draw=0;
     var scratch=document.createElementNS("http://www.w3.org/2000/svg","g");scratch.innerHTML=step.svgElements||"";
     Array.prototype.slice.call(scratch.children).forEach(function(el){
       if(el.tagName.toLowerCase()==="text")draw+=Math.max(.3,String(el.textContent||"").length*.042);
       else draw+=1.2;
     });
-    return Math.max(4,speech,draw)+.45;
+    return Math.max(4,speech,draw)+.7;
   }
   function buildLessonTimeline(){
     if(!L)return;var t=0;L.timeline=L.steps.map(function(step){var d=lessonStepDuration(step),item={start:t,end:t+d,duration:d};t+=d;return item;});
@@ -5625,17 +5983,19 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     if(time)time.textContent=fmtReplay(L.replayTime)+" / "+fmtReplay(L.totalTime);
   }
   function replayClock(){
-    if(!L||!L.playing||L.paused||L.questionMode||!L.timeline.length)return;
+    if(!L||L.state!=="teaching"||!L.timeline.length)return;
     var item=L.timeline[L.step],end=item?item.end:L.totalTime;
     L.replayTime=Math.min(end,(L.replayTime||0)+.2);updateReplayUI();
   }
   function klNewStepGroup(i){
     var g=document.createElementNS("http://www.w3.org/2000/svg","g");g.innerHTML=L.steps[i].svgElements||"";
+    g.setAttribute("data-step",String(i));g.__klDrawn=false;
     Array.prototype.slice.call(g.children).forEach(function(el){el.style.opacity="0";el.__klFullText=el.textContent||"";});
     document.getElementById("klSteps").appendChild(g);klLayoutGroup(g);L.groups[i]=g;return g;
   }
   function klShowGroup(g){
-    Array.prototype.slice.call(g.children).forEach(function(el){el.style.opacity="1";el.style.strokeDasharray="none";el.style.strokeDashoffset="0";if(el.tagName.toLowerCase()==="text")el.textContent=el.__klFullText||el.textContent;});
+    if(!g)return;g.__klDrawn=true;
+    Array.prototype.slice.call(g.children).forEach(function(el){el.style.opacity="1";el.style.strokeDasharray="none";el.style.strokeDashoffset="0";if(el.tagName.toLowerCase()==="text"&&el.__klFullText!=null)el.textContent=el.__klFullText;});
   }
   function klRevealGroup(g,elapsed){
     var els=Array.prototype.slice.call(g.children),shapes=els.filter(function(el){return el.tagName.toLowerCase()!=="text";}),labels=els.filter(function(el){return el.tagName.toLowerCase()==="text";}),seq=shapes.concat(labels),at=0;
@@ -5653,175 +6013,372 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       at+=dur;
     });
   }
+  function rebuildBoard(upto){
+    var root=document.getElementById("klSteps");if(!root)return;
+    root.innerHTML="";L.groups=[];L.history=[];
+    for(var j=0;j<upto;j++)klShowGroup(klNewStepGroup(j));
+  }
+  /* Stop everything in flight (speech, timers, pending answers) before jumping somewhere new. */
+  function haltForNav(){
+    L.run++;L.askSeq++;KV.stop();clearTimeout(L.advT);clearTimeout(L.autoT);hideNote();L.afterQ=false;
+  }
   function seekReplay(target){
     if(!L||!L.timeline.length)return;
-    L.paused=true;L.needsResume=true;L.questionMode=false;try{speechSynthesis.cancel();}catch(e){}hideNote();
+    haltForNav();
     target=Math.max(0,Math.min(L.totalTime,Number(target)||0));
     var idx=L.timeline.length-1;for(var i=0;i<L.timeline.length;i++){if(target<L.timeline[i].end){idx=i;break;}}
-    document.getElementById("klSteps").innerHTML="";L.groups=[];L.history=[];
-    for(var j=0;j<idx;j++){var old=klNewStepGroup(j);klShowGroup(old);}
-    var current=klNewStepGroup(idx);klRevealGroup(current,target-L.timeline[idx].start);
-    L.step=idx;L.replayTime=target;L.playing=true;
-    var b=document.getElementById("klPlayPause");if(b)b.textContent="▶ Play";
-    var sub=document.getElementById("klSub");if(sub)sub.innerHTML="<b>Knovo:</b> "+esc(L.steps[idx].voice||("Step "+(idx+1)));
-    setStatus("replay paused at "+fmtReplay(target)+" — step "+(idx+1));updateReplayUI();
+    rebuildBoard(idx);
+    var local=target-L.timeline[idx].start,current=klNewStepGroup(idx);klRevealGroup(current,local);
+    var sents=L.steps[idx].__sent||[];
+    L.step=idx;L.replayTime=target;L.state="paused";L.needsResume=true;L.stepSpoken=false;
+    L.seekSentence=L.sentence=Math.max(0,Math.min(sents.length-1,Math.floor(local/L.timeline[idx].duration*sents.length)));
+    if(sents.length)caption(sents,L.seekSentence);
+    setStatus("replay paused at "+fmtReplay(target)+" — tap ▶ Play");updateReplayUI();updateControls();
   }
   function rewindReplay(seconds){if(!L||!L.timeline.length)return;seekReplay(Math.max(0,(L.replayTime||0)-seconds));}
+  function goStep(i){
+    if(!L||!L.steps.length)return;
+    if(i>=L.steps.length){haltForNav();rebuildBoard(L.steps.length);finishLesson();return;}
+    i=Math.max(0,i);
+    haltForNav();rebuildBoard(i);playStep(i);
+  }
+  function replayStep(){
+    if(!L||!L.steps.length)return;
+    var i=Math.min(L.step,L.steps.length-1);
+    haltForNav();
+    var g=L.groups[i];if(g)g.remove();L.groups[i]=null;
+    playStep(i);
+  }
 
-  function playStep(i){
-    if(!L||!L.steps[i]){if(L){L.playing=false;L.replayTime=L.totalTime||L.replayTime;updateReplayUI();setStatus("lesson complete");var sub=document.getElementById("klSub");if(sub)sub.innerHTML="<b>Knovo:</b> ✅ that's the whole idea! Tap ↺ Replay Step to revisit anything, or ask me a question below.";try{speechSynthesis.cancel();}catch(e){}}return;}
-    L.step=i;L.paused=false;L.needsResume=false;
-    if(L.timeline&&L.timeline[i]){L.replayTime=L.timeline[i].start;updateReplayUI();}
-    var step=L.steps[i],pen=document.getElementById("klPen");if(pen)pen.style.opacity="1";
+  /* ---------------- teaching loop ---------------- */
+  function playStep(i,opts){
+    if(!L)return;opts=opts||{};
+    clearTimeout(L.advT);
+    if(!L.steps[i]){finishLesson();return;}
+    var run=++L.run;
+    L.groups.forEach(function(g,k){if(g&&k!==i&&!g.__klDrawn)klShowGroup(g);}); /* finish any half-drawn step */
+    L.step=i;L.state="teaching";L.needsResume=false;L.stepSpoken=false;L.afterQ=false;L.sentence=0;
+    hideNote();
+    if(L.timeline[i]){L.replayTime=L.timeline[i].start;updateReplayUI();}
     setStatus("teaching — step "+(i+1)+" of "+L.steps.length);
-    var sub=document.getElementById("klSub");if(sub)sub.innerHTML="<b>Knovo:</b> "+esc(step.voice||("Step "+(i+1)));
-    /* New elements are positioned with 24px collision clearance before drawing. */
+    var old=L.groups[i];if(old&&old.isConnected)old.remove();
     var g=klNewStepGroup(i);
-    animateGroup(g);
-    speak(step.voice||("Step "+(i+1)),function(){
-      if(!L||L.paused||L.questionMode)return;
-      setTimeout(function(){if(L&&!L.paused&&!L.questionMode)playStep(i+1);},450);
+    var pen=document.getElementById("klPen");if(pen)pen.style.opacity="1";
+    animateGroup(g,run);
+    updateControls();
+    speakStep(i,0,opts.lead);
+  }
+  function speakStep(i,from,lead){
+    if(!L||!L.steps[i])return;
+    var run=L.run,st=L.steps[i],sents=st.__sent&&st.__sent.length?st.__sent:[stepLabel(st,i)+"."];
+    from=Math.max(0,Math.min(sents.length-1,from||0));
+    var leadList=lead?KV.sentences(lead):[],n=leadList.length,list=leadList.concat(sents.slice(from));
+    KV.play(list,{
+      onSentence:function(k){
+        if(!L||L.run!==run)return;
+        if(k<n){caption(list,k);return;}
+        L.sentence=from+k-n;caption(sents,L.sentence);
+      },
+      onEnd:function(){if(!L||L.run!==run||L.state!=="teaching")return;L.stepSpoken=true;afterSpoken(run);}
     });
+  }
+  /* A real teacher finishes writing before moving on: wait (briefly) for the drawing. */
+  function afterSpoken(run){
+    var waited=0;
+    (function check(){
+      if(!L||L.run!==run||L.state!=="teaching")return;
+      var g=L.groups[L.step];
+      if(g&&g.isConnected&&!g.__klDrawn&&waited<6000){waited+=150;L.advT=setTimeout(check,150);return;}
+      if(g&&!g.__klDrawn)klShowGroup(g);
+      L.advT=setTimeout(function(){if(L&&L.run===run&&L.state==="teaching")playStep(L.step+1);},700);
+    })();
+  }
+  function finishLesson(){
+    if(!L)return;
+    L.run++;KV.stop();clearTimeout(L.advT);
+    L.step=Math.max(0,L.steps.length-1);L.state="done";L.afterQ=false;
+    L.groups.forEach(function(g){if(g&&!g.__klDrawn)klShowGroup(g);});
+    L.replayTime=L.totalTime;updateReplayUI();
+    var pen=document.getElementById("klPen");if(pen)pen.style.opacity="0";
+    setStatus("lesson complete — your turn");
+    var sub=document.getElementById("klSub");
+    if(sub)sub.innerHTML="<b>Knovo:</b> ✅ That's the lesson! Answer my check question below, ask me anything, or tap a step in the plan to revisit it.";
+    logLine("sys","Lesson complete — answer the check question or ask anything.");
+    updateControls();
+    var q=document.getElementById("klQ");if(q&&window.innerWidth>=900)try{q.focus();}catch(e){}
+  }
+  function pauseLesson(msg){
+    if(!L||L.state!=="teaching")return;
+    L.state="paused";KV.pause();clearTimeout(L.advT);
+    setStatus(msg||"paused — tap ▶ Play to continue");updateControls();
+  }
+  function togglePause(){
+    if(!L||!L.steps.length)return;
+    if(L.state==="teaching"){pauseLesson();return;}
+    if(L.state==="done"){goStep(0);return;}
+    if(L.state==="answering"||L.state==="waiting"||(L.state==="paused"&&L.afterQ)){resumeLesson();return;}
+    if(L.state!=="paused")return;
+    L.state="teaching";setStatus("teaching — step "+(L.step+1)+" of "+L.steps.length);
+    if(L.needsResume){ /* resume after a rewind/seek: finish the board, speak from that point */
+      L.needsResume=false;klShowGroup(L.groups[L.step]);updateControls();speakStep(L.step,L.seekSentence);return;
+    }
+    updateControls();
+    if(L.stepSpoken){afterSpoken(L.run);return;}
+    if(!KV.resume())speakStep(L.step,L.sentence);
+  }
+  var BRIDGES=["Okay, back to the board.","Right, where were we?","Great, let's carry on.","Alright, picking up where we left off.","Good. Now, back to it."];
+  function resumeLesson(){
+    if(!L||!L.steps.length)return;
+    L.askSeq++;clearTimeout(L.autoT);clearTimeout(L.advT);hideNote();L.afterQ=false;
+    if(L.state==="done"||L.wasDone){L.wasDone=false;L.state="done";KV.stop();updateControls();return;}
+    var bridge=BRIDGES[Math.floor(Math.random()*BRIDGES.length)];
+    L.state="teaching";updateControls();setStatus("teaching — step "+(L.step+1)+" of "+L.steps.length);
+    if(L.stepSpoken){playStep(L.step+1,{lead:bridge});return;}
+    var g=L.groups[L.step];
+    if(!g||!g.isConnected){playStep(L.step,{lead:bridge});return;}
+    if(L.needsResume){L.needsResume=false;klShowGroup(g);}
+    speakStep(L.step,L.sentence,bridge);
   }
 
   /* ---------------- human-style drawing ----------------
-     Shapes are traced in real time with the pen riding the path;
-     labels are written letter-by-letter like handwriting.       */
+     Shapes are traced with the pen riding the path, then labels are
+     handwritten letter by letter. Drawing freezes while Knovo is paused
+     or answering, and stops cleanly when the student jumps elsewhere. */
   function movePen(x,y){var pen=document.getElementById("klPen");if(pen)pen.setAttribute("transform","translate("+x+","+y+")");}
-  function animateGroup(g){
+  function klAlive(g,run,force){return !!(L&&g.isConnected&&(force||L.run===run));}
+  function klHalted(force){return !force&&!!L&&L.state!=="teaching";}
+  function animateGroup(g,run,force){
+    g.__klDrawn=false;
     var els=Array.prototype.slice.call(g.children);
-    /* teacher's order: draw every shape/line of the diagram first,
-       then handwrite the labels one by one */
     var shapes=els.filter(function(el){return el.tagName&&el.tagName.toLowerCase()!=="text";});
     var labels=els.filter(function(el){return el.tagName&&el.tagName.toLowerCase()==="text";});
     var seq=shapes.concat(labels);
     (function next(k){
-      if(!L||!g.isConnected||k>=seq.length)return;
+      if(!klAlive(g,run,force))return;
+      if(k>=seq.length){g.__klDrawn=true;return;}
+      if(klHalted(force)){setTimeout(function(){next(k);},150);return;}
       var el=seq[k],tag=el.tagName?el.tagName.toLowerCase():"";
-      if(tag==="text")writeOnText(el,function(){next(k+1);});
-      else drawShape(el,function(){next(k+1);});
+      if(tag==="text")writeOnText(el,g,run,force,function(){next(k+1);});
+      else drawShape(el,g,run,force,function(){next(k+1);});
     })(0);
   }
-  function drawShape(el,done){
-    var fin=function(){if(done)done();};
-    try{
-      var len=el.getTotalLength?el.getTotalLength():0;
-      if(!len){el.style.opacity="1";fin();return;}
-      el.style.opacity="1";
-      el.style.strokeDasharray=String(len);
-      el.style.strokeDashoffset=String(len);
-      var dur=Math.min(2400,Math.max(650,len*3.2));
-      var t0=null;
-      var fr=function(ts){
-        if(!L||!el.isConnected)return;
-        if(!t0)t0=ts;
-        var p=Math.min(1,(ts-t0)/dur);
-        el.style.strokeDashoffset=String(len*(1-p));
-        try{var pt=el.getPointAtLength(len*p);var ctm=el.getCTM&&el.getCTM();
-          if(ctm)movePen(pt.x*ctm.a+pt.y*ctm.c+ctm.e,pt.x*ctm.b+pt.y*ctm.d+ctm.f);
-          else movePen(pt.x,pt.y);}catch(e){}
-        if(p<1)requestAnimationFrame(fr);
-        else{el.style.strokeDasharray="none";el.style.strokeDashoffset="0";fin();}
-      };
-      requestAnimationFrame(fr);
-    }catch(e){fin();}
+  function drawShape(el,g,run,force,done){
+    var len=0;try{len=el.getTotalLength?el.getTotalLength():0;}catch(e){len=0;}
+    if(!len||!isFinite(len)){el.style.opacity="1";done();return;}
+    el.style.opacity="1";el.style.strokeDasharray=String(len);el.style.strokeDashoffset=String(len);
+    var dur=Math.min(2400,Math.max(650,len*3.2)),t=0,last=null;
+    function fr(ts){
+      if(!klAlive(g,run,force))return;
+      if(last===null)last=ts;var dt=Math.min(100,ts-last);last=ts;
+      if(!klHalted(force))t+=dt;
+      var p=Math.min(1,t/dur);
+      el.style.strokeDashoffset=String(len*(1-p));
+      try{var pt=el.getPointAtLength(len*p),ctm=el.getCTM&&el.getCTM();
+        if(ctm)movePen(pt.x*ctm.a+pt.y*ctm.c+ctm.e,pt.x*ctm.b+pt.y*ctm.d+ctm.f);else movePen(pt.x,pt.y);}catch(e){}
+      if(p<1)requestAnimationFrame(fr);
+      else{el.style.strokeDasharray="none";el.style.strokeDashoffset="0";done();}
+    }
+    requestAnimationFrame(fr);
   }
-  function writeOnText(el,done){
+  function writeOnText(el,g,run,force,done){
     el.style.opacity="1";
-    var full=el.textContent||"";el.textContent="";
-    var x0=parseFloat(el.getAttribute("x"))||0,y0=parseFloat(el.getAttribute("y"))||0;
-    var i=0;
+    var full=el.__klFullText!=null?el.__klFullText:(el.textContent||"");el.textContent="";
+    var x0=parseFloat(el.getAttribute("x"))||0,y0=parseFloat(el.getAttribute("y"))||0,i=0;
     (function stepFn(){
-      if(!L||!el.isConnected)return;
-      if(i>=full.length){if(done)done();return;}
+      if(!klAlive(g,run,force))return;
+      if(klHalted(force)){setTimeout(stepFn,150);return;}
+      if(i>=full.length){done();return;}
       i++;el.textContent=full.slice(0,i);
-      try{var w=el.getComputedTextLength?el.getComputedTextLength():i*10;movePen(x0+w+8,y0-8);}catch(e){}
+      try{var w=el.getComputedTextLength?el.getComputedTextLength():i*10;var ctm=el.getCTM&&el.getCTM();
+        var px=x0+w+8,py=y0-8;if(ctm)movePen(px*ctm.a+py*ctm.c+ctm.e,px*ctm.b+py*ctm.d+ctm.f);else movePen(px,py);}catch(e){}
       setTimeout(stepFn,full[i-1]===" "?20:42); /* natural handwriting pace */
     })();
   }
 
-  function togglePause(){
-    if(!L)return;
-    var b=document.getElementById("klPlayPause");
-    if(L.paused){
-      if(L.needsResume){
-        var i=L.step,step=L.steps[i];L.needsResume=false;L.paused=false;L.playing=true;b.textContent="⏸ Pause";
-        var g=L.groups[i];if(g)klShowGroup(g);
-        setStatus("teaching — step "+(i+1)+" of "+L.steps.length);
-        speak(step.voice||("Step "+(i+1)),function(){if(L&&!L.paused&&!L.questionMode)playStep(i+1);});
-      }else{L.paused=false;b.textContent="⏸ Pause";try{speechSynthesis.resume();}catch(e){}if(!("speechSynthesis" in window))playStep(L.step+1);}
-    }else{L.paused=true;b.textContent="▶ Play";try{speechSynthesis.pause();}catch(e){} }
+  /* ---------------- raise hand: Q&A that remembers the lesson ---------------- */
+  var RE_CONT=/^(ok(ay)?|ok then|got it|gotcha|yes|yeah|yep|sure|continue|carry on|go on|keep going|resume|proceed|makes sense|that makes sense|understood|i understand( now)?|i get it( now)?|go ahead|thanks?|thank you|cool|great|nice|alright|all right)([ ,]+(please|now|thanks|thank you|continue|carry on|go on|let'?s continue))*[ .!]*$/i;
+  var RE_NEXT=/^(next( step)?|skip( this| it| ahead)?|move on|next one)( please)?[ .!]*$/i;
+  var RE_BACK=/^(go back|back|previous( step)?|last step|go back a step)( please)?[ .!]*$/i;
+  var RE_REPEAT=/^(can you )?(repeat( that| this| it| the step)?|again|say (that|it) again|once more|replay( that)?)( please)?[ .!?]*$/i;
+  var RE_PAUSE=/^(pause|stop|wait|hold on|one sec(ond)?)[ .!]*$/i;
+  function hideNote(){var n=document.getElementById("klNote");if(n)n.remove();}
+  function boardText(){
+    var root=document.getElementById("klSteps");if(!root)return "";
+    return Array.prototype.map.call(root.querySelectorAll("text"),function(t){return t.__klFullText!=null?t.__klFullText:t.textContent;}).filter(Boolean).join(" · ").replace(/\s+/g," ").slice(0,500);
   }
-  function replayStep(){
-    if(!L||!L.steps.length)return;
-    L.paused=true;try{speechSynthesis.cancel();}catch(e){}
-    L.questionMode=false;L.needsResume=false;hideNote();
-    var g=L.groups[L.step];if(g)g.remove();
-    playStep(L.step);
+  function buildAskBody(q,wasDone){
+    var st=L.steps[L.step]||{},n=L.steps.length;
+    var plan=L.steps.map(function(s,i){return (i+1)+". "+stepLabel(s,i);}).join("\n");
+    var said=(st.__sent||[]).slice(0,(L.sentence||0)+1).join(" ");
+    var board=boardText();
+    var ctx="LIVE LESSON CONTEXT — keep all of this in mind for every reply.\nLesson title: "+L.title+
+      "\nWhat the student originally asked for: "+L.topic+
+      (L.context?"\nEarlier chat with the student: "+L.context.slice(0,500):"")+
+      "\nLesson plan:\n"+plan+"\n"+
+      (wasDone?"Position: the lesson has finished. The final step (with the check question) was: "+st.voice
+              :"Position: step "+(L.step+1)+" of "+n+" ("+stepLabel(st,L.step)+").\nThis step's full script: "+st.voice+"\nYou had just said: \""+said.slice(-400)+"\"")+
+      (board?"\nWritten on the board so far: "+board:"");
+    var contents=[{role:"user",parts:[{text:ctx}]},
+      {role:"model",parts:[{text:JSON.stringify({say:"Got it. I'm teaching "+L.title+" and I'm at "+(wasDone?"the end of the lesson":"step "+(L.step+1))+". I'll answer in that context and remember what we discuss.",board:"",action:"wait"})}]}];
+    L.chat.forEach(function(m){contents.push({role:m.role,parts:[{text:m.role==="model"?JSON.stringify({say:m.text,board:"",action:"wait"}):m.text}]});});
+    contents.push({role:"user",parts:[{text:q}]});
+    return {mode:"chat",systemInstruction:{parts:[{text:TUTOR_SYS}]},contents:contents};
   }
-
-  /* ---------------- Raise hand: mid-lesson Q&A ---------------- */
-  function hideNote(){var n=document.getElementById("klNote");if(n)n.remove();var r=document.getElementById("klResume");if(r)r.style.display="none";}
-  async function askQuestion(){
-    if(!L)return;
-    var inp=document.getElementById("klQ"),q=inp.value.trim();if(!q)return;
-    inp.value="";
-    L.questionMode=true;L.paused=true;
-    try{speechSynthesis.cancel();}catch(e){}
-    setStatus("answering your question…");
-    var sub=document.getElementById("klSub");if(sub)sub.innerHTML="<b>Knovo:</b> ✋ good question — let me explain that…";
-    var step=L.steps[L.step]||{};
-    try{
-      var body={mode:"chat",
-        contents:[{role:"user",parts:[{text:"Answer like a warm human tutor pausing a visual lesson: conversational, first-person and encouraging, in 2-4 spoken sentences with no lists or markdown. During your lesson on \""+L.topic+"\", at the step explaining: \""+String(step.voice||"").slice(0,400)+"\", the student asked: "+q}]}]};
-      var r=await edgeFetch(body,L.token);
-      var d=null;try{d=await r.json();}catch(e){}
-      if(!L)return;
-      if(r.status===401||r.status===403){
-        closeLive();clearAuth();openSignin();
-        if(window.toast)toast("Your session has expired — please sign in again to keep learning.");
-        return;
-      }
-      var ans=(r.ok&&d&&d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0]&&d.candidates[0].content.parts[0].text)||"I couldn't get that answer just now — try asking again.";
-      showSay(ans);
-      speak(ans,function(){});
-      if(sub)sub.innerHTML="<b>Knovo:</b> does that clear it up? Tap ▶ Resume Lesson when you're ready.";
-      document.getElementById("klResume").style.display="inline-block";
-    }catch(e){ if(sub)sub.innerHTML="<b>Knovo:</b> ⚠️ I couldn't reach my notes just then — check your connection and ask again."; }
+  function cleanSay(s){
+    return String(s||"").replace(/```[\s\S]*?```/g," ").replace(/\*\*|__|`/g,"").replace(/^#{1,6}\s+/gm,"")
+      .replace(/^\s*(?:[-*•]|\d+[.)])\s+/gm,"").replace(/\s+/g," ").trim().slice(0,900);
   }
-  /* the tutor "says" the answer in a handwritten speech bubble, written out live */
-  function showSay(ans){
+  function parseAnswer(txt){
+    var t=String(txt||"").replace(/```(?:json|JSON)?/g,"").trim(),o=null,a=t.indexOf("{"),b=t.lastIndexOf("}");
+    if(a>=0&&b>a){try{o=JSON.parse(t.slice(a,b+1));}catch(e){try{o=JSON.parse(repairJSON(t.slice(a)).text);}catch(e2){o=null;}}}
+    var say="";
+    if(o&&typeof o==="object")say=String(o.say||o.answer||o.reply||o.text||"");
+    if(!say&&a>=0){var m=/"say"\s*:\s*"((?:[^"\\]|\\.)*)/.exec(t);if(m){try{say=JSON.parse("\""+m[1]+"\"");}catch(e){say=m[1];}}}
+    if(!say)say=o?"":t; /* the model answered in plain prose */
+    var act=String(o&&o.action||"wait").toLowerCase().replace(/[^a-z]/g,"");
+    if(!/^(resume|repeat|next|back|wait)$/.test(act))act="wait";
+    return {say:cleanSay(say)||"Good question — could you put it another way so I can be sure I answer exactly what you mean?",board:o?sanitizeSVG(String(o.board||o.svg||"")):"",action:act};
+  }
+  function showThinking(q){
     hideNote();
     var stage=document.getElementById("klStage");if(!stage)return;
     var n=document.createElement("div");n.className="klSay";n.id="klNote";
-    n.innerHTML="<span class='klSayAv'>✦</span><b>Knovo answers</b><span class='klSayTxt'></span>";
+    n.innerHTML="<span class='klSayAv'>✦</span><button class='klSayX' title='Close'>✕</button><b>You asked</b><span class='klSayQ'></span><span class='klThinking'><i></i><i></i><i></i> Knovo is thinking</span>";
+    n.querySelector(".klSayQ").textContent=q;
+    n.querySelector(".klSayX").onclick=hideNote;
     stage.appendChild(n);
-    var t=n.querySelector(".klSayTxt"),full=String(ans).replace(/\*\*/g,"").slice(0,600),i=0;
-    (function type(){
-      if(!document.getElementById("klNote"))return;
-      if(i>=full.length)return;
-      i++;t.textContent=full.slice(0,i);
-      setTimeout(type,22);
-    })();
   }
-  function resumeLesson(){
+  function showSay(list){
+    hideNote();
+    var stage=document.getElementById("klStage");if(!stage)return;
+    var n=document.createElement("div");n.className="klSay";n.id="klNote";
+    n.innerHTML="<span class='klSayAv'>✦</span><button class='klSayX' title='Close'>✕</button><b>Knovo answers</b><span class='klSayTxt'></span>";
+    var box=n.querySelector(".klSayTxt");
+    list.forEach(function(s,i){var sp=document.createElement("span");sp.className="klSaySent";sp.setAttribute("data-k",i);sp.textContent=s+" ";box.appendChild(sp);});
+    n.querySelector(".klSayX").onclick=hideNote;
+    stage.appendChild(n);
+  }
+  function highlightSay(k){
+    var n=document.getElementById("klNote");if(!n)return;
+    Array.prototype.forEach.call(n.querySelectorAll(".klSaySent"),function(sp){var i=Number(sp.getAttribute("data-k"));sp.classList.toggle("now",i===k);sp.classList.toggle("said",i<k);});
+  }
+  function drawAnswerSketch(svg){
+    var root=document.getElementById("klSteps");if(!root||!svg)return;
+    var g=document.createElementNS("http://www.w3.org/2000/svg","g");g.setAttribute("data-answer","1");g.innerHTML=svg;
+    Array.prototype.slice.call(g.children).forEach(function(el){el.style.opacity="0";el.__klFullText=el.textContent||"";});
+    root.appendChild(g);klLayoutGroup(g);animateGroup(g,L.run,true);
+  }
+  async function askQuestion(override){
     if(!L)return;
-    hideNote();L.questionMode=false;L.paused=false;
-    setStatus("teaching — step "+(L.step+1)+" of "+L.steps.length);
-    var b=document.getElementById("klPlayPause");if(b)b.textContent="⏸ Pause";
-    var step=L.steps[L.step]||{};
-    var sub=document.getElementById("klSub");if(sub)sub.innerHTML="<b>Knovo:</b> "+esc(step.voice||"");
-    speak(step.voice||"",function(){ if(L&&!L.paused&&!L.questionMode)playStep(L.step+1); });
+    var inp=document.getElementById("klQ");
+    var q=String(override!=null?override:(inp?inp.value:"")).replace(/\s+/g," ").trim().slice(0,500);
+    if(!q)return;
+    if(!L.steps.length){if(window.toast)toast(L.state==="error"?"The lesson didn't start — tap ↻ Try again first.":"One moment — Knovo is still preparing the board.");return;}
+    if(inp)inp.value="";
+    var st=L.state;
+    /* quick spoken-style commands are handled instantly, no server round trip */
+    if(st!=="done"){
+      if(RE_PAUSE.test(q)){pauseLesson();return;}
+      if(RE_REPEAT.test(q)){replayStep();return;}
+      if(RE_NEXT.test(q)){goStep(L.step+1);return;}
+      if(RE_BACK.test(q)){goStep(L.step-1);return;}
+      if(RE_CONT.test(q)){if(st!=="teaching")resumeLesson();return;}
+    }
+    var wasDone=st==="done"||(L.wasDone&&(st==="answering"||st==="waiting"));
+    clearTimeout(L.advT);clearTimeout(L.autoT);KV.stop(); /* raise hand: freeze the lesson where it is */
+    L.wasDone=wasDone;L.state="answering";L.afterQ=true;updateControls();
+    logLine("you",q);
+    var ask=++L.askSeq,tagged=(wasDone?"Student (after the lesson): ":"Student (raising hand at step "+(L.step+1)+"): ")+q;
+    showThinking(q);setStatus("thinking about your question…");
+    var sub=document.getElementById("klSub");if(sub)sub.innerHTML="<b>Knovo:</b> ✋ Good question — give me a second…";
+    var res=await liveFetch(buildAskBody(tagged,wasDone),45000);
+    if(!L||ask!==L.askSeq)return;
+    if(res.auth){sessionExpired();return;}
+    var say,board="",action="wait",ok=false;
+    if(res.limit){
+      say="You've used your free Knovo questions for now"+(res.msLeft?" — they unlock again in "+fmtWait(res.msLeft):"")+". The lesson itself can keep going, so tap Continue whenever you're ready.";
+    }else if(res.error){
+      say="Sorry, I couldn't reach my notes just then. Tap Ask to try that question again, or Continue to carry on with the lesson.";
+      if(inp&&!inp.value)inp.value=q;
+    }else{
+      var pr=parseAnswer(res.text);say=pr.say;board=pr.board;action=pr.action;ok=true;
+      L.chat.push({role:"user",text:tagged},{role:"model",text:say});
+      if(L.chat.length>24)L.chat=L.chat.slice(-24);
+    }
+    var item=logLine("knovo",say);if(item&&!ok)item.classList.add("err");
+    if(board)drawAnswerSketch(board);
+    var list=KV.sentences(say);if(!list.length)list=[say];
+    showSay(list);setStatus("answering your question");
+    KV.play(list,{
+      onSentence:function(k){if(!L||ask!==L.askSeq)return;highlightSay(k);caption(list,k);},
+      onEnd:function(){
+        if(!L||ask!==L.askSeq)return;
+        highlightSay(list.length);
+        if(L.wasDone){
+          L.state="done";L.afterQ=false;L.wasDone=false;updateControls();setStatus("lesson complete — ask anything else");
+          if(sub)sub.innerHTML="<b>Knovo:</b> Ask me something else, or tap a step in the plan to revisit it.";return;
+        }
+        if(ok&&action==="resume"){L.autoT=setTimeout(function(){if(L&&ask===L.askSeq)resumeLesson();},900);return;}
+        if(ok&&action==="repeat"){L.autoT=setTimeout(function(){if(L&&ask===L.askSeq)replayStep();},700);return;}
+        if(ok&&action==="next"){L.autoT=setTimeout(function(){if(L&&ask===L.askSeq)goStep(L.step+1);},700);return;}
+        if(ok&&action==="back"){L.autoT=setTimeout(function(){if(L&&ask===L.askSeq)goStep(L.step-1);},700);return;}
+        L.state="waiting";updateControls();setStatus("your turn — ask a follow-up or continue");
+        if(sub)sub.innerHTML="<b>Knovo:</b> Does that help? Ask a follow-up, or tap <b>▶ Continue lesson</b> and I'll pick up where we left off.";
+      }
+    });
   }
   function micAsk(){
+    if(!L)return;
     var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(!SR){if(window.toast)toast("Voice input isn't supported in this browser — type your question instead.");return;}
-    var rec=new SR();rec.lang="en-US";rec.interimResults=false;
-    var inp=document.getElementById("klQ");
-    rec.onresult=function(e){inp.value=e.results[0][0].transcript;askQuestion();};
-    rec.onerror=function(){if(window.toast)toast("Couldn't hear that — please type your question.");};
-    rec.start();
+    if(L.rec){try{L.rec.stop();}catch(e){}return;} /* second tap = done talking */
+    var wasTeaching=L.state==="teaching";
+    if(wasTeaching)pauseLesson("listening…");else KV.pause();
+    var rec=new SR(),inp=document.getElementById("klQ"),btn=document.getElementById("klMic"),heard=false,fin="";
+    rec.lang=(navigator.language&&/^en/i.test(navigator.language))?navigator.language:"en-GB";
+    rec.interimResults=true;rec.maxAlternatives=1;rec.continuous=false;
+    L.rec=rec;if(btn)btn.classList.add("on");setStatus("listening — ask your question");
+    rec.onresult=function(e){var interim="";for(var i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)fin+=e.results[i][0].transcript;else interim+=e.results[i][0].transcript;}if(inp)inp.value=(fin+" "+interim).trim();heard=true;};
+    rec.onerror=function(ev){
+      if(ev.error==="not-allowed"||ev.error==="service-not-allowed"){if(window.toast)toast("Microphone access is blocked — allow it in your browser, or type your question.");}
+      else if(ev.error!=="aborted"&&ev.error!=="no-speech"){if(window.toast)toast("Couldn't hear that — try again or type your question.");}
+    };
+    rec.onend=function(){
+      if(!L)return;L.rec=null;if(btn)btn.classList.remove("on");
+      if(heard&&inp&&inp.value.trim())askQuestion();
+      else setStatus(L.state==="paused"?"paused — tap ▶ Play to continue":"ready");
+    };
+    try{rec.start();}catch(e){L.rec=null;if(btn)btn.classList.remove("on");}
   }
+
+  /* ---------------- voice & speed settings ---------------- */
+  function initVoicePanel(){
+    var btn=document.getElementById("klVoiceBtn"),panel=document.getElementById("klVoicePanel"),sel=document.getElementById("klVoiceSel"),
+        rate=document.getElementById("klRate"),rv=document.getElementById("klRateVal"),mute=document.getElementById("klMute"),test=document.getElementById("klVoiceTest");
+    if(!btn||!panel)return;
+    function fill(){
+      if(!document.getElementById("klVoiceSel"))return;
+      var vs=KV.voices(),cur=KV.best();sel.innerHTML="";
+      if(!vs.length){sel.innerHTML="<option>Browser default voice</option>";sel.disabled=true;return;}
+      sel.disabled=false;
+      vs.forEach(function(v){var o=document.createElement("option");o.value=v.name;o.textContent=v.name.replace(/^(Microsoft|Google) /,"")+" · "+v.lang+(/(Natural|Neural)/i.test(v.name)?" ★":"");if(cur&&v.name===cur.name)o.selected=true;sel.appendChild(o);});
+    }
+    fill();setTimeout(fill,600);
+    try{if(KV.supported)speechSynthesis.addEventListener("voiceschanged",fill);}catch(e){}
+    rate.value=String(KV.prefs.rate);rv.textContent=Number(KV.prefs.rate).toFixed(2)+"×";mute.checked=KV.prefs.muted;
+    btn.onclick=function(){panel.hidden=!panel.hidden;btn.setAttribute("aria-expanded",panel.hidden?"false":"true");if(!panel.hidden)fill();};
+    sel.onchange=function(){KV.prefs.voice=sel.value;KV.save();};
+    rate.oninput=function(){KV.prefs.rate=Number(rate.value)||1;rv.textContent=KV.prefs.rate.toFixed(2)+"×";KV.save();};
+    mute.onchange=function(){KV.prefs.muted=mute.checked;KV.save();};
+    test.onclick=function(){if(L&&L.state==="teaching")pauseLesson("paused for a voice test — tap ▶ Play to continue");KV.play("Hi, I'm Knovo. This is how I'll sound in your lesson.",{});};
+    if(!KV.supported){btn.title="This browser has no speech voice — captions will guide the lesson";mute.checked=true;mute.disabled=true;}
+  }
+
+  document.addEventListener("keydown",function(e){
+    if(!L||!document.getElementById("knovoLiveModal"))return;
+    var t=e.target;if(t&&(/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(t.tagName)||t.isContentEditable))return;
+    if(e.key===" "||e.code==="Space"){e.preventDefault();togglePause();}
+  });
 
   /* Live Lesson launcher: the input-toolbar button.
      Reply-button launches call window.knovoLiveLesson directly from the engine. */

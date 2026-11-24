@@ -1,7 +1,7 @@
 /* EduVerse service worker — app-shell cache so the site installs and loads fast,
    with offline access to the pages you have already opened. PDFs are NOT cached
    (they are large and always fetched fresh). */
-const CACHE = "eduverse-v29";
+const CACHE = "eduverse-v30";
 const SHELL = ["./", "index.html", "signin.html", "manifest.webmanifest", "xp-leaderboard.js", "leaderboard-database-setup.txt",
                "icons/icon-192.png", "icons/icon-512.png",
                "icons/favicon-32.png", "icons/icon-maskable-512.png",
