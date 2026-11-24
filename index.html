@@ -5661,7 +5661,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
         var d=null;try{d=await r.json();}catch(e){}
         if(r.status===401||r.status===403)return {auth:true,status:r.status};
         if(r.status===429)return {limit:true,status:429,msLeft:Number(d&&d.msLeft)||0,data:d};
-        if(r.status>=500&&attempt<1){attempt++;await new Promise(function(ok){setTimeout(ok,1200);});continue;}
+        if(r.status>=500&&attempt<1&&!(d&&d.error&&d.error.code==="AI_UNAVAILABLE")){attempt++; /* the server already retried every model */await new Promise(function(ok){setTimeout(ok,1200);});continue;}
         if(!r.ok)return {error:(d&&d.error&&(d.error.message||d.error))||("HTTP "+r.status),status:r.status};
         var txt=replyText(d);
         if(!txt){if(attempt<1){attempt++;continue;}return {error:"empty reply"};}
@@ -5690,14 +5690,14 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       if(attempt)setStatus("tidying up the board…");
       /* The deployed server owns the system prompt. Keep the structured lesson contract in user content. */
       var prompt=LESSON_SYS+(attempt?LESSON_COMPACT:"")+"\n\nCreate a visual lesson about: "+L.topic+(L.context?"\n\nThe student was just discussing this in chat — tailor the lesson to it and build on it:\n"+L.context:"");
-      var res=await liveFetch({mode:"whiteboard",contents:[{role:"user",parts:[{text:prompt}]}]},90000);
+      var res=await liveFetch({mode:"whiteboard",contents:[{role:"user",parts:[{text:prompt}]}]},140000);
       if(!L){clearInterval(tipInt);return;}
       if(res.auth){clearInterval(tipInt);sessionExpired();return;}
       if(res.limit){
         clearInterval(tipInt);if(loading)loading.style.display="none";L.state="error";updateControls();setStatus("allowance used");
         sub.innerHTML="<span class='klError'>⏳ Your Live Lesson allowance is used for now. "+(res.msLeft?"Please try again in <b>"+fmtWait(res.msLeft)+"</b>.":"Please retry shortly.")+" Knovo Pro includes unlimited lessons.</span>";return;
       }
-      if(res.error){if(res.status&&window.console)console.warn("Knovo Live Lesson server error",res.status,res.error);lastErr=res.network?"net":res.status?"server":"garbled";L.serverDetail=res.status?String(res.error).slice(0,160):"";if(res.network||res.status)break;continue;}
+      if(res.error){if(res.status&&window.console)console.warn("Knovo Live Lesson server error",res.status,res.error);lastErr=res.network?"net":res.status?"server":"garbled";L.serverDetail=res.status?String(res.error).slice(0,1500):"";if(res.network||res.status)break;continue;}
       try{lesson=parseLesson(res.text);}catch(e){lastErr="garbled";lesson=null;}
     }
     clearInterval(tipInt);
@@ -5708,7 +5708,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       var owner=ownerUnlimited(),msg=lastErr==="net"?"I couldn't reach the lesson server. Check your internet connection and try again."
         :lastErr==="server"?"Live Lessons are having a server problem right now. Please try again in a little while."
         :"The lesson came back in a form I couldn't read. Please try again.";
-      if(owner&&lastErr==="server"&&L.serverDetail)msg+=" <br><small>Owner detail: "+esc(L.serverDetail)+"</small>";
+      if(owner&&lastErr==="server"&&L.serverDetail)msg+=" <br><small class='klOwnerDetail'>Owner detail: "+esc(L.serverDetail).replace(/ \| /g,"<br>")+"</small>";
       sub.innerHTML="<span class='klError'>⚠️ "+msg+"</span> <button class='klRetry' id='klRetry'>↻ Try again</button> <button class='klRetry' id='klChangeTopic'>✎ Change topic</button>";
       var ct=document.getElementById("klChangeTopic");if(ct)ct.onclick=function(){showStart(L.topic);};
       var rb=document.getElementById("klRetry");if(rb)rb.onclick=function(){sub.innerHTML="<b>Knovo:</b> let's try that again…";loadLesson();};
@@ -6352,7 +6352,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     var ask=++L.askSeq,tagged=(wasDone?"Student (after the lesson): ":"Student (raising hand at step "+(L.step+1)+"): ")+q;
     showThinking(q);setStatus("thinking about your question…");
     var sub=document.getElementById("klSub");if(sub)sub.innerHTML="<b>Knovo:</b> ✋ Good question — give me a second…";
-    var res=await liveFetch(buildAskBody(tagged,wasDone),45000);
+    var res=await liveFetch(buildAskBody(tagged,wasDone),75000);
     if(!L||ask!==L.askSeq)return;
     if(res.auth){sessionExpired();return;}
     var say,board="",action="wait",ok=false;
