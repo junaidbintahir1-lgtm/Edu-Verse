@@ -5095,6 +5095,18 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   #knovoLiveModal text{font-family:'Caveat','Patrick Hand',cursive}
   @media(max-width:640px){#knovoLiveModal .klHead h3{white-space:normal}#knovoLiveModal .klBoardbar{padding:7px 10px;gap:5px}#knovoLiveModal .klBoardbar button{min-height:40px;padding:6px 9px}#knovoLiveModal .klNote{right:12px;top:12px}#knovoLiveModal .klStage{min-height:180px;padding:8px}#knovoLiveModal .klControls{padding:8px 10px;gap:7px}#knovoLiveModal .klControls button{padding:8px 10px;min-height:44px}#knovoLiveModal .klReplayMeter{order:5;flex-basis:100%;max-width:none}#knovoLiveModal .klAsk{min-width:180px}}
   /* ---- Live Lesson v2 ---- */
+  #knovoLiveModal .klStart{position:absolute;inset:12px;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center;overflow-y:auto}
+  #knovoLiveModal .klStartIcon{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;border:1px solid #38bdf8;background:radial-gradient(circle at 35% 30%,#1e3a5f,#0b1220);color:#7dd3fc;font-size:1.4rem}
+  #knovoLiveModal .klStart h4{margin:0;font-family:Georgia,serif;font-size:clamp(1.35rem,3vw,1.9rem);font-weight:400;color:#f1f5f9}
+  #knovoLiveModal .klStart p{margin:0;max-width:480px;color:#94a3b8;font-size:.85rem;line-height:1.6}
+  #knovoLiveModal .klStart textarea{width:min(560px,100%);padding:12px 14px;border:1px solid #334155;border-radius:14px;background:#0f1b30;color:#f1f5f9;font:inherit;font-size:.95rem;line-height:1.5;resize:vertical;outline:none}
+  #knovoLiveModal .klStart textarea:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.15)}
+  #knovoLiveModal .klStartChips{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;max-width:600px}
+  #knovoLiveModal .klStartChips button{padding:6px 12px;border:1px solid #334155;border-radius:999px;background:#16223a;color:#cbd5e1;font-size:.74rem;cursor:pointer}
+  #knovoLiveModal .klStartChips button:hover{border-color:#38bdf8;color:#7dd3fc}
+  #knovoLiveModal .klStartBtn{min-height:46px;padding:10px 26px;border:1px solid #38bdf8;border-radius:12px;background:linear-gradient(120deg,#0ea5e9,#2563eb);color:#fff;font-weight:800;font-size:.92rem;cursor:pointer;box-shadow:0 8px 24px rgba(14,165,233,.25)}
+  #knovoLiveModal .klStartBtn:hover{filter:brightness(1.1)}
+  #knovoLiveModal .klStartErr{min-height:1em;color:#fbbf24;font-size:.78rem}
   #knovoLiveModal .klHead h3{text-align:center}
   #knovoLiveModal .klStepPill{padding:6px 11px;border:1px solid rgba(52,211,153,.45);border-radius:999px;background:rgba(52,211,153,.08);color:#6ee7b7;font-size:.72rem;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
   #knovoLiveModal .klIconBtn{border:1px solid #334155;background:#16223a;color:#e2e8f0;border-radius:10px;padding:7px 11px;cursor:pointer;font-size:.76rem;font-weight:700;white-space:nowrap}
@@ -5530,8 +5542,9 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 
   async function startLive(topic){
     /* The deployed server is authoritative for allowances; local counters are display-only. */
+    /* topic is only a suggestion for the start screen — the lesson never starts until the student taps Start */
     topic=String(topic||"").replace(/\s+/g," ").trim().slice(0,300);
-    if(!topic){if(window.toast)toast("Type or send a question first, then tap ✨ Live Lesson.");return;}
+    if(/^(the topic we are discussing|general study skills)$/i.test(topic))topic="";
     closeLive();
     KV.unlock(); /* must run inside the tap, before any await */
     var s=await getSession();if(!s){openSignin();return;}
@@ -5539,16 +5552,16 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     var modal=document.createElement("div");modal.id="knovoLiveModal";
     modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");modal.setAttribute("aria-label","Knovo Live Lesson");
     modal.innerHTML=
-      "<div class='klHead'><div class='klTutor'><span class='klAvatar' id='klAvatar'>✦<i class='klWave'><b></b><b></b><b></b></i></span><span class='klWho'><b>Knovo · Live Tutor</b><i id='klStatus'>preparing your lesson…</i></span></div><h3 id='klTitle'>✨ Live Lesson</h3><span class='klStepPill' id='klStepPill'>Getting ready</span><span class='klBadge' id='klBadge'>"+(ownerUnlimited()?"👑 Owner · Unlimited":isPro()?"Knovo Pro ✨":"✨ Server-managed access")+"</span><span class='klTimer' id='klTimer'>60:00</span><button class='klIconBtn' id='klNotesBtn' title='Show or hide lesson notes' aria-pressed='true'>📝 Notes</button><button class='klIconBtn' id='klVoiceBtn' title='Voice and speed' aria-expanded='false'>🔊 Voice</button><button class='klClose' id='klClose'>✕ Close</button></div>"+
+      "<div class='klHead'><div class='klTutor'><span class='klAvatar' id='klAvatar'>✦<i class='klWave'><b></b><b></b><b></b></i></span><span class='klWho'><b>Knovo · Live Tutor</b><i id='klStatus'>waiting for your topic</i></span></div><h3 id='klTitle'>✨ Live Lesson</h3><span class='klStepPill' id='klStepPill'>New lesson</span><span class='klBadge' id='klBadge'>"+(ownerUnlimited()?"👑 Owner · Unlimited":isPro()?"Knovo Pro ✨":"✨ Server-managed access")+"</span><span class='klTimer' id='klTimer'>60:00</span><button class='klIconBtn' id='klNewTopic' title='Start a lesson on a different topic' hidden>✎ New topic</button><button class='klIconBtn' id='klNotesBtn' title='Show or hide lesson notes' aria-pressed='true'>📝 Notes</button><button class='klIconBtn' id='klVoiceBtn' title='Voice and speed' aria-expanded='false'>🔊 Voice</button><button class='klClose' id='klClose'>✕ Close</button></div>"+
       "<div class='klVoicePanel' id='klVoicePanel' hidden><label>Voice <select id='klVoiceSel'></select></label><label>Speed <input type='range' id='klRate' min='0.75' max='1.35' step='0.05'><span id='klRateVal'></span></label><label class='klMute'><input type='checkbox' id='klMute'> Captions only (mute)</label><button id='klVoiceTest'>▶ Test voice</button></div>"+
       "<div class='klBoardbar'><span class='klBoardLabel'>Board tools</span><button id='klZoomOut' title='Zoom out'>−</button><button id='klZoomReset' title='Reset zoom'><span class='klZoomValue' id='klZoomValue'>100%</span></button><button id='klZoomIn' title='Zoom in'>+</button><button id='klEraser' title='Click board items to erase them'>Eraser: Off</button><button id='klClearBoard' title='Clear the current board'>Clear Board</button><button class='klClean' id='klCleanLayout'>Clean Layout</button><button id='klUndo'>↶ Undo</button><button id='klExport'>Export SVG</button></div>"+
-      "<div class='klMain'><div class='klStage' id='klStage'><svg class='klCanvas' id='klSvg' viewBox='0 0 800 500' preserveAspectRatio='xMidYMid meet'><g id='klSteps'></g><g class='klPen' id='klPen' transform='translate(60,440)'><circle r='9' fill='#38bdf8' opacity='.35'/><circle r='4' fill='#7dd3fc'/><text x='6' y='-8' font-size='26'>✍️</text></g></svg><div class='klLoading' id='klLoading'><span class='klSpinner'></span><b>Knovo is planning your lesson…</b><small id='klLoadingTip'>Sketching the board and choosing a worked example.</small></div></div>"+
-      "<aside class='klSide' id='klSide'><div class='klSideHead'>Lesson plan</div><ol class='klPlan' id='klPlan'><li class='klPlanGhost'>Planning steps…</li></ol><div class='klSideHead'>Questions &amp; answers</div><div class='klLog' id='klLog'><p class='klLogHint'>✋ Interrupt any time — Knovo pauses, answers, remembers what you asked, and carries on from the same spot.</p></div></aside></div>"+
-      "<div class='klSub' id='klSub' aria-live='polite'><b>Knovo:</b> setting up the board and sketching a plan for your lesson…</div>"+
+      "<div class='klMain'><div class='klStage' id='klStage'><svg class='klCanvas' id='klSvg' viewBox='0 0 800 500' preserveAspectRatio='xMidYMid meet'><g id='klSteps'></g><g class='klPen' id='klPen' transform='translate(60,440)' style='opacity:0'><circle r='9' fill='#38bdf8' opacity='.35'/><circle r='4' fill='#7dd3fc'/><text x='6' y='-8' font-size='26'>✍️</text></g></svg><div class='klStart' id='klStart'><span class='klStartIcon'>✦</span><h4>What would you like to learn?</h4><p>Type a topic or question. Your lesson starts only when you tap <b>Start lesson</b>.</p><textarea id='klTopicIn' rows='3' maxlength='300' placeholder='e.g. Explain photosynthesis for O Level Biology, with a labelled diagram' aria-label='What would you like to learn?'></textarea><div class='klStartChips' id='klStartChips'><button>Photosynthesis step by step</button><button>Solving simultaneous equations</button><button>Supply and demand with a diagram</button><button>How to prepare a trial balance</button></div><button class='klStartBtn' id='klStartBtn'>✨ Start lesson</button><small class='klStartErr' id='klStartErr'></small></div><div class='klLoading' id='klLoading' style='display:none'><span class='klSpinner'></span><b>Knovo is planning your lesson…</b><small id='klLoadingTip'>Sketching the board and choosing a worked example.</small></div></div>"+
+      "<aside class='klSide' id='klSide'><div class='klSideHead'>Lesson plan</div><ol class='klPlan' id='klPlan'><li class='klPlanGhost'>Your lesson plan appears here once you start.</li></ol><div class='klSideHead'>Questions &amp; answers</div><div class='klLog' id='klLog'><p class='klLogHint'>✋ Interrupt any time — Knovo pauses, answers, remembers what you asked, and carries on from the same spot.</p></div></aside></div>"+
+      "<div class='klSub' id='klSub' aria-live='polite'><b>Knovo:</b> Hi! Tell me what you'd like to learn and I'll teach it on the board.</div>"+
       "<div class='klControls'><button id='klPrev' title='Previous step'>⏮</button><button id='klPlayPause' class='klPrimary'>⏸ Pause</button><button id='klNext' title='Next step'>⏭</button><button id='klReplay'>↺ Replay Step</button><button class='klRewind klBack5' id='klBack5' title='Rewind 5 seconds'>−5s</button><button class='klRewind' id='klBack10' title='Rewind 10 seconds'>−10s</button><div class='klReplayMeter'><input class='klReplayTrack' id='klReplayTrack' type='range' min='0' max='0' step='0.1' value='0' aria-label='Lesson replay position'><span class='klReplayTime' id='klReplayTime'>0:00 / 0:00</span></div>"+
       "<div class='klAsk'><input id='klQ' maxlength='500' autocomplete='off' placeholder='✋ Ask a question — Knovo pauses and answers' aria-label='Ask Knovo a question'><button id='klMic' class='klMicBtn' title='Ask with your voice'>🎤</button><button id='klAskBtn'>Ask</button></div><button class='klResume' id='klResume' style='display:none'>▶ Continue lesson</button></div>";
     document.body.appendChild(modal);
-    L={step:0,steps:[],state:"loading",run:0,askSeq:0,sentence:0,stepSpoken:false,seconds:3600,groups:[],topic:topic,context:liveChatContext(topic),chat:[],
+    L={step:0,steps:[],state:"setup",run:0,askSeq:0,sentence:0,stepSpoken:false,seconds:3600,groups:[],topic:topic,context:liveChatContext(topic),chat:[],
        timeline:[],totalTime:0,replayTime:0,needsResume:false,seekSentence:0,zoom:1,eraseMode:false,history:[],title:topic};
     KV.onTalk(tutorTalking);
     var $=function(id){return document.getElementById(id);};
@@ -5577,10 +5590,49 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     if(window.innerWidth<900){modal.classList.add("klNotesOff");$("klNotesBtn").setAttribute("aria-pressed","false");}
     initVoicePanel();
     document.addEventListener("visibilitychange",liveVisibility);
-    L.timerInt=setInterval(tick,1000);
     L.clockInt=setInterval(replayClock,200);
-    updateControls();
+    $("klStartBtn").onclick=beginFromStart;
+    $("klNewTopic").onclick=newTopic;
+    $("klTopicIn").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();beginFromStart();}});
+    $("klTopicIn").addEventListener("input",function(){var er=$("klStartErr");if(er)er.textContent="";});
+    Array.prototype.forEach.call(modal.querySelectorAll("#klStartChips button"),function(b){b.onclick=function(){var t=$("klTopicIn");t.value=b.textContent;t.focus();};});
+    showStart(topic);
+  }
+  /* ---------------- start screen: the student chooses the topic ---------------- */
+  function showStart(prefill){
+    if(!L)return;
+    L.state="setup";updateControls();setStatus("waiting for your topic");
+    var st=document.getElementById("klStart"),inp=document.getElementById("klTopicIn"),ld=document.getElementById("klLoading");
+    if(ld)ld.style.display="none";
+    if(st)st.style.display="";
+    var pen=document.getElementById("klPen");if(pen)pen.style.opacity="0";
+    if(inp){if(prefill!=null)inp.value=prefill;setTimeout(function(){try{inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);}catch(e){}},50);}
+    var pill=document.getElementById("klStepPill");if(pill)pill.textContent="New lesson";
+    var nt=document.getElementById("klNewTopic");if(nt)nt.hidden=true;
+  }
+  function beginFromStart(){
+    if(!L||(L.state!=="setup"&&L.state!=="error"))return;
+    var inp=document.getElementById("klTopicIn"),er=document.getElementById("klStartErr");
+    var t=String(inp&&inp.value||"").replace(/\s+/g," ").trim().slice(0,300);
+    if(t.length<3){if(er)er.textContent="Please type what you'd like to learn first.";if(inp)inp.focus();return;}
+    KV.unlock(); /* inside the tap, so speech is allowed on iPhone/iPad */
+    L.topic=t;L.title=t;L.context=liveChatContext(t);
+    var st=document.getElementById("klStart");if(st)st.style.display="none";
+    document.getElementById("klTitle").textContent="✨ "+t;
+    if(!L.timerInt)L.timerInt=setInterval(tick,1000); /* the 60-minute clock starts with the lesson */
+    var sub=document.getElementById("klSub");if(sub)sub.innerHTML="<b>Knovo:</b> setting up the board and sketching a plan for your lesson…";
     loadLesson();
+  }
+  function newTopic(){
+    if(!L)return;
+    haltForNav();
+    var root=document.getElementById("klSteps");if(root)root.innerHTML="";
+    L.steps=[];L.groups=[];L.history=[];L.chat=[];L.timeline=[];L.totalTime=0;L.replayTime=0;L.step=0;L.wasDone=false;updateReplayUI();
+    var ol=document.getElementById("klPlan");if(ol)ol.innerHTML="<li class='klPlanGhost'>Your lesson plan appears here once you start.</li>";
+    document.getElementById("klTitle").textContent="✨ Live Lesson";
+    var sub=document.getElementById("klSub");if(sub)sub.innerHTML="<b>Knovo:</b> Sure — what would you like to learn next?";
+    logLine("sys","Choosing a new topic…");
+    showStart("");
   }
   window.knovoLiveLesson=startLive;
 
@@ -5630,6 +5682,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     if(!L)return;
     var sub=document.getElementById("klSub"),tips=["Sketching the board and choosing a worked example.","Picking the clearest diagram for this idea.","Writing a check question for the end.","Lining up the exam tips."],ti=0;
     var loading=document.getElementById("klLoading");if(loading)loading.style.display="";
+    var startEl=document.getElementById("klStart");if(startEl)startEl.style.display="none";
     var tipInt=setInterval(function(){var t=document.getElementById("klLoadingTip");if(!t)return clearInterval(tipInt);ti=(ti+1)%tips.length;t.textContent=tips[ti];},2600);
     L.state="loading";updateControls();setStatus("preparing your lesson…");
     var lesson=null,lastErr="";
@@ -5652,7 +5705,8 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     if(!lesson){
       if(loading)loading.style.display="none";
       L.state="error";updateControls();setStatus("couldn't start");
-      sub.innerHTML="<span class='klError'>⚠️ Sorry — "+esc(lastErr||"something went wrong")+". Check your connection and try again.</span> <button class='klRetry' id='klRetry'>↻ Try again</button>";
+      sub.innerHTML="<span class='klError'>⚠️ Sorry — "+esc(lastErr||"something went wrong")+". Check your connection and try again.</span> <button class='klRetry' id='klRetry'>↻ Try again</button> <button class='klRetry' id='klChangeTopic'>✎ Change topic</button>";
+      var ct=document.getElementById("klChangeTopic");if(ct)ct.onclick=function(){showStart(L.topic);};
       var rb=document.getElementById("klRetry");if(rb)rb.onclick=function(){sub.innerHTML="<b>Knovo:</b> let's try that again…";loadLesson();};
       return;
     }
@@ -5662,6 +5716,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     buildLessonTimeline();liveRecord();updateBadge();
     try{if(window.knovoLogUsage)window.knovoLogUsage("live_lesson");}catch(e){} /* owner analytics */
     document.getElementById("klTitle").textContent="✨ "+lesson.title;
+    var ntb=document.getElementById("klNewTopic");if(ntb)ntb.hidden=false;
     renderPlan();
     logLine("sys","Lesson started: "+lesson.title+" · "+L.steps.length+" steps");
     playStep(0);
@@ -6273,6 +6328,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     var inp=document.getElementById("klQ");
     var q=String(override!=null?override:(inp?inp.value:"")).replace(/\s+/g," ").trim().slice(0,500);
     if(!q)return;
+    if(L.state==="setup"){var ti=document.getElementById("klTopicIn");if(ti)ti.value=q;if(inp)inp.value="";beginFromStart();return;}
     if(!L.steps.length){if(window.toast)toast(L.state==="error"?"The lesson didn't start — tap ↻ Try again first.":"One moment — Knovo is still preparing the board.");return;}
     if(inp)inp.value="";
     var st=L.state;
@@ -6387,8 +6443,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     e.preventDefault();
     var topic=(window.KNOVO_STATE&&window.KNOVO_STATE.currentTopic)||"";
     if(!topic){var inp=document.getElementById("evAiIn");topic=(inp&&inp.value.trim())||"";}
-    if(!topic){var bots=document.querySelectorAll("#evAiLog .evAiMsg.bot");if(bots.length)topic=bots[bots.length-1].innerText.slice(0,250);}
-    startLive(topic||"general study skills");
+    startLive(topic); /* opens the start screen; nothing plays until the student taps Start */
   });
 })();
 </script>
