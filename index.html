@@ -6281,7 +6281,8 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       {role:"model",parts:[{text:JSON.stringify({say:"Got it. I'm teaching "+L.title+" and I'm at "+(wasDone?"the end of the lesson":"step "+(L.step+1))+". I'll answer in that context and remember what we discuss.",board:"",action:"wait"})}]}];
     L.chat.forEach(function(m){contents.push({role:m.role,parts:[{text:m.role==="model"?JSON.stringify({say:m.text,board:"",action:"wait"}):m.text}]});});
     contents.push({role:"user",parts:[{text:q}]});
-    return {mode:"chat",systemInstruction:{parts:[{text:TUTOR_SYS}]},contents:contents};
+    /* "lesson_qa" counts against the chat allowance; the updated server also asks Gemini for strict JSON */
+    return {mode:"lesson_qa",systemInstruction:{parts:[{text:TUTOR_SYS}]},contents:contents};
   }
   function cleanSay(s){
     return String(s||"").replace(/```[\s\S]*?```/g," ").replace(/\*\*|__|`/g,"").replace(/^#{1,6}\s+/gm,"")
