@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://junaidbintahir1-lgtm.github.io/Edu-Verse/sitemap.xml

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — EduVerse</title>
+<meta name="description" content="Sign in or create a free EduVerse student account to save progress and use Knovo.">
+<meta name="theme-color" content="#070712">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070712;--card:#12141f;--border:rgba(255,255,255,.12);--text:#e8e8f5;--muted:#9a9ab5;--gold:#f0d58a;--gold2:#d9b25f}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Inter,system-ui,sans-serif;color:var(--text);background:radial-gradient(900px 500px at 10% -10%,rgba(124,58,237,.35),transparent 55%),radial-gradient(800px 420px at 110% 0%,rgba(6,182,212,.22),transparent 50%),var(--bg);display:flex;align-items:center;justify-content:center;padding:28px 16px}
+.card{width:min(440px,100%);background:rgba(18,20,31,.92);border:1px solid var(--border);border-radius:22px;padding:28px 26px 24px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;margin-bottom:18px}
+.brand img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.brand b{font-size:1.25rem;background:linear-gradient(90deg,#06b6d4,#7c3aed,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand span{display:block;color:var(--muted);font-size:.78rem;font-weight:600}
+h1{margin:0 0 6px;font-size:1.45rem}
+.lead{margin:0 0 18px;color:var(--muted);line-height:1.5;font-size:.92rem}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.tabs button{border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:999px;padding:10px 12px;font-weight:700;cursor:pointer}
+.tabs button.on{color:#1a1206;background:linear-gradient(120deg,var(--gold),var(--gold2));border-color:transparent}
+label{display:block;font-size:.78rem;font-weight:700;color:#c9c9de;margin:12px 0 6px}
+input,select{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:12px;font-size:1rem}
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.row button.link{background:none;border:none;color:#06b6d4;cursor:pointer;font-weight:700;padding:0}
+.submit{width:100%;margin-top:16px;border:none;border-radius:999px;padding:13px 16px;font-weight:800;cursor:pointer;color:#1a1206;background:linear-gradient(120deg,var(--gold),var(--gold2) 60%,#b78f3e)}
+.submit:disabled{opacity:.65;cursor:wait}
+.msg{min-height:1.2em;margin:12px 0 0;font-size:.86rem;line-height:1.45}
+.msg.err{color:#fca5a5}
+.msg.ok{color:#86efac}
+.back{display:inline-block;margin-top:16px;color:var(--muted);font-size:.85rem;text-decoration:none}
+.back:hover{color:#fff}
+</style>
+</head>
+<body>
+<main class="card">
+  <a class="brand" href="index.html"><img src="assets/eduverse_logo.png" alt=""><div><b>EduVerse</b><span>O Level, IGCSE and A Level revision</span></div></a>
+  <h1 id="title">Sign in</h1>
+  <p class="lead" id="lead">Use your student account to save progress and open Knovo.</p>
+  <div class="tabs" role="tablist">
+    <button type="button" id="tabIn" class="on" onclick="showMode('in')">Sign in</button>
+    <button type="button" id="tabUp" onclick="showMode('up')">Create account</button>
+  </div>
+  <form id="form" autocomplete="on">
+    <div id="nameWrap" hidden>
+      <label for="name">Display name</label>
+      <input id="name" name="name" maxlength="60" autocomplete="name" placeholder="Your name">
+    </div>
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" required autocomplete="email" placeholder="you@email.com">
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" required minlength="8" autocomplete="current-password" placeholder="At least 8 characters">
+    <div class="row"><span></span><button type="button" class="link" id="forgot" onclick="sendReset()">Forgot password?</button></div>
+    <button class="submit" id="submit" type="submit">Sign in</button>
+    <p class="msg" id="msg" role="status"></p>
+  </form>
+  <a class="back" id="back" href="index.html">← Back to EduVerse</a>
+</main>
+<script>
+(function(){
+  "use strict";
+  var SUPA_URL="https://yazzyldmohngmotiozlj.supabase.co";
+  var SUPA_KEY="sb_publishable_1p58DjFzc2m-VsPOO1thuA_gjemaUpq";
+  var mode="in";
+  var params=new URLSearchParams(location.search);
+  function $(id){return document.getElementById(id);}
+  function nextUrl(){
+    var next=params.get("next")||"";
+    if(!next) return "index.html";
+    if(next.charAt(0)==="#") return "index.html"+next;
+    if(/^[A-Za-z0-9._~/?=&%#-]+$/.test(next) && next.indexOf("..")===-1 && next.indexOf("//")!==0) return next;
+    return "index.html";
+  }
+  function setMsg(text, kind){
+    var el=$("msg");
+    el.textContent=text||"";
+    el.className="msg"+(kind?(" "+kind):"");
+  }
+  function saveSession(data){
+    var user=data.user||{};
+    var meta=user.user_metadata||{};
+    localStorage.setItem("ev_auth_token", data.access_token);
+    if(data.refresh_token) localStorage.setItem("ev_auth_refresh", data.refresh_token);
+    localStorage.setItem("ev_auth_expires", String(Date.now()+((Number(data.expires_in)||3600)*1000)));
+    localStorage.setItem("ev_auth_user", JSON.stringify({
+      id: user.id||"",
+      email: user.email||$("email").value.trim(),
+      full_name: meta.full_name||$("name").value.trim()||"",
+      user_role: meta.user_role||"student"
+    }));
+  }
+  function showMode(next){
+    mode=next;
+    var up=next==="up";
+    $("tabIn").classList.toggle("on", !up);
+    $("tabUp").classList.toggle("on", up);
+    $("nameWrap").hidden=!up;
+    $("title").textContent=up?"Create a free account":"Sign in";
+    $("lead").textContent=up?"Join EduVerse. Your notes, ranks and Knovo chats stay on your student account.":"Use your student account to save progress and open Knovo.";
+    $("submit").textContent=up?"Create account":"Sign in";
+    $("password").autocomplete=up?"new-password":"current-password";
+    $("forgot").style.visibility=up?"hidden":"visible";
+    setMsg("");
+    if(up) history.replaceState(null,"","signin.html#register"+(location.search||""));
+    else history.replaceState(null,"","signin.html"+(location.search||""));
+  }
+  window.showMode=showMode;
+  async function auth(path, body){
+    var res=await fetch(SUPA_URL+path,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify(body)});
+    var data=null;
+    try{ data=await res.json(); }catch(e){ data={}; }
+    if(!res.ok){
+      var message=(data&& (data.msg||data.error_description||data.message||data.error)) || "Something went wrong. Please try again.";
+      throw new Error(message);
+    }
+    return data;
+  }
+  $("form").addEventListener("submit", async function(ev){
+    ev.preventDefault();
+    var email=$("email").value.trim();
+    var password=$("password").value;
+    if(password.length<8){ setMsg("Use a password of at least 8 characters.","err"); return; }
+    $("submit").disabled=true;
+    setMsg(mode==="up"?"Creating your account…":"Signing you in…");
+    try{
+      if(mode==="up"){
+        var name=$("name").value.trim();
+        if(name.length<2){ setMsg("Please add your display name.","err"); $("submit").disabled=false; return; }
+        var created=await auth("/auth/v1/signup",{email:email,password:password,data:{full_name:name,user_role:"student",study_track:"Cambridge O Level / IGCSE"}});
+        if(created && created.access_token){
+          saveSession(created);
+          location.href=nextUrl();
+          return;
+        }
+        setMsg("Account created. Check your email to confirm it, then sign in.","ok");
+        showMode("in");
+        $("email").value=email;
+      }else{
+        var session=await auth("/auth/v1/token?grant_type=password",{email:email,password:password});
+        if(!session.access_token) throw new Error("Sign-in did not return a session.");
+        saveSession(session);
+        location.href=nextUrl();
+        return;
+      }
+    }catch(err){
+      setMsg(err.message||"Could not sign in.","err");
+    }
+    $("submit").disabled=false;
+  });
+  window.sendReset=async function(){
+    var email=$("email").value.trim();
+    if(!email){ setMsg("Enter your email first, then tap Forgot password.","err"); return; }
+    $("forgot").disabled=true;
+    try{
+      await auth("/auth/v1/recover",{email:email});
+      setMsg("If that email has an account, a reset link is on its way.","ok");
+    }catch(err){
+      setMsg(err.message||"Could not send a reset email.","err");
+    }
+    $("forgot").disabled=false;
+  };
+  if(location.hash==="#register") showMode("up");
+  $("back").href=nextUrl();
+})();
+</script>
+</body>
+</html>
