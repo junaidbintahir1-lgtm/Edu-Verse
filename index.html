@@ -5697,15 +5697,19 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
         clearInterval(tipInt);if(loading)loading.style.display="none";L.state="error";updateControls();setStatus("allowance used");
         sub.innerHTML="<span class='klError'>⏳ Your Live Lesson allowance is used for now. "+(res.msLeft?"Please try again in <b>"+fmtWait(res.msLeft)+"</b>.":"Please retry shortly.")+" Knovo Pro includes unlimited lessons.</span>";return;
       }
-      if(res.error){lastErr=res.network?"I couldn't reach the lesson server":res.status?"the lesson server had a problem ("+String(res.error).slice(0,80)+")":String(res.error);if(res.network||res.status)break;continue;}
-      try{lesson=parseLesson(res.text);}catch(e){lastErr="the lesson came back garbled";lesson=null;}
+      if(res.error){if(res.status&&window.console)console.warn("Knovo Live Lesson server error",res.status,res.error);lastErr=res.network?"net":res.status?"server":"garbled";L.serverDetail=res.status?String(res.error).slice(0,160):"";if(res.network||res.status)break;continue;}
+      try{lesson=parseLesson(res.text);}catch(e){lastErr="garbled";lesson=null;}
     }
     clearInterval(tipInt);
     if(!L)return;
     if(!lesson){
       if(loading)loading.style.display="none";
       L.state="error";updateControls();setStatus("couldn't start");
-      sub.innerHTML="<span class='klError'>⚠️ Sorry — "+esc(lastErr||"something went wrong")+". Check your connection and try again.</span> <button class='klRetry' id='klRetry'>↻ Try again</button> <button class='klRetry' id='klChangeTopic'>✎ Change topic</button>";
+      var owner=ownerUnlimited(),msg=lastErr==="net"?"I couldn't reach the lesson server. Check your internet connection and try again."
+        :lastErr==="server"?"Live Lessons are having a server problem right now. Please try again in a little while."
+        :"The lesson came back in a form I couldn't read. Please try again.";
+      if(owner&&lastErr==="server"&&L.serverDetail)msg+=" <br><small>Owner detail: "+esc(L.serverDetail)+"</small>";
+      sub.innerHTML="<span class='klError'>⚠️ "+msg+"</span> <button class='klRetry' id='klRetry'>↻ Try again</button> <button class='klRetry' id='klChangeTopic'>✎ Change topic</button>";
       var ct=document.getElementById("klChangeTopic");if(ct)ct.onclick=function(){showStart(L.topic);};
       var rb=document.getElementById("klRetry");if(rb)rb.onclick=function(){sub.innerHTML="<b>Knovo:</b> let's try that again…";loadLesson();};
       return;
