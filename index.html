@@ -5062,6 +5062,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   #knovoLiveModal .klResume{border-color:#34d399!important;color:#6ee7b7!important}
   #knovoLiveModal .klError{padding:22px;text-align:center;color:#fca5a5;font-size:.9rem;line-height:1.7}
   #knovoLiveModal text{font-family:'Caveat','Patrick Hand',cursive}
+  #knovoLiveModal text.klB{font-family:'Patrick Hand','Caveat',cursive}
   @media(max-width:640px){#knovoLiveModal .klHead h3{white-space:normal}#knovoLiveModal .klBoardbar{padding:7px 10px;gap:5px}#knovoLiveModal .klBoardbar button{min-height:40px;padding:6px 9px}#knovoLiveModal .klNote{right:12px;top:12px}#knovoLiveModal .klStage{min-height:180px;padding:8px}#knovoLiveModal .klControls{padding:8px 10px;gap:7px}#knovoLiveModal .klControls button{padding:8px 10px;min-height:44px}#knovoLiveModal .klReplayMeter{order:5;flex-basis:100%;max-width:none}#knovoLiveModal .klAsk{min-width:180px}}
   /* ---- Live Lesson v2 ---- */
   #knovoLiveModal .klStart{position:absolute;inset:12px;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center;overflow-y:auto}
@@ -5152,10 +5153,17 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   var SUPA_KEY="sb_publishable_1p58DjFzc2m-VsPOO1thuA_gjemaUpq";
   var CHAT_SYS="You are Knovo, an all-around study tutor at EduVerse. Help every student with any qualification, exam board or subject: explain concepts clearly and step by step, break down past-paper questions, and help organise study plans.";
   var LESSON_SYS="You are Knovo, a warm, expert human tutor giving a one-to-one LIVE whiteboard lesson for EduVerse. You speak while you draw. Return valid JSON only — no markdown code fences, no commentary — in exactly this structure: {\"title\":\"Topic Title\",\"steps\":[{\"title\":\"Short step heading\",\"voice\":\"What you say aloud while drawing this step.\",\"svgElements\":\"<circle cx='200' cy='180' r='80' stroke='#38bdf8' stroke-width='3' fill='none'/><text x='160' y='280' fill='#f8fafc' font-family='Caveat' font-size='26'>Label</text>\"}]}. "+
+    "Each step uses EITHER svgElements (a drawn diagram) OR board (a neat layout that the app draws for you) — never both. USE board, NOT svgElements, for anything made of rows of words or numbers: financial statements and formats (statement of financial position, income statement, trial balance, cash flow), tables, line-by-line calculations, lists of key points and cause-and-effect chains. Never build a table or statement out of loose svg text. board shapes: "+
+    "{\"kind\":\"table\",\"title\":\"Statement of Financial Position as at 31 December 2025\",\"columns\":[\"\",\"$\",\"$\"],\"rows\":[{\"cells\":[\"Non-current assets\"],\"style\":\"heading\"},{\"cells\":[\"Machinery\",\"\",\"40,000\"]},{\"cells\":[\"Current assets\"],\"style\":\"heading\"},{\"cells\":[\"Inventory\",\"6,000\",\"\"]},{\"cells\":[\"Total assets\",\"\",\"52,000\"],\"style\":\"grand\"}]} "+
+    "(row style: heading for section names, total for sub-totals, grand for the final figure; put item amounts in the inner column and totals in the outer column, exactly as Cambridge expects); "+
+    "{\"kind\":\"working\",\"title\":\"Gross profit\",\"lines\":[\"Gross profit = Revenue − Cost of sales\",\"= 200,000 − 80,000\",\"= 120,000\"]} (the last line is boxed as the answer); "+
+    "{\"kind\":\"points\",\"title\":\"...\",\"items\":[\"...\",\"...\"]} (at most 6 short points); "+
+    "{\"kind\":\"flow\",\"title\":\"...\",\"items\":[\"cause\",\"effect\",\"result\"]} (2-6 short boxes joined by arrows). "+
+    "To build a statement or table over several steps, repeat the SAME title in each step and give ALL rows so far plus the new ones — the app writes only the new rows, so it grows on the board like a real teacher writing it out. Keep every table to at most 18 rows. "+
     "LESSON SHAPE: 6-8 steps that flow like one continuous conversation, not separate slides. Step 1 greets the student briefly, poses the key question and says in one sentence what the lesson will cover. The middle steps build the idea one piece at a time with a diagram plus short handwritten labels, then walk through at least one fully worked example with real figures, intermediate working and the exam-specific detail examiners reward, and point out one common mistake. Draw the emphasis marks a human tutor would draw — an underline beneath a key term, a circle or box around the final result, small arrows linking cause to effect. The final step recaps the single key takeaway and asks ONE quick check question, inviting the student to type or say their answer. "+
     "title = a 2-6 word heading for the step. "+
     "voice = the natural sentences you say WHILE drawing that step: 3-5 short spoken sentences, 40-75 words in total. Conversational, first person, with contractions (\"Alright, watch this arrow...\", \"Here's the bit examiners love...\", \"Notice what happens when...\"). Refer to what you are drawing (\"this curve I've just drawn\") and link each step to the one before, so the lesson sounds like one teacher talking. Vary how steps begin; never open two steps the same way. Write maths and symbols the way you would say them aloud (x squared, divided by, leads to). No lists, markdown or emojis in voice. "+
-    "svgElements = one string of SVG elements only (circle, ellipse, rect, line, path, polyline, polygon, text), at most 10 per step. Use SINGLE quotes for every attribute and never put double quotes or line breaks inside any JSON string value. STRICT VISUAL RULES: every single step MUST contain BOTH (a) at least one vector shape (path, circle, ellipse, rect, line or polyline) that draws a real, recognisable part of the diagram or illustration — axes, curves, apparatus, cells, circuits, vectors, containers — never decorative dots alone — AND (b) short handwritten <text> labels and, where useful, equations or table rows. For accounting lessons, draw the actual statement formats with headings such as Revenue, Cost of Sales, Gross Profit, Non-current Assets, Capital and Liabilities; never substitute generic pictures. A step with only text, or only shapes with no label, is INVALID. The canvas is viewBox 0 0 800 500 on a dark background: keep EVERY coordinate strictly inside x: 60-740 and y: 60-440 so nothing is clipped. Use strokes #38bdf8 (main), #f472b6, #fbbf24, #34d399, stroke-width 3, fill none for shapes; text fill #f8fafc, font-family Caveat, font-size 26. Build left-to-right and top-to-bottom so later steps never overlap earlier content.";
+    "svgElements = one string of SVG elements only (circle, ellipse, rect, line, path, polyline, polygon, text), at most 10 per step. Use SINGLE quotes for every attribute and never put double quotes or line breaks inside any JSON string value. STRICT VISUAL RULES for svgElements steps: each such step MUST contain BOTH (a) at least one vector shape (path, circle, ellipse, rect, line or polyline) that draws a real, recognisable part of the diagram or illustration — axes, curves, apparatus, cells, circuits, vectors, containers — never decorative dots alone — AND (b) short handwritten <text> labels and, where useful, equations or table rows. For accounting lessons, show the actual statement formats with a board of kind table, using the correct headings (Revenue, Cost of sales, Gross profit, Non-current assets, Current assets, Capital, Non-current liabilities, Current liabilities); never substitute generic pictures. When you use svgElements, a step with only text, or only shapes with no label, is INVALID. The canvas is viewBox 0 0 800 500 on a dark background: keep EVERY coordinate strictly inside x: 60-740 and y: 60-440 so nothing is clipped. Use strokes #38bdf8 (main), #f472b6, #fbbf24, #34d399, stroke-width 3, fill none for shapes; text fill #f8fafc, font-family Caveat, font-size 26. Build left-to-right and top-to-bottom so later steps never overlap earlier content.";
 
   /* ---------------- Supabase session (with silent refresh) ---------------- */
   var supa=null;
@@ -5482,7 +5490,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   var L=null; /* current session state */
   var TUTOR_SYS="You are Knovo, a warm, expert one-to-one tutor in the middle of a LIVE spoken whiteboard lesson for EduVerse. The student has just raised their hand. Reply with JSON only, no code fences: {\"say\":\"...\",\"board\":\"\",\"action\":\"wait\"}. "+
     "say = exactly what you say out loud: natural and conversational, first person, 2-5 short sentences (under 90 words), plain spoken English, no markdown, no bullet points, no emojis; write symbols as words when spoken. Answer the student's actual question directly first, then link it back to the step you were teaching. Remember everything already said in this lesson and refer back to it (for example 'like the arrow I drew earlier'). If the student is answering your check question, say clearly whether they are right and why, kindly correcting any mistake. If the question is off-topic, answer briefly and steer back to the lesson. Never say you cannot draw or that you are text-only. "+
-    "board = an empty string unless a quick sketch genuinely helps; if it does, give at most 6 SVG elements (path, line, circle, ellipse, rect, polyline, text) using single quotes for attributes, stroke-width 3, fill none for shapes, colours #fbbf24 or #f472b6, text fill #f8fafc font-family Caveat font-size 24, every coordinate inside x 60-740 and y 60-440. "+
+    "board = an empty string unless something on the board genuinely helps. For a format, statement, table, calculation or list (for example 'what is the format of the SOFP?'), give a neat board object instead of a string: {\"kind\":\"table\",\"title\":\"...\",\"columns\":[\"\",\"$\",\"$\"],\"rows\":[{\"cells\":[\"Non-current assets\"],\"style\":\"heading\"},{\"cells\":[\"Machinery\",\"\",\"40,000\"]},{\"cells\":[\"Total assets\",\"\",\"52,000\"],\"style\":\"grand\"}]}, or {\"kind\":\"working\",\"title\":\"...\",\"lines\":[\"...\",\"= ...\"]}, or {\"kind\":\"points\",\"title\":\"...\",\"items\":[\"...\"]}, or {\"kind\":\"flow\",\"title\":\"...\",\"items\":[\"...\"]}. For a quick diagram, give at most 6 SVG elements (path, line, circle, ellipse, rect, polyline, text) using single quotes for attributes, stroke-width 3, fill none for shapes, colours #fbbf24 or #f472b6, text fill #f8fafc font-family Caveat font-size 24, every coordinate inside x 60-740 and y 60-440. "+
     "action = 'resume' only when the student says they understand or asks you to continue, 'repeat' when they ask to hear the step again, 'next' when they ask to skip ahead, 'back' when they ask to go back a step, otherwise 'wait'.";
   var LESSON_COMPACT="\n\nIMPORTANT: the previous attempt could not be read. Return a SHORTER lesson as compact valid JSON on a single line: exactly 5 steps, each voice 35-55 words, at most 6 SVG elements per step, single quotes inside svgElements, no double quotes or line breaks inside any string.";
 
@@ -5787,9 +5795,12 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     if(!Array.isArray(raw))throw new Error("no steps");
     var steps=raw.map(function(s){
       if(!s||typeof s!=="object")return null;
-      return {title:String(s.title||s.heading||"").replace(/\s+/g," ").trim().slice(0,70),
+      var board=normBoard(s.board||s.layout||s.table);
+      var st={title:String(s.title||s.heading||"").replace(/\s+/g," ").trim().slice(0,70),
               voice:String(s.voice||s.say||s.narration||s.text||"").replace(/\s+/g," ").trim(),
-              svgElements:sanitizeSVG(String(s.svgElements||s.svg||s.board||""))};
+              svgElements:board?renderBoard(board):sanitizeSVG(String(s.svgElements||s.svg||""))};
+      if(board){st.__ordered=true;st.__meta={key:boardKey(board),rows:rowsSig(board)};}
+      return st;
     }).filter(function(s){return s&&(s.voice||s.svgElements);});
     if(truncated&&steps.length>2)steps.pop(); /* the last step of a cut-off reply is incomplete */
     if(steps.length<2)throw new Error("The lesson came back empty");
@@ -5904,9 +5915,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     if(L.eraseMode)toggleWhiteboardEraser();setStatus("board cleared — Replay Step or rewind to restore content");
   }
 
-  /* ---------------- collision-free SVG layout + dragging ---------------- */
-  /* 32px solver clearance preserves the required 24px after webfont metric changes. */
-  var KL_PAD=32;
+  /* ---------------- board geometry + dragging ---------------- */
   function klApplyOffset(el,x,y){
     if(!Object.prototype.hasOwnProperty.call(el,"__klBaseTransform"))el.__klBaseTransform=el.getAttribute("transform")||"";
     el.__klX=Number(x)||0;el.__klY=Number(y)||0;el.setAttribute("data-kl-offset","1");
@@ -5925,37 +5934,6 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       var b2=el.getBBox?el.getBBox():{x:0,y:0,width:0,height:0};
       return {x:b2.x+(el.__klX||0),y:b2.y+(el.__klY||0),width:b2.width,height:b2.height};
     }
-  }
-  function klHits(a,b){return a.x<b.x+b.width+KL_PAD&&a.x+a.width+KL_PAD>b.x&&a.y<b.y+b.height+KL_PAD&&a.y+a.height+KL_PAD>b.y;}
-  function klCollisionCount(a,boxes){var n=0;boxes.forEach(function(b){if(klHits(a,b))n++;});return n;}
-  function klGrowCanvas(bottom){
-    var svg=document.getElementById("klSvg");if(!svg)return;
-    var vb=(svg.getAttribute("viewBox")||"0 0 800 500").split(/\s+/).map(Number),h=Math.max(vb[3]||500,Math.ceil((bottom+30)/10)*10);
-    if(h>vb[3]){svg.setAttribute("viewBox","0 0 800 "+h);svg.style.aspectRatio="800 / "+h;}
-  }
-  function klResolveElement(el,boxes){
-    var start=klBox(el),ox=el.__klX||0,oy=el.__klY||0,candidates=[{x:start.x,y:start.y}];
-    boxes.forEach(function(b){
-      candidates.push({x:start.x,y:b.y+b.height+KL_PAD});
-      candidates.push({x:b.x+b.width+KL_PAD,y:start.y});
-    });
-    /* Vertical search first, then a regular grid across the board. */
-    for(var y=48;y<=456;y+=24)candidates.push({x:start.x,y:y});
-    for(var gy=48;gy<=456;gy+=24)for(var gx=48;gx<=696;gx+=72)candidates.push({x:gx,y:gy});
-    var best=null,bestScore=Infinity;
-    candidates.forEach(function(c){
-      klApplyOffset(el,ox+c.x-start.x,oy+c.y-start.y);
-      var box=klBox(el),hits=klCollisionCount(box,boxes);
-      var outside=Math.max(0,24-box.x)+Math.max(0,24-box.y)+Math.max(0,box.x+box.width-776);
-      var score=hits*10000000+outside*100000+Math.abs(box.x-start.x)+Math.abs(box.y-start.y)*1.15;
-      if(score<bestScore){bestScore=score;best={box:box,x:el.__klX,y:el.__klY,hits:hits};}
-    });
-    if(!best||best.hits){
-      var maxBottom=boxes.reduce(function(m,b){return Math.max(m,b.y+b.height);},48);
-      klApplyOffset(el,ox,oy+maxBottom+KL_PAD-start.y);best={box:klBox(el),x:el.__klX,y:el.__klY,hits:0};
-    }else klApplyOffset(el,best.x,best.y);
-    klGrowCanvas(best.box.y+best.box.height);
-    return best.box;
   }
   function klClientPoint(e){
     var svg=document.getElementById("klSvg"),p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;
@@ -5978,16 +5956,201 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       el.addEventListener("pointermove",move);el.addEventListener("pointerup",finish);el.addEventListener("pointercancel",finish);
     });
   }
-  function klLayoutGroup(g){
-    var root=document.getElementById("klSteps"),boxes=[];
-    Array.prototype.slice.call(root.children).forEach(function(old){if(old!==g)Array.prototype.slice.call(old.children).forEach(function(el){boxes.push(klBox(el));});});
-    Array.prototype.slice.call(g.children).forEach(function(el){klEnableDrag(el);boxes.push(klResolveElement(el,boxes));});
+  /* ---------------- neat structured boards ----------------
+     The AI fills in a small object; Knovo lays it out cleanly instead of the AI
+     placing loose text. Kinds: table (financial statements, data tables),
+     working (line-by-line calculation), points (key points), flow (cause → effect). */
+  var KL_NS="http://www.w3.org/2000/svg",KL_X=64,KL_W=672,KL_TOP=34;
+  function klCell(c){return String(c==null?"":c).replace(/\s+/g," ").trim().slice(0,70);}
+  function normBoard(b){
+    if(!b||typeof b!=="object"||Array.isArray(b))return null;
+    var kind=String(b.kind||b.type||"").toLowerCase(),title=klCell(b.title||b.heading).slice(0,80);
+    if(kind==="table"||kind==="statement"||kind==="format"||Array.isArray(b.rows)){
+      var rows=(Array.isArray(b.rows)?b.rows:[]).slice(0,22).map(function(r){
+        var cells,style="";
+        if(Array.isArray(r))cells=r.map(klCell);
+        else if(r&&typeof r==="object"){cells=(Array.isArray(r.cells)?r.cells:[r.label,r.amount,r.total]).map(klCell);style=String(r.style||r.type||"").toLowerCase();}
+        else cells=[klCell(r)];
+        while(cells.length>1&&!cells[cells.length-1])cells.pop();
+        if(!style){ /* sensible defaults when the AI gives none */
+          var rest=cells.slice(1).some(Boolean);
+          if(!rest&&cells[0]&&!/\d/.test(cells[0]))style="heading";
+          else if(/^(total|net |gross profit|profit for|loss for|capital employed|working capital|net assets|net current)/i.test(cells[0]||""))style="total";
+        }
+        if(!/^(heading|total|grand)$/.test(style))style="";
+        return {cells:cells,style:style};
+      }).filter(function(r){return r.cells.some(Boolean);});
+      if(!rows.length)return null;
+      var cols=(Array.isArray(b.columns)?b.columns:[]).map(klCell).slice(0,5);
+      var n=Math.min(5,Math.max(cols.length,rows.reduce(function(m,r){return Math.max(m,r.cells.length);},1)));
+      return {kind:"table",title:title,columns:cols,n:n,rows:rows};
+    }
+    var list=b.lines||b.items||b.points||b.steps||[];
+    var items=(Array.isArray(list)?list:[]).map(function(x){return String(x==null?"":x).replace(/\s+/g," ").trim().slice(0,150);}).filter(Boolean).slice(0,10);
+    if(!items.length)return null;
+    if(/^(working|equation|calculation|calc|solution)$/.test(kind))return {kind:"working",title:title,items:items};
+    if(/^(flow|process|chain|cycle|sequence)$/.test(kind))return {kind:"flow",title:title,items:items.slice(0,6)};
+    return {kind:"points",title:title,items:items};
+  }
+  function klMk(tag,attrs,text){var e=document.createElementNS(KL_NS,tag);for(var k in attrs)e.setAttribute(k,String(attrs[k]));if(text!=null)e.textContent=text;return e;}
+  function klTxt(x,y,txt,fs,o){
+    o=o||{};
+    var a={x:Math.round(x),y:Math.round(y),"font-size":fs,fill:o.fill||"#f8fafc","class":"klB","data-row":o.row==null?-1:o.row};
+    if(o.anchor)a["text-anchor"]=o.anchor;if(o.bold)a["font-weight"]="700";
+    var e=klMk("text",a,txt);
+    if(o.max&&txt.length*fs*.47>o.max){e.setAttribute("textLength",Math.round(o.max));e.setAttribute("lengthAdjust","spacingAndGlyphs");}
+    return e;
+  }
+  function klLine(x1,y1,x2,y2,stroke,w,row){return klMk("line",{x1:Math.round(x1),y1:Math.round(y1),x2:Math.round(x2),y2:Math.round(y2),stroke:stroke,"stroke-width":w||2,"stroke-linecap":"round","data-row":row==null?-1:row});}
+  function klWrap(t,max){
+    var words=String(t).split(" "),lines=[],cur="";
+    words.forEach(function(w){if((cur+" "+w).trim().length>max&&cur){lines.push(cur);cur=w;}else cur=(cur+" "+w).trim();});
+    if(cur)lines.push(cur);return lines;
+  }
+  function klTitle(out,b,y){
+    if(!b.title)return y;
+    out.push(klTxt(KL_X,y+26,b.title,28,{fill:"#fbbf24",max:KL_W}));
+    out.push(klLine(KL_X,y+38,KL_X+Math.min(KL_W,b.title.length*13+20),y+38,"#fbbf24",2.5));
+    return y+54;
+  }
+  function renderTable(b){
+    var out=[],y=klTitle(out,b,KL_TOP),n=b.n,hasHead=b.columns.some(Boolean);
+    var avail=470-y-(hasHead?32:0);
+    var rh=Math.max(21,Math.min(32,Math.floor(avail/b.rows.length))),fs=rh>=30?24:rh>=26?22:rh>=23?20:18;
+    var labelW=n<=1?KL_W:n===2?KL_W*.64:n===3?KL_W*.5:KL_W*.4,amtW=n>1?(KL_W-labelW)/(n-1):0;
+    var right=function(c){return KL_X+labelW+amtW*c-6;};
+    if(hasHead){
+      for(var c=0;c<n;c++){var h=b.columns[c]||"";if(!h)continue;out.push(c===0?klTxt(KL_X,y+20,h,18,{fill:"#94a3b8",max:labelW-20}):klTxt(right(c),y+20,h,18,{fill:"#94a3b8",anchor:"end",max:amtW-12}));}
+      out.push(klLine(KL_X,y+28,KL_X+KL_W,y+28,"#334155",1.5));y+=34;
+    }
+    b.rows.forEach(function(r,ri){
+      var st=r.style,base=y+rh*.74,lab=r.cells[0]||"",hd=st==="heading",tot=st==="total"||st==="grand";
+      if(lab)out.push(klTxt(KL_X+(hd||tot?0:20),base,lab,fs,{fill:hd?"#7dd3fc":st==="grand"?"#34d399":"#f8fafc",bold:hd||st==="grand",row:ri,max:labelW-(hd||tot?14:34)}));
+      for(var c=1;c<n;c++){
+        var v=r.cells[c]||"";if(!v)continue;
+        var rx=right(c),lx=rx-Math.min(amtW-16,Math.max(60,v.length*fs*.5+10));
+        if(tot)out.push(klLine(lx,y+3,rx,y+3,"#94a3b8",1.5,ri)); /* rule above a total, as accountants write it */
+        out.push(klTxt(rx,base,v,fs,{fill:st==="grand"?"#34d399":"#f8fafc",anchor:"end",row:ri,max:amtW-14}));
+        if(st==="grand"){out.push(klLine(lx,y+rh-1,rx,y+rh-1,"#34d399",1.5,ri));out.push(klLine(lx,y+rh+3,rx,y+rh+3,"#34d399",1.5,ri));}
+      }
+      y+=rh;
+    });
+    return out;
+  }
+  function renderWorking(b){
+    var out=[],y=klTitle(out,b,KL_TOP),fs=b.items.length>7?22:26,lh=fs+16,max=Math.floor(KL_W/(fs*.47));
+    b.items.forEach(function(t,i){
+      var cont=/^\s*[=≈]/.test(t),x=KL_X+(cont?44:0),last=i===b.items.length-1;
+      var e=klTxt(x,y+fs,t,fs,{fill:last?"#34d399":"#f8fafc",row:i,max:KL_W-(cont?44:0)-(last?24:0)});out.push(e);
+      if(last){var w=Math.min(KL_W-(cont?44:0),Math.min(t.length,max)*fs*.47+28);out.push(klMk("rect",{x:x-12,y:y+2,width:Math.round(w),height:fs+16,rx:8,fill:"none",stroke:"#34d399","stroke-width":2.5,"data-row":i}));}
+      y+=lh;
+    });
+    return out;
+  }
+  function renderPoints(b){
+    var out=[],y=klTitle(out,b,KL_TOP),fs=24,max=50;
+    var total=b.items.reduce(function(m,t){return m+klWrap(t,max).length;},0);
+    if(total*34+b.items.length*8>470-y){fs=20;max=62;}
+    var lh=fs+10,colours=["#38bdf8","#f472b6","#fbbf24","#34d399"];
+    b.items.forEach(function(t,i){
+      var lines=klWrap(t,max).slice(0,3);
+      out.push(klMk("circle",{cx:KL_X+9,cy:y+fs*.62,r:6,fill:"none",stroke:colours[i%4],"stroke-width":2.5,"data-row":i}));
+      lines.forEach(function(ln,k){out.push(klTxt(KL_X+28,y+fs*.85+k*lh,ln,fs,{row:i,max:KL_W-28}));});
+      y+=lines.length*lh+8;
+    });
+    return out;
+  }
+  function renderFlow(b){
+    var out=[],y=klTitle(out,b,KL_TOP),n=b.items.length,colours=["#38bdf8","#f472b6","#fbbf24","#34d399","#38bdf8","#f472b6"];
+    if(n<=4){
+      var gap=46,bw=(KL_W-gap*(n-1))/n,bh=110,fs=n>=4?18:21,max=Math.max(8,Math.floor((bw-16)/(fs*.47)));
+      y+=10;
+      b.items.forEach(function(t,i){
+        var x=KL_X+i*(bw+gap);
+        out.push(klMk("rect",{x:Math.round(x),y:y,width:Math.round(bw),height:bh,rx:12,fill:"none",stroke:colours[i],"stroke-width":2.5,"data-row":i}));
+        var lines=klWrap(t,max).slice(0,4),y0=y+bh/2-(lines.length-1)*(fs+4)/2+fs*.35;
+        lines.forEach(function(ln,k){out.push(klTxt(x+bw/2,y0+k*(fs+4),ln,fs,{anchor:"middle",row:i,max:bw-14}));});
+        if(i<n-1){var ax=x+bw+6,ay=y+bh/2;out.push(klLine(ax,ay,ax+gap-12,ay,"#e2e8f0",2.5,i));out.push(klMk("polyline",{points:(ax+gap-20)+","+(ay-7)+" "+(ax+gap-12)+","+ay+" "+(ax+gap-20)+","+(ay+7),fill:"none",stroke:"#e2e8f0","stroke-width":2.5,"data-row":i}));}
+      });
+    }else{
+      var bh2=44,gap2=Math.max(16,Math.min(26,Math.floor((470-y-n*bh2)/(n-1)))),bw2=480,x2=KL_X+(KL_W-bw2)/2;
+      b.items.forEach(function(t,i){
+        out.push(klMk("rect",{x:Math.round(x2),y:y,width:bw2,height:bh2,rx:10,fill:"none",stroke:colours[i],"stroke-width":2.5,"data-row":i}));
+        out.push(klTxt(x2+bw2/2,y+bh2/2+7,t,20,{anchor:"middle",row:i,max:bw2-20}));
+        if(i<n-1){var cx=x2+bw2/2,y1=y+bh2+3,y2=y+bh2+gap2-3;out.push(klLine(cx,y1,cx,y2,"#e2e8f0",2.5,i));out.push(klMk("polyline",{points:(cx-6)+","+(y2-7)+" "+cx+","+y2+" "+(cx+6)+","+(y2-7),fill:"none",stroke:"#e2e8f0","stroke-width":2.5,"data-row":i}));}
+        y+=bh2+gap2;
+      });
+    }
+    return out;
+  }
+  function renderBoard(b){
+    var els=b.kind==="table"?renderTable(b):b.kind==="working"?renderWorking(b):b.kind==="flow"?renderFlow(b):renderPoints(b);
+    return els.map(function(e){return e.outerHTML;}).join("");
+  }
+  function boardKey(b){return b&&b.kind==="table"&&b.title?b.title.toLowerCase().replace(/[^a-z0-9]+/g," ").trim():"";}
+  function rowsSig(b){return b&&b.kind==="table"?b.rows.map(function(r){return JSON.stringify(r);}):[];}
+
+  /* ---------------- board placement ----------------
+     A step is moved as ONE block, so labels stay inside their boxes. It keeps the AI's
+     position when that is free; otherwise it goes below what is already written; when
+     the board is full, Knovo starts a fresh board (earlier boards come back on replay). */
+  function klOverlap(a,b,pad){return a.x<b.x+b.width+pad&&a.x+a.width+pad>b.x&&a.y<b.y+b.height+pad&&a.y+a.height+pad>b.y;}
+  function klVisibleGroups(except){
+    var root=document.getElementById("klSteps");if(!root)return [];
+    return Array.prototype.filter.call(root.children,function(x){return x!==except&&x.style.display!=="none";});
+  }
+  function klElementBoxes(groups){
+    var out=[];groups.forEach(function(x){Array.prototype.forEach.call(x.children,function(el){var b=klBox(el);if(b&&(b.width||b.height))out.push(b);});});return out;
+  }
+  function klNewPage(keep){klVisibleGroups(keep).forEach(function(x){x.style.display="none";x.setAttribute("data-hidden","1");});}
+  function placeGroup(g,meta){
+    var others=klVisibleGroups(g);
+    /* a statement/table built up over several steps is rewritten in place: only the new rows get written */
+    var key=meta&&meta.key;
+    if(key){
+      g.setAttribute("data-board-key",key);g.setAttribute("data-rows",JSON.stringify(meta.rows||[]));
+      var prev=null;for(var k=others.length-1;k>=0;k--){if(others[k].getAttribute("data-board-key")===key){prev=others[k];break;}}
+      if(prev){
+        var old=[];try{old=JSON.parse(prev.getAttribute("data-rows")||"[]");}catch(e){}
+        var same=0;while(same<old.length&&same<meta.rows.length&&old[same]===meta.rows[same])same++;
+        Array.prototype.forEach.call(g.children,function(el){var r=Number(el.getAttribute("data-row"));if(r<same){el.__klSkip=true;el.style.opacity="1";}});
+        prev.style.display="none";prev.setAttribute("data-replaced","1");
+        g.setAttribute("transform",prev.getAttribute("transform")||"");
+        var rest=klVisibleGroups(g),mineNow=klElementBoxes([g]),obst=klElementBoxes(rest);
+        var fits=mineNow.every(function(m){return m.y>=8&&m.y+m.height<=494;})&&!mineNow.some(function(m){return obst.some(function(o){return klOverlap(m,o,6);});});
+        if(fits)return;
+        g.removeAttribute("transform");others=rest;
+      }
+    }
+    var bb;try{bb=g.getBBox();}catch(e){bb=null;}
+    if(!bb||(!bb.width&&!bb.height))return;
+    var s=Math.min(1,740/Math.max(1,bb.width),456/Math.max(1,bb.height));
+    var left=bb.x*s,rightE=(bb.x+bb.width)*s,top=bb.y*s,bottom=(bb.y+bb.height)*s;
+    var dx=left<20?20-left:rightE>780?780-rightE:0;
+    var mine=klElementBoxes([g]).map(function(m){return {x:m.x*s,y:m.y*s,width:m.width*s,height:m.height*s};});
+    var obst=klElementBoxes(others);
+    function freeAt(dy){
+      if(top+dy<14||bottom+dy>490)return false;
+      return !mine.some(function(m){var t={x:m.x+dx,y:m.y+dy,width:m.width,height:m.height};return obst.some(function(o){return klOverlap(t,o,8);});});
+    }
+    var floor=obst.reduce(function(m,o){return Math.max(m,o.y+o.height);},0);
+    var tries=[s===1?0:24-top,floor+24-top],dy=null;
+    for(var t=0;t<tries.length;t++){if(freeAt(tries[t])){dy=tries[t];break;}}
+    if(dy===null){
+      if(others.length){klNewPage(g);if(L&&L.state==="teaching")setStatus("fresh board — step "+(L.step+1)+" of "+L.steps.length);}
+      dy=(s===1&&top>=14&&bottom<=490)?0:24-top;
+    }
+    g.setAttribute("transform","translate("+Math.round(dx)+" "+Math.round(dy)+")"+(s<1?" scale("+s.toFixed(3)+")":""));
   }
   function cleanWhiteboardLayout(){
-    var root=document.getElementById("klSteps");if(!root)return;klSaveHistory();
-    var els=[];Array.prototype.slice.call(root.children).forEach(function(g){Array.prototype.slice.call(g.children).forEach(function(el){klApplyOffset(el,0,0);els.push(el);});});
-    var boxes=[];els.forEach(function(el){boxes.push(klResolveElement(el,boxes));});
-    setStatus("layout cleaned — 24px minimum spacing");
+    var root=document.getElementById("klSteps");if(!root||!L)return;klSaveHistory();
+    var gs=Array.prototype.filter.call(root.children,function(g){return g.getAttribute("data-replaced")!=="1";});
+    gs.forEach(function(g){
+      Array.prototype.forEach.call(g.children,function(el){if(el.getAttribute("data-kl-offset")==="1")klApplyOffset(el,0,0);});
+      g.removeAttribute("transform");g.style.display="none";g.removeAttribute("data-hidden");
+    });
+    gs.forEach(function(g){g.style.display="";placeGroup(g,null);});
+    setStatus("board tidied");
   }
 
   /* ---------------- timestamped lesson replay ---------------- */
@@ -6018,15 +6181,17 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   function klNewStepGroup(i){
     var g=document.createElementNS("http://www.w3.org/2000/svg","g");g.innerHTML=L.steps[i].svgElements||"";
     g.setAttribute("data-step",String(i));g.__klDrawn=false;
-    Array.prototype.slice.call(g.children).forEach(function(el){el.style.opacity="0";el.__klFullText=el.textContent||"";});
-    document.getElementById("klSteps").appendChild(g);klLayoutGroup(g);L.groups[i]=g;return g;
+    if(L.steps[i].__ordered)g.setAttribute("data-ordered","1");
+    Array.prototype.slice.call(g.children).forEach(function(el){el.style.opacity="0";el.__klFullText=el.textContent||"";klEnableDrag(el);});
+    document.getElementById("klSteps").appendChild(g);placeGroup(g,L.steps[i].__meta);L.groups[i]=g;return g;
   }
   function klShowGroup(g){
     if(!g)return;g.__klDrawn=true;
     Array.prototype.slice.call(g.children).forEach(function(el){el.style.opacity="1";el.style.strokeDasharray="none";el.style.strokeDashoffset="0";if(el.tagName.toLowerCase()==="text"&&el.__klFullText!=null)el.textContent=el.__klFullText;});
   }
   function klRevealGroup(g,elapsed){
-    var els=Array.prototype.slice.call(g.children),shapes=els.filter(function(el){return el.tagName.toLowerCase()!=="text";}),labels=els.filter(function(el){return el.tagName.toLowerCase()==="text";}),seq=shapes.concat(labels),at=0;
+    var els=Array.prototype.slice.call(g.children),shapes=els.filter(function(el){return el.tagName.toLowerCase()!=="text";}),labels=els.filter(function(el){return el.tagName.toLowerCase()==="text";}),at=0;
+    var seq=(g.getAttribute("data-ordered")==="1"?els:shapes.concat(labels)).filter(function(el){return !el.__klSkip;});
     seq.forEach(function(el){
       var text=el.tagName.toLowerCase()==="text",len=0,dur;
       if(text)dur=Math.max(.3,String(el.__klFullText||"").length*.042);
@@ -6180,7 +6345,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     var els=Array.prototype.slice.call(g.children);
     var shapes=els.filter(function(el){return el.tagName&&el.tagName.toLowerCase()!=="text";});
     var labels=els.filter(function(el){return el.tagName&&el.tagName.toLowerCase()==="text";});
-    var seq=shapes.concat(labels);
+    var seq=(g.getAttribute("data-ordered")==="1"?els:shapes.concat(labels)).filter(function(el){return !el.__klSkip;});
     (function next(k){
       if(!klAlive(g,run,force))return;
       if(k>=seq.length){g.__klDrawn=true;return;}
@@ -6232,7 +6397,8 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   function hideNote(){var n=document.getElementById("klNote");if(n)n.remove();}
   function boardText(){
     var root=document.getElementById("klSteps");if(!root)return "";
-    return Array.prototype.map.call(root.querySelectorAll("text"),function(t){return t.__klFullText!=null?t.__klFullText:t.textContent;}).filter(Boolean).join(" · ").replace(/\s+/g," ").slice(0,500);
+    var out=[];klVisibleGroups().forEach(function(g){Array.prototype.forEach.call(g.querySelectorAll("text"),function(t){out.push(t.__klFullText!=null?t.__klFullText:t.textContent);});});
+    return out.filter(Boolean).join(" · ").replace(/\s+/g," ").slice(0,700);
   }
   function buildAskBody(q,wasDone){
     var st=L.steps[L.step]||{},n=L.steps.length;
@@ -6266,7 +6432,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     if(!say)say=o?"":t; /* the model answered in plain prose */
     var act=String(o&&o.action||"wait").toLowerCase().replace(/[^a-z]/g,"");
     if(!/^(resume|repeat|next|back|wait)$/.test(act))act="wait";
-    return {say:cleanSay(say)||"Good question — could you put it another way so I can be sure I answer exactly what you mean?",board:o?sanitizeSVG(String(o.board||o.svg||"")):"",action:act};
+    return {say:cleanSay(say)||"Good question — could you put it another way so I can be sure I answer exactly what you mean?",board:o?answerBoard(o.board||o.svg):null,action:act};
   }
   function showThinking(q){
     hideNote();
@@ -6291,11 +6457,16 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     var n=document.getElementById("klNote");if(!n)return;
     Array.prototype.forEach.call(n.querySelectorAll(".klSaySent"),function(sp){var i=Number(sp.getAttribute("data-k"));sp.classList.toggle("now",i===k);sp.classList.toggle("said",i<k);});
   }
-  function drawAnswerSketch(svg){
-    var root=document.getElementById("klSteps");if(!root||!svg)return;
-    var g=document.createElementNS("http://www.w3.org/2000/svg","g");g.setAttribute("data-answer","1");g.innerHTML=svg;
-    Array.prototype.slice.call(g.children).forEach(function(el){el.style.opacity="0";el.__klFullText=el.textContent||"";});
-    root.appendChild(g);klLayoutGroup(g);animateGroup(g,L.run,true);
+  function answerBoard(b){
+    if(b&&typeof b==="object"){var nb=normBoard(b);return nb?{svg:renderBoard(nb),ordered:true}:null;}
+    var svg=sanitizeSVG(String(b||""));return svg?{svg:svg,ordered:false}:null;
+  }
+  function drawAnswerSketch(ab){
+    var root=document.getElementById("klSteps");if(!root||!ab||!ab.svg)return;
+    var g=document.createElementNS("http://www.w3.org/2000/svg","g");g.setAttribute("data-answer","1");g.innerHTML=ab.svg;
+    if(ab.ordered)g.setAttribute("data-ordered","1");
+    Array.prototype.slice.call(g.children).forEach(function(el){el.style.opacity="0";el.__klFullText=el.textContent||"";klEnableDrag(el);});
+    root.appendChild(g);placeGroup(g,null);animateGroup(g,L.run,true);
   }
   async function askQuestion(override){
     if(!L)return;
@@ -6324,7 +6495,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     var res=await liveFetch(buildAskBody(tagged,wasDone),75000);
     if(!L||ask!==L.askSeq)return;
     if(res.auth){sessionExpired();return;}
-    var say,board="",action="wait",ok=false;
+    var say,board=null,action="wait",ok=false;
     if(res.limit){
       say="You've used your free Knovo questions for now"+(res.msLeft?" — they unlock again in "+fmtWait(res.msLeft):"")+". The lesson itself can keep going, so tap Continue whenever you're ready.";
     }else if(res.error){
