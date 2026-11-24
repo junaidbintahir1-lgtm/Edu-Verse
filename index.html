@@ -3876,8 +3876,6 @@ window.EV_RESOURCES = {
   },
   "olevel/bus7115": {
     detailed: [{t:"Study Book — detailed notes", d:"Business Studies 7115 study book · exam technique (AO ladder, command words, PEEL), business activity, people, marketing, operations, finance, external influences and full Paper 2 case-study craft · glossary and checklist", f:"resources/Business_OLevel_7115/Business_OLevel_7115_Study_Book.pdf"}],
-    compiled: [{t:"Paper 2 Case Study — topical compilation", d:"207 pages · Business Studies 0450 IGCSE + 7115 O Level · full case-study questions organised by syllabus topic · 2023–2026 papers", f:"resources/Business_Shared/BusinessStudies_0450_7115_Paper2_Case_Study_Topical_2023-2026.pdf"},
-      {t:"Paper 1 Short Answer & Data Response — topical compilation", d:"147 pages · Business Studies 0450 IGCSE + 7115 O Level · short-answer and data-response questions organised by syllabus topic · 2023–2026 papers", f:"resources/Business_Shared/BusinessStudies_0450_7115_Paper1_Short_Answer_Data_Response_Topical_2023-2026.pdf"}],
     topical: [{t:"Practice question bank + model answers", d:"Original short-answer, data-response and full case-study tasks (SpiceRoute Sauces) with calculations, 12-mark model evaluations and marking guidance (EV-7115-QB-01)", f:"resources/Business_OLevel_7115/Business_OLevel_7115_Practice_Question_Bank.pdf"}]
   },
   "olevel/eco2281": {
@@ -3934,7 +3932,6 @@ window.EV_RESOURCES = {
     assess: [{t:"Full-syllabus assessment + marking guide", d:"One complete Paper 4-style assessment (80 marks, 1 h 15 min) covering every syllabus topic, with worked marking guide and performance bands", f:"resources/Physics_IGCSE_0625/Physics_IGCSE_0625_Full_Syllabus_Assessment.pdf"}]
   },
   "db:igc0580": {
-    compiled: [{t:"Topical Paper 1 and 2 Compiled", d:"735 pages · Mathematics 0580 Extended + Mathematics (Syllabus D) 4024 · all nine chapters · 2023–May/June 2026 · questions only", f:"resources/Mathematics_Shared/Mathematics_0580_4024_Topical_Paper_1_and_2_Compiled.pdf"}],
     mocks: [
       {t:"Challenge Mock Paper 1 — Non-calculator", d:"100 marks · 2 hours · 14 harder structured questions · formal EduVerse examination cover", f:"resources/Mathematics_IGCSE_0580/Mathematics_0580_Mock_Paper_1_Non_Calculator.pdf"},
       {t:"Challenge Mock Paper 1 — Original marking guide", d:"100 marks · worked answers · every question shows its source code, session, year and question number", f:"resources/Mathematics_IGCSE_0580/Mathematics_0580_Mock_Paper_1_Marking_Guide.pdf"},
@@ -3943,7 +3940,6 @@ window.EV_RESOURCES = {
     ]
   },
   "olevel/math4024": {
-    compiled: [{t:"Topical Paper 1 and 2 Compiled", d:"735 pages · Mathematics 0580 Extended + Mathematics (Syllabus D) 4024 · all nine chapters · 2023–May/June 2026 · questions only", f:"resources/Mathematics_Shared/Mathematics_0580_4024_Topical_Paper_1_and_2_Compiled.pdf"}],
     mocks: [
       {t:"Challenge Mock Paper 1 — Non-calculator", d:"100 marks · 2 hours · original EduVerse 2026 practice questions · formal examination cover", f:"resources/Mathematics_OLevel_4024/Mathematics_4024_Mock_Paper_1_Non_Calculator.pdf"},
       {t:"Challenge Mock Paper 1 — Original marking guide", d:"100 marks · worked solutions · every question individually labelled 2026 · EduVerse original", f:"resources/Mathematics_OLevel_4024/Mathematics_4024_Mock_Paper_1_Marking_Guide.pdf"},
@@ -3959,33 +3955,6 @@ window.EV_RESOURCES = {
     assess: [{t:"Full-syllabus assessment + marking guide", d:"One 100-mark / 2-hour assessment covering every topic group, with worked solutions, M/A mark scheme and performance bands", f:"resources/Mathematics_OLevel_4024/Mathematics_OLevel_4024_Full_Syllabus_Assessment.pdf"}]
   }
 };
-/* Shared uploaded topical collections: one PDF serves both syllabus codes. */
-(function(){
-  function share(refs,items){refs.forEach(ref=>{const r=window.EV_RESOURCES[ref]||(window.EV_RESOURCES[ref]={});r.compiled=items;});}
-  share(["olevel/acc0452","olevel/acc7707"],[
-    {t:"Topical Multiple Choice Questions",d:"471 pages · Accounting 0452 + 7707 · Paper 1 · 1,225 questions · 2023–May/June 2026 · topic by topic",f:"resources/Accounting_Shared/Accounting_0452_7707_Topical_Multiple_Choice.pdf"},
-    {t:"Topical Structured Questions",d:"635 pages · Accounting 0452 + 7707 · Paper 2 · 175 questions · 2023–May/June 2026 · topic by topic",f:"resources/Accounting_Shared/Accounting_0452_7707_Topical_Structured_Questions.pdf"}
-  ]);
-  share(["olevel/bio0610","olevel/bio5090"],[
-    {t:"Topical Multiple Choice Questions",d:"1,095 pages · Biology 0610 + 5090 · Papers 1 and 2 / Paper 1 · 2,240 questions · 2023–May/June 2026",f:"resources/Biology_Shared/Biology_0610_5090_Topical_Multiple_Choice.pdf"},
-    {t:"Topical Practical Papers",d:"622 pages · Biology 0610 + 5090 · Practical Test + Alternative to Practical · 172 questions · 2023–May/June 2026",f:"resources/Biology_Shared/Biology_0610_5090_Topical_Practical.pdf"},
-    {t:"Topical Structured Theory",d:"883 pages · Biology 0610 + 5090 · Papers 3 and 4 / Paper 2 · 387 questions · 2023–May/June 2026",f:"resources/Biology_Shared/Biology_0610_5090_Topical_Theory.pdf"}
-  ]);
-  share(["olevel/chem0620","olevel/chem5070"],[
-    {t:"Topical Multiple Choice Questions",d:"1,089 pages · Chemistry 0620 + 5070 · 2,560 questions · 2023–May/June 2026 · topic by topic",f:"resources/Chemistry_Shared/Chemistry_0620_5070_Topical_Multiple_Choice.pdf"},
-    {t:"Topical Practical Papers",d:"761 pages · Chemistry 0620 + 5070 · Practical Test + Alternative to Practical · 264 questions · 2023–May/June 2026",f:"resources/Chemistry_Shared/Chemistry_0620_5070_Topical_Practical.pdf"},
-    {t:"Topical Theory Questions",d:"986 pages · Chemistry 0620 + 5070 · Structured theory · 470 questions · 2023–May/June 2026 · topic by topic",f:"resources/Chemistry_Shared/Chemistry_0620_5070_Topical_Theory.pdf"}
-  ]);
-  share(["olevel/cs0478","olevel/cs2210"],[
-    {t:"Topical Paper 1 — Computer Systems",d:"433 pages · Computer Science 0478 + 2210 · 307 questions · 2023–May/June 2026 · topic by topic",f:"resources/ComputerScience_Shared/ComputerScience_0478_2210_Topical_Paper_1_Computer_Systems.pdf"},
-    {t:"Topical Paper 2 — Algorithms, Programming and Logic",d:"533 pages · Computer Science 0478 + 2210 · 349 questions · 2023–May/June 2026 · topic by topic",f:"resources/ComputerScience_Shared/ComputerScience_0478_2210_Topical_Paper_2_Algorithms_Programming_Logic.pdf"}
-  ]);
-  share(["olevel/phys0625","olevel/phys5054"],[
-    {t:"Topical Multiple Choice Questions",d:"1,145 pages · Physics 0625 + 5054 · 2,560 questions · 2023–May/June 2026 · topic by topic",f:"resources/Physics_Shared/Physics_0625_5054_Topical_Multiple_Choice.pdf"},
-    {t:"Topical Practical Papers",d:"927 pages · Physics 0625 + 5054 · Practical Test + Alternative to Practical · 312 questions · 2023–May/June 2026",f:"resources/Physics_Shared/Physics_0625_5054_Topical_Practical.pdf"},
-    {t:"Topical Theory Questions",d:"990 pages · Physics 0625 + 5054 · Structured theory · 616 questions · 2023–May/June 2026 · topic by topic",f:"resources/Physics_Shared/Physics_0625_5054_Topical_Theory.pdf"}
-  ]);
-})();
 (function(){
   Object.keys(EV_SUBJECT_ALIASES).forEach(alias=>{
     const primary=EV_SUBJECT_ALIASES[alias],a=window.EV_RESOURCES[alias];
@@ -4159,7 +4128,7 @@ function vPapers(){
   const subs=mockSubjects();
   if(!PP.subj){
     const initialCount=ppFilteredSubjects(subs,PP.q).length;
-    let h=`<h1>📄 Past papers</h1><p class="sub">Find your subject, open compiled PDF papers, or filter interactive questions by paper, year, session and topic. Anything you miss goes straight to your ✎ Mistakes notebook.</p>
+    let h=`<h1>📄 Past papers</h1><p class="sub">Find your subject, open PDF practice papers, or filter interactive questions by paper, year, session and topic. Anything you miss goes straight to your ✎ Mistakes notebook.</p>
     <form class="ppSearchBar" role="search" onsubmit="event.preventDefault();ppSearch(document.getElementById('ppSubjectSearch').value)">
       <div class="ppSearchField"><label for="ppSubjectSearch">Find a subject</label><input id="ppSubjectSearch" type="search" value="${escH(PP.q||"")}" placeholder="Search Mathematics, 0580, Cambridge, O Level…" autocomplete="off" oninput="ppSearch(this.value)"></div>
       <button class="btn pri" type="submit">Search</button><button class="btn" type="button" onclick="ppClearSearch()">Clear</button>
