@@ -1,4 +1,4 @@
-/* EduVerse test build — ☰ side menu, notifications bell, text size (matches the live site's menu and bell) */
+/* EduVerse new design — ☰ side menu, notifications bell, text size (matches the live site's menu and bell) */
 (function(){
 "use strict";
 var EV=window.EV,$=EV.$,$$=EV.$$,esc=EV.esc,ST=EV.ST;
@@ -14,22 +14,23 @@ var LINKS=[['📚','Choose qualification','#qualifications'],['📊','Dashboard'
 EV.renderDrawer=function(){
   var p=ST.profile,favs=ST.favs.map(function(r){return EV.BYREF[r]}).filter(Boolean),rec=ST.recent.map(function(r){return EV.BYREF[r]}).filter(function(o){return o&&favs.indexOf(o)<0}).slice(0,4);
   var h='<div class="dHead"><button class="dClose" type="button" data-dclose aria-label="Close menu">✕</button></div>'+
-  '<section class="dSec"><h4>Profile</h4><div class="dProf"><div class="avatar dAv">'+esc((p?p.name:'G').charAt(0).toUpperCase())+'</div><div class="grow"><b>'+esc(p?p.name:'Guest student')+'</b><small>Student · EduVerse learner</small><small style="color:var(--gold)">⭐ Level '+EV.level(ST.xp)+' · '+ST.xp+' XP</small><span class="pill" style="width:max-content;margin-top:4px">🌱 Free plan</span></div></div>'+
+  '<section class="dSec"><h4>Profile</h4><div class="dProf"><div class="avatar dAv">'+esc((p?p.name:'G').charAt(0).toUpperCase())+'</div><div class="grow"><b>'+esc(p?p.name:'Guest student')+'</b><small>'+esc(p&&p.email?p.email:'Student · EduVerse learner')+'</small><small style="color:var(--gold)">⭐ Level '+EV.level(EV.shownXP())+' · '+EV.shownXP()+' XP</small><span class="pill'+(EVLive.isPro()||EVLive.isOwner()?' gold':'')+'" style="width:max-content;margin-top:4px">'+esc(p?EV.planLabel():'🌱 Free plan')+'</span></div></div>'+
     (p?'<div class="row" id="dEditRow"><button class="btn sm" type="button" id="dEdit">✦ Edit profile</button></div>':'<a class="btn gold sm" href="#signin" data-dclose>✦ Sign in / Join free</a>')+'</section>'+
   '<section class="dSec"><h4>❤️ Liked subjects</h4>'+(favs.length?'<div class="dList">'+favs.map(function(o){return '<div class="dItem"><a href="#overview-'+o.slug+'" data-dclose><span>'+o.s.icon+'</span><span class="grow">'+esc(o.s.name)+' <span class="code muted">'+esc(o.s.code)+'</span></span></a><button type="button" data-unfav="'+o.ref+'" aria-label="Remove '+esc(o.s.name)+' from liked subjects">✕</button></div>';}).join('')+'</div>':'<p class="dEmpty">Tap ♡ on any subject and it will be pinned here.</p>')+'</section>'+
   (rec.length?'<section class="dSec"><h4>🕘 Recently opened</h4><div class="dList">'+rec.map(function(o){return '<div class="dItem"><a href="#overview-'+o.slug+'" data-dclose><span>'+o.s.icon+'</span><span class="grow">'+esc(o.s.name)+' <span class="code muted">'+esc(o.s.code)+'</span></span></a></div>';}).join('')+'</div></section>':'')+
   '<section class="dSec"><h4>🧭 Everything on EduVerse</h4><div class="dGrid">'+LINKS.map(function(l){return '<a href="'+l[2]+'" data-dclose><span>'+l[0]+'</span>'+l[1]+'</a>';}).join('')+'</div>'+
     '<div class="dQuals">'+EV.LEVELS.map(function(L){var soon=L.subjects.every(function(o){return o.soon});return '<a href="#level-'+L.slug+'" data-dclose class="pill'+(soon?'':' gold')+'">'+esc(L.meta.short)+(soon?' · soon':'')+'</a>';}).join('')+'</div></section>'+
-  '<section class="dSec"><h4>⚙️ Settings</h4><div class="dRow"><span>🔠 Text size</span><span class="row" style="gap:4px"><button class="btn sm" type="button" data-fs="-1" aria-label="Smaller text">A−</button><button class="btn sm" type="button" data-fs="0" aria-label="Default text size">A</button><button class="btn sm" type="button" data-fs="1" aria-label="Larger text">A+</button></span></div><div class="dRow"><span>🌗 Theme</span><span class="small muted">Black (this design)</span></div><div class="dRow"><span>🔔 Future-update alerts</span><button class="btn sm'+(ST.futureNotify?' teal':'')+'" type="button" data-notify>'+(ST.futureNotify?'✓ On':'Turn on')+'</button></div></section>'+
+  '<section class="dSec"><h4>⚙️ Settings</h4><div class="dRow"><span>🔠 Text size</span><span class="row" style="gap:4px"><button class="btn sm" type="button" data-fs="-1" aria-label="Smaller text">A−</button><button class="btn sm" type="button" data-fs="0" aria-label="Default text size">A</button><button class="btn sm" type="button" data-fs="1" aria-label="Larger text">A+</button></span></div><div class="dRow"><span>🌗 Theme</span><span class="small muted">Black (this design)</span></div><div class="dRow"><span>🏆 Show me on the leaderboard</span><button class="btn sm'+(EVLive.lbOptIn()?' gold':'')+'" type="button" data-lb aria-pressed="'+EVLive.lbOptIn()+'">'+(EVLive.lbOptIn()?'✓ On':'Off')+'</button></div><div class="dRow"><span>🔔 Future-update alerts</span><button class="btn sm'+(ST.futureNotify?' teal':'')+'" type="button" data-notify>'+(ST.futureNotify?'✓ On':'Turn on')+'</button></div></section>'+
   '<section class="dSec"><h4>✦ Knovo AI</h4><a class="btn teal" href="#knovo" data-dclose>Open Knovo workspace</a><button class="btn ghost sm" type="button" data-plans>See Knovo Pro plans</button></section>'+
   '<section class="dSec"><h4>🏆 XP leaderboard</h4><a class="btn" href="#ranks" data-dclose>View genuine student rankings</a></section>'+
   '<section class="dSec"><h4>✦ Get to know us</h4><a class="btn" href="#about" data-dclose>About EduVerse &amp; our mission</a></section>'+
-  '<section class="dSec"><h4>🌐 Community</h4><a class="btn" href="https://instagram.com/eduverse.27" target="_blank" rel="noopener">📸 Instagram · @eduverse.27</a><p class="dEmpty">Discord: <b>to be added</b></p></section>'+
+  '<section class="dSec"><h4>🌐 Community</h4><a class="btn" href="https://www.instagram.com/eduverse.27" target="_blank" rel="noopener">📸 Sneak peeks on Instagram · @eduverse.27</a><p class="dEmpty">New features, study tips and behind-the-scenes previews land on Instagram first. Discord: <b>to be added</b></p></section>'+
+  (EVLive.isOwner()?'<section class="dSec"><h4>👑 Owner</h4><a class="btn gold" href="#admin" data-dclose>Open the EduVerse admin</a></section>':'')+
   '<section class="dSec">'+(p?'<button class="btn" type="button" id="dOut">🚪 Log out</button>':'<a class="btn gold" href="#signin" data-dclose>✦ Sign in / Join</a>')+'</section>'+
-  '<p class="dFoot">EDUVERSE · Study Platform · test build</p>';
+  '<p class="dFoot">EDUVERSE · Study Platform · new design preview</p>';
   $('#drawer').innerHTML=h;
   var e=$('#dEdit');if(e)e.addEventListener('click',function(){$('#dEditRow').innerHTML='<form class="row" id="dEditF" style="width:100%"><label class="sr" for="dName">Display name</label><input class="inp grow" id="dName" maxlength="30" value="'+esc(p.name)+'"><button class="btn sm gold" type="submit">Save</button></form>';var i=$('#dName');i.focus();i.select();$('#dEditF').addEventListener('submit',function(ev){ev.preventDefault();var n=i.value.trim();if(!n)return;ST.profile.name=n;EV.save();EV.paintProfile();EV.renderDrawer();EV.toast('Profile updated');});});
-  var o=$('#dOut');if(o)o.addEventListener('click',function(){ST.profile=null;EV.save();EV.paintProfile();EV.closeDrawer();EV.toast('Logged out. Your study progress stays saved on this device.');EV.render();});
+  var o=$('#dOut');if(o)o.addEventListener('click',function(){EV.closeDrawer();EV.signOut();});
 };
 EV.openDrawer=function(){EV.closeBell();EV.renderDrawer();var d=$('#drawer');d.classList.add('open');d.setAttribute('aria-hidden','false');$('#drawerScrim').classList.add('on');$('#menuBtn').setAttribute('aria-expanded','true');setTimeout(function(){var c=d.querySelector('.dClose');if(c)c.focus();},300);};
 EV.closeDrawer=function(){var d=$('#drawer');d.classList.remove('open');d.setAttribute('aria-hidden','true');$('#drawerScrim').classList.remove('on');$('#menuBtn').setAttribute('aria-expanded','false');};
@@ -40,6 +41,7 @@ $('#drawer').addEventListener('click',function(e){
   var u=e.target.closest('[data-unfav]');if(u){EV.toggleFav(u.dataset.unfav);EV.renderDrawer();EV.toast('Removed from liked subjects');if(EV.route.name==='subject'||EV.route.name==='subjects'||EV.route.name==='level')EV.render();return;}
   var f=e.target.closest('[data-fs]');if(f){EV.fontStep(+f.dataset.fs);return;}
   if(e.target.closest('[data-notify]')){EV.toggleNotify();EV.renderDrawer();}
+  if(e.target.closest('[data-lb]')){var on=!EVLive.lbOptIn();EVLive.setLbOptIn(on);EV.renderDrawer();EV.toast(on?'You now appear on the XP leaderboard':'You are hidden from the XP leaderboard. Your XP still counts for you.');if(EV.route.name==='ranks')EV.render();}
 });
 
 /* ---------- notifications ---------- */

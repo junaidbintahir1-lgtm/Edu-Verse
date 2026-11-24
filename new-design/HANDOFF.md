@@ -1,110 +1,117 @@
 # EduVerse new design: handover guide
 
-This folder is a **working test build of the new black 3D EduVerse design**. It was made beside the live site
-(`index.html`, `signin.html`, `data*.js`, `deep/`, `resources/`), which it does not change. Use this file to continue the work.
-
-The owner's goal for the next step: **move this design onto the real site and connect it to the real backend**
-(Supabase sign-in, the real Knovo edge function, the real XP leaderboard).
+The new black 3D EduVerse design, **connected to the real backend**. It lives in `new-design/` on the
+branch `claude/new-design` and does not change the classic site (`index.html`, `signin.html`, data files, PDFs).
+EduVerse launches in **January 2027**.
 
 ---
 
 ## 1. Run it
 
-The pages load JSON with `fetch`, so open them through a local web server, not `file://`:
+The design reads the live site's files from the folder above it, so serve the **repo root**:
 
 ```bash
-cd new-design
-python3 -m http.server 8766
-# open http://localhost:8766/eduverse-app.html
+cd Edu-Verse            # the repo root, not new-design/
+python3 -m http.server 8767
+# open http://localhost:8767/new-design/eduverse-app.html
 ```
 
-Three.js r128 loads from cdnjs. Everything else is local.
+On GitHub Pages it works at `/new-design/eduverse-app.html` with no changes. All code is local, including
+Three.js r128 (`vendor/three-r128.min.js`, MIT licence). The only external requests are Supabase,
+Google Fonts, the contact-form service (formsubmit.co) and, for photo scans, Tesseract from jsDelivr.
 
 ## 2. Files
 
 | File | What it holds |
 |---|---|
-| `eduverse-app.html` | Page shell, **all CSS** (design tokens on `:root`), top bar, ☰ drawer, bell box, Knovo side sheet, Knovo Pro plans modal |
-| `core.js` | `window.EV` namespace: saved progress, XP rules, router, data loading, **Knovo AI engine**, Markdown renderer, side sheet, 3D hero (`EV.mountHero`) |
-| `views.js` | Home, qualification shelves (`EV.qualCard`), level pages, subject hub and its tabs (`TAB.overview/notes/questions/cards/technique/library/tools/topics`), Maths 4024 topic engine |
-| `views2.js` | Dashboard, Technique, Mistakes, Mock exam, Papers (`V.papers`, `V.paperSubj`), Ranks, Knovo workspace (`V.knovo`), About, Sign in, What to add. Calls `EV.boot()` at the end |
-| `menu.js` | ☰ side menu (`EV.renderDrawer`), notifications bell (`EV.buildNotifs`), text size |
-| `data/hub.json` | `window.EV_HUB` from the live site: 35 subjects across `olevel`, `alevel`, `alevel_edx`, `ielts`, `act`, `sat` |
-| `data/deep.json` | `window.EV_HUB_DEEP` (expanded notes, which override `notes` where present) |
-| `data/resources.json` | `window.EV_RESOURCES` (PDF lists per subject; paths point into `/resources` and `/notes`) |
-| `data/db.json` | `window.EV_DB`, only subjects that have chapters (Maths 4024 topic engine) |
-| `data/extra.json` | Command-word table and FAQ, taken from `index.html` |
-| `assets/` | Resized EduVerse and Knovo logos |
-| `tools/extract-data.js` | Playwright script that regenerates the JSON from the live `index.html` |
-
-**The JSON files are copies.** When the real site's data changes, regenerate them from the repo root:
-`node new-design/tools/extract-data.js new-design/data-raw`, then rebuild `data/*.json`. Or, better, have the
-real pages read `window.EV_HUB` etc. directly instead of the JSON (see section 6).
+| `eduverse-app.html` | Page shell and **all CSS** (design tokens on `:root`), top bar, ☰ drawer, bell, Knovo side sheet, Knovo plans modal |
+| `live.js` | **Every real connection** (`window.EVLive`): Supabase sign-in / sign-up / refresh / sign-out, Knovo edge function, XP ledger + leaderboard sync, leaderboard choice, seasons, owner tools, photo text reader, the live site's saved progress |
+| `core.js` | `window.EV`: live data loading, saved progress + the bridge to the live site, effort-only XP, router + members-only gate, Knovo engine (`EV.knovoAsk`, `EV.kSend`, `EV.kFlash`), Markdown, side sheet, 3D hero |
+| `views.js` | Home (with the Contact section), qualification shelves, level pages, subject hub tabs (PDF library with the Pro lock), Maths topic engine |
+| `views2.js` | Dashboard, technique, mistakes, mock, papers, ranks + seasons, **admin**, Knovo workspace, about, sign in / create account, ideas |
+| `menu.js` | ☰ side menu (plan, leaderboard switch, Instagram sneak peeks, owner admin link), notifications bell, text size |
+| `data/extra.json` | Command-word table and FAQ (design copy; the FAQ says EduVerse is members-only) |
+| `database-update.sql` | **Run once in Supabase**: effort-only XP rules, leaderboard choice, seasons, mystery rewards, owner tools |
+| `vendor/` | Three.js r128 and its licence |
+| `assets/` | EduVerse and Knovo logos |
 
 ## 3. How it works
 
-- **Routing:** plain hash names only. Examples: `#home`, `#qualifications`, `#level-olevel`,
-  `#<tab>-<slug>` (for example `#notes-olevelphys5054`), `#topic-num1`, `#papers-olevelmath4024`, `#dashboard`, `#knovo`.
-  The slug is `lk + id` with non-alphanumerics removed (see `EV.BYSLUG`). Parsing is in `EV.parse`, and views register on `EV.views`.
-- **State:** one object `EV.ST`, saved to `localStorage["evtest1"]` (`EV.save()`). Fields include `xp`, `xpLog`, `streak`,
-  `today`, `goal`, `attempts`, `mistakes`, `cards`, `cardsSeen`, `topicsDone`, `notesSeen`, `mocks`, `favs`, `recent`, `exam`,
-  `chats`, `kdeck`, `kn` (allowance), `profile`, `notifsRead`, `notifsHidden`, `futureNotify`, `font`.
-  **This differs from the live site's `ST`.** Map one to the other when you merge (see section 6).
-- **XP:** same rules as the live site: topic +50, question +10 (+5 if correct), flashcard +3, streak day +20, mock +100.
-  Level = `floor(sqrt(xp/60))+1`. There are 11 badges, the same as the live site (`EV.badges`).
-- **Members-only pages:** Knovo, Mock and the Knovo side sheet need `ST.profile`. In this build, "Test as a student" on `#signin` creates a local profile.
+- **Data:** the classic `index.html` is the single source of truth. Its subject data (`EV_DB`, `EV_HUB`,
+  `EV_HUB_DEEP`, `EV_RESOURCES`) is written *inside* `index.html` (the separate `data1-3.js` and `deep/*.js`
+  files are older copies that index.html does not load). `EV.loadLive()` fetches `index.html`, runs only the
+  data blocks (from `==== DATA 1 (embedded)` to `==== DEEP NOTES (embedded)`, plus the `window.EV_RESOURCES = {`
+  section up to `function resFor(`) and loads `pastpapers.js`. If those markers are renamed in index.html,
+  update them in `EV.loadLive`. PDFs open with relative paths through `EV.pdfView` (`EV.SITE` = `'../'`;
+  set `window.EV_SITE_ROOT=''` before core.js if the design moves to the site root).
+- **Members only:** `EV.render` shows the sign-in page for every route until a student is signed in, then
+  returns them to the page they asked for. Top-bar navigation, Knovo and the menu are hidden while signed out.
+- **Sign-in:** same Supabase project and same localStorage keys as `signin.html` (`ev_auth_token`,
+  `ev_auth_refresh`, `ev_auth_expires`, `ev_auth_user`), so one login works on both designs. Sign-up uses the
+  same fields and username rules as signin.html. Tokens renew silently.
+- **Saved progress:** design-only settings are in `localStorage["ev_design_v1"]`. Shared progress is kept in
+  step with the classic site's `ev_state_v1` both ways (`EV.syncFromLive` / `EV.syncToLive`): streak, daily
+  goal, topics, cards, attempts, mistakes, mocks, liked subjects, display name. Maths topic-engine ids are
+  mapped to the classic ids (`chapter/topic[/n]`). Changes made in another tab are picked up.
+- **XP (effort only):** XP is one shared ledger (`ev_state_v1.xpLedger`, the same one xp-leaderboard.js uses),
+  synced with the same server functions. The design only creates these events:
+  `q:<id>` +15 for a correct answer (once per question, not faster than one per 15 s),
+  `mastery:<topic>` +50 when every question in a Maths topic is right, and
+  `exam:<subject>:<paper>:w<week>` +100 for a timed mock with half the time used and 40%+ scored.
+  Ticking chapters, flashcards, daily visits and wrong answers earn nothing. `database-update.sql` makes the
+  **server** enforce the same rules with daily caps (40 answers, 5 masteries, 3 mocks), so XP cannot be farmed
+  from the classic site or by editing the page. XP students earned before stays earned.
+- **Leaderboard choice:** asked at sign-in and sign-up, changeable in the ☰ menu (`ev_lb_optin`). "Off" stops
+  XP syncing and, after the database update, hides the student on the server too.
+- **Seasons:** January–June and July–December (UTC), starting January 2027. Ranks shows a countdown and the
+  season standings. After a season ends, the top 3 by season XP each pick one of three mystery rewards that the
+  owner sets in Admin. Server functions: `eduverse_season_board`, `eduverse_my_season_reward`,
+  `eduverse_claim_season_reward`.
+- **Knovo:** `EV.knovoAsk` calls the Supabase `Knovo` edge function with the student's Bearer token. The rules
+  from `EV.knovoRules` go in `systemInstruction` (the server adds its own rules first and keeps up to 3,000
+  characters of ours); the subject's EduVerse notes go in the first student message. 429 `LIMIT_REACHED` with
+  `msLeft` shows the real wait and sets `knovo_chat_blocked_until` (shared with the classic site). Photo scans
+  read the text in the browser with Tesseract (like the classic site), then ask Knovo. Flashcards from an answer
+  also go through the edge function. Modes: chat, mark my answer, scan a question, live lesson (3-part guided
+  lesson in chat).
+- **Pro lock:** topical banks, topic tests, mixed tests and full-syllabus assessments in the PDF library are
+  locked unless the student is the owner, has early-access Pro (`ev_state_v1.plan.tier === "pro"`) — the same
+  rule as the classic site. This is a display lock; the files are still public in the repository.
+- **Admin (`#admin`):** owner and co-owner only (checked on the server with `eduverse_is_admin`). Site counts,
+  season reward options, winners and their choices (emails shown only after the classic dashboard's two-step
+  owner check), "mark delivered", leaderboard snapshot, messages, a link to `ctrl-panel-x94k.html`, and which
+  server features are switched on.
+- **Contact:** the home page ends with the Contact EduVerse section. It sends through formsubmit.co to
+  educationalverse2027@gmail.com, exactly like the classic site, with an email-app fallback.
 
-## 4. Knovo: the main thing to change
+## 4. Owner checklist before launch
 
-In the test build, Knovo calls **Claude through the claude.ai artifact `sample` capability** (`window.claude.use("sample")`).
-That only works inside a claude.ai artifact. On the real site, Knovo must call the existing Supabase edge function.
+1. In Supabase, run `new-design/database-update.sql` once (tested on PostgreSQL 16 against the leaderboard
+   setup; safe to run twice). Admin → "Server features" should then show ✓ On for all three.
+2. In Admin, set the three mystery rewards for Season 2027-H1 before it ends on 30 June 2027.
+3. Decide whether solved/practice **questions** should also be Pro (the classic site locks them; this design
+   keeps them open because the Questions tab, daily quiz and mocks depend on them).
+4. When ready to make the new design the main site: copy `new-design/*` to the repo root (or point the root
+   `index.html` to it), set `window.EV_SITE_ROOT=''`, and keep the data in a shared file both pages load.
 
-Everything goes through **one function, `EV.knovoAsk(turns, opts)` in `core.js`**:
+## 5. Not connected yet / known limits
 
-- `turns` is `[{role:"user"|"assistant", content}]`, ending on a user turn.
-- `opts.mode` is `chat` | `mark` | `scan` | `lesson` | `plan`. `opts.ctx` is `{label, ref, topic, extra}`.
-  `opts.images` is a Blob array (scan). `opts.onText` streams text. `opts.signal` is an AbortSignal.
-- It returns a Promise of `{text}`.
-- `EV.knovoRules(ctx, mode)` builds the system prompt. It includes the current subject's paper pattern and up to 8,000
-  characters of its EduVerse notes, which is what makes answers subject-aware. Keep this.
+| Item | Status |
+|---|---|
+| Payments | "Coming soon" only, as on the classic site |
+| Light theme | Black only |
+| Service worker / PWA | Not included in this folder |
+| Paid PDFs | Display lock only; real protection needs private storage (e.g. Cloudflare R2) and signed links |
+| Past-paper questions | `EV_PASTPAPERS` is still empty; Papers shows the empty state |
+| XP from Knovo marking | Not awarded (cannot be verified yet) |
 
-To use the live backend, replace the body of `EV.knovoAsk` with a call shaped like the live site's `askEdge` in `index.html`:
+## 6. Testing
 
-```js
-POST https://<project>.supabase.co/functions/v1/Knovo
-Headers: Content-Type: application/json, Authorization: Bearer <student access token>
-Body: { mode: "chat",
-        systemInstruction: { parts: [{ text: EV.knovoRules(ctx, mode) }] },
-        contents: turns.map(t => ({ role: t.role === "assistant" ? "model" : "user", parts: [{ text: t.content }] })) }
-```
-
-- Handle `429` with `error:"LIMIT_REACHED"` and `msLeft`, as the live site does. That replaces the local 20-messages/3-hours
-  counter (`EV.allowance`, `EV.useAllowance`), which exists only for the test build.
-- For photo scans, send the image the way the live site does (it uses Tesseract OCR in the browser plus the edge function).
-- Keep `EV.kSend` (chat bubbles, Stop, "Exam answer / Test me / Make flashcards") and `EV.kFlash` (flashcards from an answer). They only depend on `EV.knovoAsk`.
-- Remove the offline fallback (`EV.offlineAnswer`) and the "Live AI is off in this view" note, or keep the fallback for network errors.
-
-## 5. Other things that are not connected yet
-
-| Feature | Test build | Live site source to connect |
-|---|---|---|
-| Sign in | Local test profile (`V.signin`) | `signin.html` + Supabase (`ev_auth_token`, `ev_auth_user`, …) |
-| Ranks | Shows only your own XP | `xp-leaderboard.js` (Supabase, signed-in students only) |
-| XP sync | Local only | `xp-leaderboard.js` queues XP events |
-| Past-paper questions | Empty state (`pastpapers.js` is empty) | `window.EV_PASTPAPERS`: add paper/year/session/topic filters when entries exist |
-| Payments | "Coming soon" only | Not live on the real site either |
-| Theme | Black only | The live site also has a light theme |
-| Service worker / PWA | Not included | `sw.js` |
-
-## 6. Suggested way to merge into the real site
-
-1. Work on a branch. Keep the live `index.html` working until the new one is complete.
-2. Keep the live data files as the single source (`data1.js`/`data2.js`/`data3.js`, `deep/*.js`, `pastpapers.js` and the inline `EV_HUB`/`EV_RESOURCES`).
-   Change `EV.load()` to read `window.EV_HUB`, `window.EV_HUB_DEEP`, `window.EV_RESOURCES` and `window.EV_DB` instead of `data/*.json`.
-3. Change `EV.pdfView` / `EV.pdfRaw` to use relative paths (`resources/...`). The test build links to GitHub because it is hosted elsewhere.
-4. Map state: either migrate the live `ST` into `EV.ST` once, or make `EV.ST` read and write the live keys, so students keep their streaks, XP and mistakes.
-5. Connect Knovo (section 4), sign-in and the leaderboard (section 5).
-6. Test on a phone: no sideways scrolling, and the hero, menu, bell and Knovo sheet must all work at 390px width.
+Tested with Playwright against a stand-in Supabase (sign-in, sign-up, Knovo, leaderboard, owner check,
+contact form) at 1366 px and 390 px: every page, no sideways scrolling, no console errors; plus the progress
+bridge, the XP rules, Knovo requests (system prompt size, notes, 429, flashcards, photo scan), seasons UI,
+Pro lock, admin and sign-out. The SQL was run on a local PostgreSQL 16 with the leaderboard setup, including a
+season-end test with the clock set to August 2027.
 
 ## 7. Design rules to keep
 

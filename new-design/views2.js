@@ -1,16 +1,17 @@
-/* EduVerse test build — views part 2: dashboard, technique, mistakes, mock, papers, ranks, knovo, about, sign in, ideas */
+/* EduVerse new design — views part 2: dashboard, technique, mistakes, mock, papers, ranks, knovo, about, sign in, ideas */
 (function(){
 "use strict";
 var EV=window.EV,$=EV.$,$$=EV.$$,esc=EV.esc,ST=EV.ST,V=EV.views;
 
 /* Members-only pages show what they do before asking for sign-in */
 function lockPage(el,title,text,preview){
+  EV.afterSignin=(location.hash||'#home').slice(1); /* come back here after signing in */
   el.innerHTML='<div class="in page"><div style="position:relative;border-radius:24px;overflow:hidden;border:1px solid var(--rim);margin-top:10px"><div style="filter:blur(4px);opacity:.5;pointer-events:none;padding:24px" aria-hidden="true">'+preview+'</div><div style="position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:12px;text-align:center;padding:24px;background:linear-gradient(180deg,rgba(3,4,5,.2),rgba(3,4,5,.88))"><span class="eyebrow">Members only · free account</span><h2 class="h2" style="margin:0">'+esc(title)+'</h2><p class="muted" style="max-width:52ch">'+esc(text)+'</p><div class="row" style="justify-content:center"><a class="btn gold" href="#signin">Sign in to unlock</a><a class="btn" href="#signin">Create free account</a></div></div></div></div>';
 }
 
 /* =================== DASHBOARD =================== */
 V.dashboard=function(el){
-  var lp=EV.levelProgress(ST.xp),b=EV.badges(),earned=b.filter(function(x){return x.ok}).length;
+  var lp=EV.levelProgress(EV.shownXP()),b=EV.badges(),earned=b.filter(function(x){return x.ok}).length;
   var tq=ST.today.d===EV.today()?ST.today.q:0,open=ST.mistakes.filter(function(m){return !m.resolved}).length;
   var STARTERS=['olevel/phys5054','olevel/chem5070','olevel/math4024','olevel/bio5090','alevel/m9709','olevel/eng1123'].map(function(r){return EV.BYREF[r]}).filter(Boolean);
   var h='<div class="in page"><div class="pageHead"><span class="eyebrow">My study dashboard'+(ST.profile?' · '+esc(ST.profile.name):'')+'</span><h1>Your progress</h1><p class="sub">Streaks, XP, mistakes and a quick way back into every subject. Everything here comes from what you actually do.</p></div>';
@@ -19,7 +20,7 @@ V.dashboard=function(el){
     '<div class="cell"><span class="eyebrow">Today</span><div class="big">'+tq+'<small> / '+ST.goal+'</small></div><label class="field" for="goal">Daily goal<select id="goal">'+[5,10,15,20,30].map(function(g){return '<option value="'+g+'"'+(g===ST.goal?' selected':'')+'>'+g+' questions</option>';}).join('')+'</select></label></div>'+
     '<div class="cell"><span class="eyebrow">Questions attempted</span><div class="big">'+ST.attempts.length+'</div><span class="small muted">across all subjects</span></div>'+
     '<a class="cell" href="#mistakes" style="text-decoration:none"><span class="eyebrow">Mistakes to review</span><div class="big" style="color:'+(open?'var(--bad)':'inherit')+'">'+open+'</div><span class="small muted">in your notebook →</span></a></div>';
-  h+='<section class="sect" style="padding-top:28px"><div class="card stack"><div class="hd"><h3 style="font-size:1.3rem">⭐ Level '+lp.l+' · '+ST.xp+' XP</h3><span class="pill gold">'+earned+' / '+b.length+' badges</span></div><div class="bar"><i style="width:'+lp.pct+'%"></i></div><p class="small muted">'+lp.pct+'% of the way to Level '+(lp.l+1)+' · topic +50 XP · question +10 XP (+5 if correct) · flashcard +3 XP · streak day +20 XP · mock +100 XP</p>'+
+  h+='<section class="sect" style="padding-top:28px"><div class="card stack"><div class="hd"><h3 style="font-size:1.3rem">⭐ Level '+lp.l+' · '+EV.shownXP()+' XP</h3><span class="pill gold">'+earned+' / '+b.length+' badges</span></div><div class="bar"><i style="width:'+lp.pct+'%"></i></div><p class="small muted">'+lp.pct+'% of the way to Level '+(lp.l+1)+' · XP comes from correct answers (+15 each, once per question), mastering a Maths topic (+50) and serious timed mocks (+100)</p>'+
     '<div class="badges">'+b.map(function(x){return '<div class="badge'+(x.ok?' on':'')+'"><span class="e">'+x.ic+'</span><b>'+esc(x.t)+'</b><span>'+esc(x.d)+'</span></div>';}).join('')+'</div><div class="row"><a class="btn sm" href="#ranks">🏆 Open XP leaderboard</a></div></div></section>';
   var bySub={};ST.attempts.forEach(function(a){var s=bySub[a.ref]=bySub[a.ref]||{n:0,ok:0};s.n++;if(a.ok)s.ok++;});
   var refs=Object.keys(bySub).filter(function(r){return EV.BYREF[r]}).sort(function(a,b){return bySub[b].n-bySub[a].n});
@@ -32,14 +33,14 @@ V.dashboard=function(el){
   var recH='<div class="card stack"><h3>Recent subjects</h3>'+(rec.length?'<div>'+rec.map(function(o){var n=EV.notesOf(o).length,d=0;for(var i=0;i<n;i++)if(ST.topicsDone.indexOf(o.ref+'#n'+i)>=0)d++;return '<a class="recRow" href="#overview-'+o.slug+'"><span class="ic">'+o.s.icon+'</span><span><b style="font-size:.88rem">'+esc(o.s.name)+'</b> <span class="code muted">'+esc(o.s.code)+'</span><small>'+d+' of '+n+' notes learned</small></span><span class="muted">→</span></a>';}).join('')+'</div>':'<p class="small muted">Nothing opened yet. Popular places to start:</p><div class="startGrid">'+STARTERS.slice(0,4).map(function(o){return '<a href="#overview-'+o.slug+'"><span>'+o.s.icon+'</span>'+esc(o.s.name)+' <span class="code muted">'+esc(o.s.code.split(' / ').pop())+'</span></a>';}).join('')+'</div>')+'</div>';
   var best=ST.mocks.reduce(function(m,x){return Math.max(m,x.pct)},0);
   var mockH='<div class="card stack"><div class="hd"><h3>Timed mocks</h3>'+(ST.mocks.length?'<span class="pill gold">Best '+best+'%</span>':'')+'</div>'+(ST.mocks.length?ST.mocks.slice().reverse().slice(0,4).map(function(m){return '<div class="row" style="justify-content:space-between;font-size:.84rem"><span>'+esc(m.subject)+' · '+esc(m.paper)+'</span><span class="pill gold">'+m.pct+'% · '+esc(m.grade)+'</span></div>';}).join(''):
-    '<div class="watch"><div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#191f27" stroke-width="8"/><circle cx="50" cy="50" r="42" fill="none" stroke="#f0b429" stroke-width="8" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="198"/></svg><b>0:00</b></div><div class="stack" style="gap:6px"><span class="small">Sit a paper with a real countdown, then mark it against the solutions.</span><div class="row" style="gap:6px"><span class="pill gold">+100 XP</span><span class="pill">⏱ Exam Ready badge</span></div></div></div>')+'<a class="btn sm gold" href="#mock">Sit a timed mock →</a></div>';
+    '<div class="watch"><div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#191f27" stroke-width="8"/><circle cx="50" cy="50" r="42" fill="none" stroke="#f0b429" stroke-width="8" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="198"/></svg><b>0:00</b></div><div class="stack" style="gap:6px"><span class="small">Sit a paper with a real countdown, then mark it against the solutions.</span><div class="row" style="gap:6px"><span class="pill gold">Up to +100 XP</span><span class="pill">⏱ Exam Ready badge</span></div></div></div>')+'<a class="btn sm gold" href="#mock">Sit a timed mock →</a></div>';
   h+='<section class="sect" style="padding-top:28px"><div class="twoCol">'+read+'<div class="stack">'+recH+mockH+'</div></div></section>';
-  h+='<section class="sect" style="padding-top:28px"><div class="dataCard"><div class="ico">💾</div><div class="stack"><div><h3 style="font-size:1.15rem">Your study data on this device</h3><p class="small muted" style="margin-top:4px">This test build keeps everything in this browser. On the live site, signed-in progress can sync to your account.</p></div>'+
-    '<div class="dataChips"><span><b>'+ST.xp+'</b>XP</span><span><b>'+ST.attempts.length+'</b>attempts</span><span><b>'+ST.mistakes.length+'</b>mistakes</span><span><b>'+ST.topicsDone.length+'</b>topics learned</span><span><b>'+ST.chats.length+'</b>Knovo chats</span><span><b>'+ST.mocks.length+'</b>mocks</span></div>'+
-    '<div class="row" id="resetRow"><button class="btn sm bad" type="button" id="resetA">Start fresh (reset progress)</button></div></div></div></section></div>';
+  h+='<section class="sect" style="padding-top:28px"><div class="dataCard"><div class="ico">💾</div><div class="stack"><div><h3 style="font-size:1.15rem">Your study progress</h3><p class="small muted" style="margin-top:4px">Your streak, topics, mistakes and XP are shared with the EduVerse site on this device'+(ST.profile?', and your XP syncs to your account for genuine rankings.':'. Sign in to sync your XP to your account.')+'</p></div>'+
+    '<div class="dataChips"><span><b>'+EV.shownXP()+'</b>XP</span><span><b>'+ST.attempts.length+'</b>attempts</span><span><b>'+ST.mistakes.length+'</b>mistakes</span><span><b>'+ST.topicsDone.length+'</b>topics learned</span><span><b>'+ST.chats.length+'</b>Knovo chats</span><span><b>'+ST.mocks.length+'</b>mocks</span></div>'+
+    '<div class="row" id="resetRow"><button class="btn sm" type="button" id="resetA">Clear saved Knovo chats</button></div></div></div></section></div>';
   el.innerHTML=h;
   $('#goal').addEventListener('change',function(){ST.goal=+this.value;EV.save();EV.toast('Daily goal set to '+ST.goal);EV.render();});
-  $('#resetA').addEventListener('click',function(){$('#resetRow').innerHTML='<span class="small">This clears XP, streak, attempts, mistakes, chats and mocks on this device.</span><button class="btn sm bad" type="button" id="resetY">Yes, reset</button><button class="btn sm" type="button" id="resetN">Cancel</button>';$('#resetY').addEventListener('click',EV.resetAll);$('#resetN').addEventListener('click',function(){EV.render()});});
+  $('#resetA').addEventListener('click',function(){$('#resetRow').innerHTML='<span class="small">This deletes your saved Knovo chats on this device. Your study progress and XP are kept.</span><button class="btn sm bad" type="button" id="resetY">Yes, clear chats</button><button class="btn sm" type="button" id="resetN">Cancel</button>';$('#resetY').addEventListener('click',function(){ST.chats=[];ST.chatCur='';EV.save();EV.toast('Knovo chats cleared');EV.render();});$('#resetN').addEventListener('click',function(){EV.render()});});
 };
 
 /* =================== TECHNIQUE (general) =================== */
@@ -55,7 +56,7 @@ V.technique=function(el){
 V.mistakes=function(el){
   var act=ST.mistakes.filter(function(m){return !m.resolved}),res=ST.mistakes.filter(function(m){return m.resolved});
   var rate=ST.mistakes.length?Math.round(100*res.length/ST.mistakes.length):0;
-  var cnt={};act.forEach(function(m){cnt[m.ref]=(cnt[m.ref]||0)+1;});var pri=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]})[0];
+  var cnt={};act.forEach(function(m){if(m.ref&&EV.BYREF[m.ref])cnt[m.ref]=(cnt[m.ref]||0)+1;});var pri=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]})[0];
   var h='<div class="in page"><div class="pageHead"><span class="eyebrow"><b>Recover · Retry · Master</b></span><h1>Mistakes recovery</h1><p class="sub">Turn every lost mark into a next step. Retry a question and it resolves only when you get it right.</p></div>'+
   '<div class="dashTop"><div class="cell"><span class="eyebrow">Active reviews</span><div class="big">'+act.length+'</div></div><div class="cell"><span class="eyebrow">Resolved</span><div class="big">'+res.length+'</div></div><div class="cell"><span class="eyebrow">Recovery rate</span><div class="big">'+rate+'<small>%</small></div></div><div class="cell"><span class="eyebrow">Priority subject</span><div style="font-weight:700;font-size:1rem">'+(pri?esc(EV.BYREF[pri].s.name+' '+EV.BYREF[pri].s.code):'No open priority')+'</div></div></div>'+
   '<div class="row" style="margin-top:18px"><button class="btn teal" type="button" id="plan"'+(act.length?'':' disabled')+'>✦ Build my recovery plan with Knovo</button></div>';
@@ -102,7 +103,7 @@ function mockPapers(el){
   $$('[data-start]',el).forEach(function(b){b.addEventListener('click',function(){
     var p=o.s.papers[+b.dataset.start],len=$('#mLen').value,mins=len==='real'?parseDur(p.t):+len;
     var qs=EV.allQuestions(o).sort(function(){return Math.random()-.5}).slice(0,15);
-    MOCK={stage:'run',ref:o.ref,paper:p,qs:qs,i:0,flags:{},ans:{},marks:{},endAt:Date.now()+mins*60000};
+    MOCK={stage:'run',ref:o.ref,paper:p,qs:qs,i:0,flags:{},ans:{},marks:{},startAt:Date.now(),mins:mins,endAt:Date.now()+mins*60000};
     EV.mockRunning=true;EV.render();window.scrollTo(0,0);});});
 }
 function mockSubmit(){clearInterval(mockTimer);if(!MOCK||MOCK.stage!=='run')return;MOCK.stage='mark';EV.mockRunning=false;EV.render();window.scrollTo(0,0);}
@@ -138,12 +139,16 @@ function mockMark(el){
     var score=0,total=0;MOCK.qs.forEach(function(q,j){var mx=q.marks||4;total+=mx;score+=MOCK.marks[j]||0;if((MOCK.marks[j]||0)<mx/2)EV.attempt(Object.assign({},q,{src:'Mock exam'}),false);else EV.attempt(q,true);});
     var pct=Math.round(100*score/total);
     MOCK.result={score:score,total:total,pct:pct,grade:EV.grade(pct)};
-    ST.mocks.push({subject:o.s.name+' '+o.s.code,paper:MOCK.paper.p,score:score,total:total,pct:pct,grade:EV.grade(pct),date:new Date().toLocaleDateString()});
-    EV.addXP(EV.XPR.mock,'mock');EV.save();MOCK.stage='result';EV.render();window.scrollTo(0,0);});
+    var mts=Date.now();ST.mocks.push({ref:o.ref,subject:o.s.name+' '+o.s.code,paper:MOCK.paper.p,score:score,total:total,pct:pct,grade:EV.grade(pct),date:new Date().toLocaleDateString(),ts:mts});
+    /* XP only for a serious attempt: half the time used, 40%+ scored, once per paper each week */
+    var used=(Date.now()-(MOCK.startAt||Date.now()))/60000,wk=Math.floor((Date.now()/864e5+3)/7);
+    MOCK.result.xp=(used>=(MOCK.mins||60)/2&&pct>=40)?EV.earn('mock','exam:'+o.ref+':'+MOCK.paper.p+':w'+wk,false):0;
+    MOCK.result.xpWhy=MOCK.result.xp?'':(used<(MOCK.mins||60)/2?'Mock XP needs at least half the paper time.':pct<40?'Mock XP needs a score of 40% or more.':'Mock XP for this paper was already earned this week.');
+    EV.save();MOCK.stage='result';EV.render();window.scrollTo(0,0);});
 }
 function mockResult(el){
   var o=EV.BYREF[MOCK.ref],R=MOCK.result;
-  el.innerHTML='<div class="in page"><div class="card" style="display:grid;gap:16px;justify-items:center;text-align:center;padding:44px 24px;margin-top:20px;background:radial-gradient(500px 260px at 50% 0%,rgba(240,180,41,.15),transparent 70%),var(--deck)"><span class="eyebrow">'+esc(o.s.name+' '+o.s.code)+' · '+esc(MOCK.paper.p)+'</span><div class="gradeBig">'+esc(R.grade)+'</div><div class="big">'+R.score+'<small> / '+R.total+' · '+R.pct+'%</small></div><p class="muted" style="max-width:52ch">Indicative grade from typical boundaries. +100 XP earned. Questions where you scored under half went to your Mistakes notebook.</p><div class="row" style="justify-content:center"><a class="btn gold" href="#mistakes">Review mistakes</a><button class="btn" type="button" id="mAgain">Sit another mock</button><button class="btn teal" type="button" data-ask="I just scored '+R.pct+'% on a '+esc(o.s.name)+' mock. Give me 3 specific things to fix before my next attempt.">Ask Knovo what to fix</button></div></div></div>';
+  el.innerHTML='<div class="in page"><div class="card" style="display:grid;gap:16px;justify-items:center;text-align:center;padding:44px 24px;margin-top:20px;background:radial-gradient(500px 260px at 50% 0%,rgba(240,180,41,.15),transparent 70%),var(--deck)"><span class="eyebrow">'+esc(o.s.name+' '+o.s.code)+' · '+esc(MOCK.paper.p)+'</span><div class="gradeBig">'+esc(R.grade)+'</div><div class="big">'+R.score+'<small> / '+R.total+' · '+R.pct+'%</small></div><p class="muted" style="max-width:52ch">Indicative grade from typical boundaries. '+(R.xp?'+'+R.xp+' XP earned. ':esc(R.xpWhy||'')+' ')+'Questions where you scored under half went to your Mistakes notebook.</p><div class="row" style="justify-content:center"><a class="btn gold" href="#mistakes">Review mistakes</a><button class="btn" type="button" id="mAgain">Sit another mock</button><button class="btn teal" type="button" data-ask="I just scored '+R.pct+'% on a '+esc(o.s.name)+' mock. Give me 3 specific things to fix before my next attempt.">Ask Knovo what to fix</button></div></div></div>';
   $('#mAgain').addEventListener('click',function(){MOCK=null;EV.render();});
 }
 
@@ -188,16 +193,97 @@ V.paperSubj=function(el,r){
 
 /* =================== RANKS =================== */
 V.ranks=function(el){
-  var lp=EV.levelProgress(ST.xp),wk=EV.weekXP(),mode=EV.rankMode||'all';
-  var you=ST.profile?esc(ST.profile.name):'You (guest)';
+  var X=EVLive.XP,mode=EV.rankMode||'all',authed=!!ST.profile&&EVLive.hasSession();
+  if(authed&&X.status==='guest')X.status='idle';
+  var ready=authed&&X.status==='ready'&&X.me;
+  var total=ready?Number(X.me.total_xp)||0:ST.xp,weekly=ready?Number(X.me.weekly_xp)||0:EV.weekXP(),lp=EV.levelProgress(total);
+  var rank=ready?(mode==='week'?X.me.week_rank:X.me.all_rank):null;
+  var key=mode==='week'?'weekly_xp':'total_xp';
+  var rows=ready?X.leaders.filter(function(r){return Number(r[key])>0;}).slice().sort(function(a,b){return Number(b[key])-Number(a[key])||String(a.display_name).localeCompare(String(b.display_name));}):[];
+  var state=authed?X.status:'guest';
+  var status=state==='ready'?'Account XP synced'+(X.updated?' · '+new Date(X.updated).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''):state==='loading'?'Syncing your study activity…':state==='guest'?'XP on this device':'Your XP is safe on this device';
+  var body;
+  if(authed&&!EVLive.lbOptIn())body='<div class="empty" style="padding:28px"><b>You are hidden from the leaderboard</b><span>You chose not to appear on the rankings, so your XP is not synced. Your XP still counts for you on this device.</span><button class="btn gold sm" type="button" id="rkShow">Show me on the leaderboard</button></div>';
+  else if(state==='guest')body='<div class="empty" style="padding:28px"><b>Sign in to see genuine student rankings</b><span>You can keep earning XP now. After you sign in, your study events sync to your student account. Your email address is never shown.</span><a class="btn gold sm" href="#signin">Sign in or create a student account</a></div>';
+  else if(state==='loading'||state==='idle')body='<div class="empty" style="padding:28px"><b>Loading genuine student scores…</b><span>No sample rows are shown while you wait.</span></div>';
+  else if(state==='setup')body='<div class="empty" style="padding:28px"><b>Shared rankings are not connected yet</b><span>The leaderboard database still needs its one-time setup. Your own XP above is safe, and no substitute students are shown.</span></div>';
+  else if(state==='auth')body='<div class="empty" style="padding:28px"><b>Please sign in again</b><span>Your session has expired. Your XP is safe on this device and will sync after you sign in.</span><a class="btn gold sm" href="#signin">Sign in</a></div>';
+  else if(state==='error')body='<div class="empty" style="padding:28px"><b>Could not load the rankings</b><span>'+esc(X.message||'Check your connection and try again.')+' Your new XP is saved on this device.</span></div>';
+  else if(!rows.length)body='<div class="empty" style="padding:28px"><b>'+(mode==='week'?'No weekly XP has been ranked yet':'The leaderboard is waiting for its first student')+'</b><span>Complete a topic, attempt a question, review a flashcard or finish a mock to start the ranking. No bots fill the empty places.</span><a class="btn gold sm" href="#dashboard">Start earning XP</a></div>';
+  else body='<div class="scrollx"><table class="tbl"><thead><tr><th>Rank</th><th>Student</th><th>Level</th><th style="text-align:right">XP</th></tr></thead><tbody>'+rows.map(function(r,i){var xp=Number(r[key])||0,me=!!r.is_me;return '<tr'+(me?' style="background:var(--goldsoft)"':'')+'><td>'+(i<3?['🥇','🥈','🥉'][i]:i+1)+'</td><td>'+esc(r.display_name||'Student')+(me?' <span class="pill gold">You</span>':'')+'</td><td>'+EV.level(Number(r.total_xp)||0)+'</td><td style="text-align:right;font-variant-numeric:tabular-nums">'+xp.toLocaleString('en-US')+'</td></tr>';}).join('')+'</tbody></table></div>';
   el.innerHTML='<div class="in page"><div class="pageHead"><span class="eyebrow"><b>EduVerse</b> · genuine student progress</span><h1>Study ranks</h1><p class="sub">Turn consistent revision into XP. Compare weekly or all-time progress with real signed-in students. Never bots, demo accounts or invented scores.</p></div>'+
-  '<div class="lbHero"><div class="cell"><span class="eyebrow">Your XP · this device</span><div class="big">'+ST.xp+'</div></div><div class="cell"><span class="eyebrow">Your level</span><div class="big">'+lp.l+'</div></div><div class="cell"><span class="eyebrow">This week</span><div class="big">'+wk+'</div></div><div class="cell"><span class="eyebrow">All-time rank</span><div class="big">—</div></div></div>'+
-  '<section class="sect" style="padding-top:28px"><div class="card stack"><div class="hd"><div class="seg" role="tablist"><button type="button" class="'+(mode==='all'?'on':'')+'" data-rm="all">All time</button><button type="button" class="'+(mode==='week'?'on':'')+'" data-rm="week">This week</button></div><span class="small muted">Live rankings come from your Supabase project on the real site</span></div>'+
-  '<div class="scrollx"><table class="tbl"><thead><tr><th>Rank</th><th>Student</th><th>Level</th><th style="text-align:right">XP</th></tr></thead><tbody><tr style="background:var(--goldsoft)"><td>—</td><td>'+you+' <span class="pill gold">You</span></td><td>'+lp.l+'</td><td style="text-align:right;font-variant-numeric:tabular-nums">'+(mode==='week'?wk:ST.xp)+'</td></tr></tbody></table></div>'+
-  '<div class="empty" style="padding:28px"><b>'+(ST.profile?'Other students appear on the live site':'Sign in to see genuine student rankings')+'</b><span>This test build cannot reach your database, so it shows only your own XP. On the live site, signed-in students with the student role are ranked here.</span>'+(ST.profile?'':'<a class="btn gold sm" href="#signin">Sign in or create a student account</a>')+'</div></div></section>'+
-  '<section class="sect" style="padding-top:28px"><div class="grid g2"><div class="card stack"><h3>How XP is earned</h3><p class="small muted">Lifetime XP stays earned. Unticking a topic does not take it away.</p><table class="tbl">'+[['Complete a topic','+50 XP'],['Attempt a question','+10 XP'],['Correct-answer bonus','+5 XP'],['Review a flashcard','+3 XP'],['New study-streak day','+20 XP'],['Finish a timed mock','+100 XP']].map(function(r){return '<tr><td>'+r[0]+'</td><td style="text-align:right;color:var(--gold)">'+r[1]+'</td></tr>';}).join('')+'</table></div>'+
-  '<div class="card stack"><h3>No bots. No invented scores.</h3><p class="small muted">Only signed-in accounts with the student role can appear. EduVerse adds no sample names, bot accounts or generated scores. Display names are shown; email addresses are never published. Fixed server rules award XP, so students cannot edit their own scores.</p></div></div></section></div>';
+  '<div class="lbHero"><div class="cell"><span class="eyebrow">'+(ready?'Your account XP':'Your XP · this device')+'</span><div class="big">'+total.toLocaleString('en-US')+'</div></div><div class="cell"><span class="eyebrow">Your level</span><div class="big">'+lp.l+'</div></div><div class="cell"><span class="eyebrow">This week</span><div class="big">'+weekly.toLocaleString('en-US')+'</div></div><div class="cell"><span class="eyebrow">'+(mode==='week'?'Weekly':'All-time')+' rank</span><div class="big">'+(rank?'#'+rank:'—')+'</div></div></div>'+
+  '<section class="sect" style="padding-top:22px"><div id="seasonHost"></div></section>'+
+  '<section class="sect" style="padding-top:28px"><div class="card stack"><div class="hd"><div class="seg" role="tablist"><button type="button" class="'+(mode==='all'?'on':'')+'" data-rm="all">All time</button><button type="button" class="'+(mode==='week'?'on':'')+'" data-rm="week">This week</button></div><span class="small muted">'+esc(status)+'</span>'+(authed?'<button class="btn sm" type="button" id="rkSync"'+(state==='loading'?' disabled':'')+'>↻ Sync &amp; refresh</button>':'')+'</div>'+body+'</div></section>'+
+  '<section class="sect" style="padding-top:28px"><div class="grid g2"><div class="card stack"><h3>How XP is earned</h3><p class="small muted">XP is earned only through real knowledge and effort, so it cannot be farmed by clicking. Wrong answers earn nothing, and the same achievement is never counted twice.</p><table class="tbl">'+[['Answer a question correctly (once per question)','+15 XP'],['Master a Maths topic (every question in it right)','+50 XP'],['Finish a timed mock: half the time used and 40%+ scored (once per paper each week)','+100 XP'],['Opening chapters, ticking topics, flashcards or just visiting','No XP']].map(function(r){return '<tr><td>'+r[0]+'</td><td style="text-align:right;color:var(--gold)">'+r[1]+'</td></tr>';}).join('')+'</table></div>'+
+  '<div class="card stack" style="align-content:start"><h3>No bots. No invented scores.</h3><p class="small muted">Only signed-in accounts with the student role can appear. EduVerse adds no sample names, bot accounts or generated scores. Display names are shown; email addresses are never published. Fixed server rules award XP, so students cannot edit their own scores. The weekly race starts each Monday at 00:00 UTC.</p></div></div></section></div>';
   $$('[data-rm]',el).forEach(function(b){b.addEventListener('click',function(){EV.rankMode=b.dataset.rm;EV.render();});});
+  var sy=$('#rkSync');if(sy)sy.addEventListener('click',function(){EVLive.xpSync(true);});
+  var sh=$('#rkShow');if(sh)sh.addEventListener('click',function(){EVLive.setLbOptIn(true);EVLive.xpSync(true);EV.render();});
+  EV.seasonCard($('#seasonHost'));
+  if(authed&&EVLive.lbOptIn()&&(X.status==='idle'||X.status==='hidden'))setTimeout(function(){EVLive.xpSync(false);},0);
+};
+
+/* =================== SEASONS (every 6 months, top 3 pick a mystery reward) =================== */
+function fmtLeft(ms){ms=Math.max(0,ms);var d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5);return d>0?d+' day'+(d===1?'':'s')+' '+h+' h':Math.max(1,Math.ceil(ms/6e4))+' min';}
+EV.seasonCard=function(host){
+  var now=Date.now(),LVx=EVLive;
+  if(now<LVx.FIRST_SEASON){
+    host.innerHTML='<div class="season"><span class="eyebrow"><b>Seasons</b> · every 6 months</span><h3 style="margin:0;font-size:1.35rem">Season 1 starts on 1 January 2027, when EduVerse launches.</h3><div class="clock">Starts in '+fmtLeft(LVx.FIRST_SEASON-now)+'</div><p class="small muted" style="margin:0">Each season runs January–June or July–December. When a season ends, the top 3 students by season XP each choose one of three mystery rewards. Only XP from real effort counts.</p></div>';
+    return;
+  }
+  var S=LVx.seasonOf(now);
+  host.innerHTML='<div class="season"><span class="eyebrow"><b>Season '+esc(S.id)+'</b> · '+esc(S.label)+'</span><div class="row" style="justify-content:space-between"><h3 style="margin:0;font-size:1.35rem">Top 3 this season pick a mystery reward</h3><div class="clock">Ends in '+fmtLeft(S.end-now)+'</div></div><div id="seasonBody"><p class="small muted">Loading season standings…</p></div><div id="rewardBody"></div></div>';
+  if(!LVx.hasSession())return;
+  LVx.seasonBoard().then(function(rows){
+    rows=(rows||[]).filter(function(r){return Number(r.season_xp)>0;});
+    var b=$('#seasonBody');if(!b)return;
+    b.innerHTML=rows.length?'<div class="scrollx"><table class="tbl"><thead><tr><th>Rank</th><th>Student</th><th style="text-align:right">Season XP</th></tr></thead><tbody>'+rows.slice(0,10).map(function(r,i){return '<tr'+(r.is_me?' style="background:var(--goldsoft)"':'')+'><td>'+(i<3?['🥇','🥈','🥉'][i]:i+1)+'</td><td>'+esc(r.display_name||'Student')+(r.is_me?' <span class="pill gold">You</span>':'')+'</td><td style="text-align:right">'+Number(r.season_xp).toLocaleString('en-US')+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="small muted">No season XP yet. Answer questions correctly and finish timed mocks to climb.</p>';
+  }).catch(function(e){var b=$('#seasonBody');if(b)b.innerHTML='<p class="small muted">'+(e.setup?'Season standings switch on after the owner runs the EduVerse database update.':'Season standings could not load right now.')+'</p>';});
+  LVx.mySeasonReward().then(function(r){
+    var b=$('#rewardBody');if(!b||!r||!r.season)return;
+    if(r.claimed_slot){b.innerHTML='<div class="mystery">'+[1,2,3].map(function(k){return '<button class="mbox'+(k===r.claimed_slot?' won':'')+'" type="button" disabled><span class="q">'+(k===r.claimed_slot?'🎁':'❔')+'</span>'+(k===r.claimed_slot?'<b>'+esc(r.reward_title||'Your reward')+'</b><span class="small muted">'+esc(r.reward_details||'')+'</span>':'<span class="small muted">Mystery '+k+'</span>')+'</button>';}).join('')+'</div><p class="small muted">You finished #'+r.rank+' in season '+esc(r.season)+'. The EduVerse team will contact you at your account email about your reward.</p>';return;}
+    if(!r.claimable)return;
+    b.innerHTML='<p style="margin:0"><b>🏆 You finished #'+r.rank+' in season '+esc(r.season)+'!</b> Choose one mystery reward. Your choice is final.</p><div class="mystery">'+[1,2,3].map(function(k){return '<button class="mbox" type="button" data-slot="'+k+'"><span class="q">❔</span><b>Mystery '+k+'</b><span class="small muted">Tap to choose</span></button>';}).join('')+'</div>';
+    $$('[data-slot]',b).forEach(function(btn){btn.addEventListener('click',function(){
+      if(!confirm('Choose Mystery '+btn.dataset.slot+'? You can only choose once.'))return;
+      $$('[data-slot]',b).forEach(function(x){x.disabled=true;});
+      LVx.claimSeasonReward(+btn.dataset.slot).then(function(){EV.toast('Reward chosen!');EV.seasonCard(host);}).catch(function(e){EV.toast(e.message==='setup'?'Rewards are not set up yet.':e.message);$$('[data-slot]',b).forEach(function(x){x.disabled=false;});});
+    });});
+  }).catch(function(){});
+};
+
+/* =================== ADMIN (owner and co-owner only) =================== */
+V.admin=function(el){
+  if(!EVLive.isOwner()){el.innerHTML='<div class="in page"><div class="empty" style="margin-top:30px"><b>This page is for the EduVerse owner</b><span>Owner access is checked on the server for your account.</span><a class="btn gold sm" href="#home">Back to home</a></div></div>';
+    EVLive.checkOwner().then(function(o){if(o&&EV.route.name==='admin')EV.render();});return;}
+  var pdfs=0,notes=0,live=0;EV.SUBJ.forEach(function(o){if(!o.soon)live++;pdfs+=EV.pdfCount(o);notes+=EV.notesOf(o).length;});
+  var S=EVLive.seasonOf(Math.max(Date.now(),EVLive.FIRST_SEASON)),X=EVLive.XP;
+  el.innerHTML='<div class="in page"><div class="pageHead"><span class="eyebrow"><b>EduVerse</b> · owner admin</span><h1>Admin</h1><p class="sub">Your control room for the new design: season rewards, rankings, messages and site content. Student accounts, purchases and XP resets stay in the secure classic owner dashboard.</p></div>'+
+  '<div class="adminGrid"><div class="cell"><span class="eyebrow">Live subjects</span><div class="big">'+live+'</div></div><div class="cell"><span class="eyebrow">Note sections</span><div class="big">'+notes+'</div></div><div class="cell"><span class="eyebrow">PDFs</span><div class="big">'+pdfs+'</div></div><div class="cell"><span class="eyebrow">Ranked students</span><div class="big">'+(X.status==='ready'?X.leaders.length:'—')+'</div></div></div>'+
+  '<section class="sect" style="padding-top:26px"><div class="card stack"><h3>🎁 Season rewards · '+esc(S.id)+' ('+esc(S.label)+')</h3><p class="small muted">Set the three mystery rewards for this season. Winners only see what is inside after they choose. Payments are not live, so pick rewards you can deliver yourself (for example a Knovo Pro month once plans open, a certificate, or an Instagram shout-out).</p><div class="stack" id="optRows">'+[1,2,3].map(function(k){return '<div class="optRow"><b>Mystery '+k+'</b><input class="inp" id="ot'+k+'" maxlength="60" placeholder="Reward title"><input class="inp" id="od'+k+'" maxlength="200" placeholder="Details the winner sees"><button class="btn sm gold" type="button" data-save="'+k+'">Save</button></div>';}).join('')+'</div><p class="small" id="optNote"></p>'+
+  '<h3 style="margin-top:10px">Winners and their choices</h3><div id="claims"><p class="small muted">Loading…</p></div></div></section>'+
+  '<section class="sect" style="padding-top:26px"><div class="grid g2"><div class="card stack"><h3>🏆 Leaderboard right now</h3><div id="lbNow"></div><button class="btn sm" type="button" id="lbSync" style="justify-self:start">↻ Sync &amp; refresh</button></div>'+
+  '<div class="card stack"><h3>✉️ Messages</h3><p class="small muted">The home-page contact form sends every message to <b>educationalverse2027@gmail.com</b>, the same inbox as the classic site.</p><a class="btn sm" href="https://mail.google.com/" target="_blank" rel="noopener" style="justify-self:start">Open Gmail</a>'+
+  '<h3 style="margin-top:10px">🔐 Classic owner dashboard</h3><p class="small muted">Students, purchases, roles and XP resets, protected by your two-step owner check.</p><a class="btn sm gold" href="'+EV.SITE+'ctrl-panel-x94k.html" style="justify-self:start">Open owner dashboard</a></div></div></section>'+
+  '<section class="sect" style="padding-top:26px"><div class="card stack"><h3>🧩 Server features</h3><div id="feat" class="stack"></div></div></section></div>';
+  function lbPaint(){var b=$('#lbNow');if(!b)return;b.innerHTML=X.status==='ready'?(X.leaders.slice(0,10).map(function(r,i){return '<div class="row" style="justify-content:space-between"><span>'+(i+1)+'. '+esc(r.display_name)+'</span><b>'+Number(r.total_xp).toLocaleString('en-US')+' XP</b></div>';}).join('')||'<p class="small muted">No ranked students yet.</p>'):'<p class="small muted">'+esc(X.status==='setup'?'The leaderboard database needs its setup.':X.status==='loading'?'Loading…':X.message||'Press Sync & refresh.')+'</p>';}
+  lbPaint();$('#lbSync').addEventListener('click',function(){EVLive.xpSync(true).then(lbPaint);});
+  function claims(){EVLive.adminSeasonRewards().then(function(rows){
+      rows=rows||[];var cur=rows.filter(function(r){return r.kind==='option'&&r.season===S.id;});
+      cur.forEach(function(r){var t=$('#ot'+r.slot),d=$('#od'+r.slot);if(t&&!t.value)t.value=r.title||'';if(d&&!d.value)d.value=r.details||'';});
+      var won=rows.filter(function(r){return r.kind==='claim';});
+      $('#claims').innerHTML=won.length?'<div class="scrollx"><table class="tbl"><thead><tr><th>Season</th><th>Rank</th><th>Student</th><th>Email</th><th>Chose</th><th>Delivered</th></tr></thead><tbody>'+won.map(function(r){return '<tr><td>'+esc(r.season)+'</td><td>#'+r.rank+'</td><td>'+esc(r.display_name||'')+'</td><td class="code">'+esc(r.email||'')+'</td><td>'+esc(r.title||('Mystery '+r.slot))+'</td><td><button class="btn sm'+(r.delivered?' ok':'')+'" type="button" data-deliv="'+r.id+'" data-on="'+(r.delivered?1:0)+'">'+(r.delivered?'✓ Delivered':'Mark delivered')+'</button></td></tr>';}).join('')+'</tbody></table></div>':'<p class="small muted">No winners yet. The first season ends on 30 June 2027.</p>';
+      $$('[data-deliv]').forEach(function(b){b.addEventListener('click',function(){EVLive.adminMarkDelivered(+b.dataset.deliv,b.dataset.on!=='1').then(claims);});});
+    }).catch(function(e){$('#claims').innerHTML='<p class="small muted">'+(e.setup?'Run new-design/database-update.sql in Supabase to switch on seasons and rewards.':esc(e.message))+'</p>';});}
+  claims();
+  $('#optRows').addEventListener('click',function(e){var b=e.target.closest('[data-save]');if(!b)return;var k=+b.dataset.save,t=$('#ot'+k).value.trim(),d=$('#od'+k).value.trim(),n=$('#optNote');
+    if(!t){n.textContent='Give the reward a title first.';n.style.color='var(--warn)';return;}
+    EVLive.adminSetRewardOption(S.id,k,t,d).then(function(){n.textContent='Mystery '+k+' saved.';n.style.color='var(--teal)';}).catch(function(err){n.textContent=err.setup?'Run the database update first.':err.message;n.style.color='var(--warn)';});});
+  /* which server features are switched on */
+  var F=[['XP leaderboard','eduverse_my_xp'],['Seasons and rewards','eduverse_season_board'],['Leaderboard choice','eduverse_set_leaderboard_visibility']];
+  $('#feat').innerHTML=F.map(function(f,i){return '<div class="row" style="justify-content:space-between"><span>'+f[0]+'</span><span class="pill" id="f'+i+'">Checking…</span></div>';}).join('');
+  F.forEach(function(f,i){var body=f[1]==='eduverse_set_leaderboard_visibility'?{p_show:EVLive.lbOptIn()}:{};EVLive.rpc(f[1],body).then(function(){var p=$('#f'+i);if(p){p.textContent='✓ On';p.className='pill ok';}}).catch(function(e){var p=$('#f'+i);if(!p)return;var miss=e.status===404||e.code==='PGRST202'||/could not find|schema cache/i.test(e.message);p.textContent=miss?'Needs the database update':'Error';p.className='pill bad';});});
 };
 
 /* =================== KNOVO WORKSPACE =================== */
@@ -217,7 +303,7 @@ V.knovo=function(el){
     '<div class="log" id="klog" aria-live="polite"></div>'+
     '<div class="compose"><div class="pv" id="kPv" hidden></div><form id="kform" autocomplete="off"><button class="att" type="button" id="kAtt" title="Attach a photo" aria-label="Attach a photo">📷</button><input type="file" id="kFile" accept="image/*" hidden><label for="kq" class="sr">Message Knovo</label><textarea id="kq" rows="1" placeholder="Ask anything about your syllabus…"></textarea><button class="stop" type="button" id="kStop" hidden>Stop</button><button class="send" type="submit" id="kSend">Send</button></form></div></div>'+
     '<aside class="kctx" aria-label="Context"><h4>Knovo knows</h4><label class="field" for="kSub">Subject for this chat<select id="kSub">'+subOpts+'</select></label><div class="kv" id="kKnow"></div>'+
-    '<h4>Free allowance</h4><div class="kv" id="kAllow"></div><div class="mini"><small>Knovo Pro</small>More messages, photo scans and Live Lessons. <button class="btn sm teal" type="button" data-plans style="justify-self:start">See plans</button></div>'+
+    '<h4>Your Knovo access</h4><div class="kv" id="kAllow"></div><div class="mini"><small>Knovo Pro</small>More messages, photo scans and Live Lessons. <button class="btn sm teal" type="button" data-plans style="justify-self:start">See plans</button></div>'+
     '<h4>Your Knovo deck</h4><div id="kDeck"></div><div class="aiNote" id="kAi"></div></aside></div></div>';
   el.innerHTML=h;
   var log=$('#klog'),conv={turns:cur.turns.slice(),log:log,mode:cur.mode,ctx:null};
@@ -234,21 +320,26 @@ V.knovo=function(el){
     else conv.turns.forEach(function(t){if(t.role==='user')EV.kBubble(log,'u','',t.content);else EV.kBubble(log,'a',EV.md(t.content));});}
   function paintList(){$('#kList').innerHTML=ST.chats.length?ST.chats.map(function(c){return '<div class="s'+(c.id===cur.id?' on':'')+'"><button class="o" type="button" data-open="'+c.id+'" title="'+esc(c.title)+'">'+esc(c.title)+'</button><button class="x" type="button" data-del="'+c.id+'" aria-label="Delete chat">×</button></div>';}).join(''):'<p class="small muted" style="padding:6px">Your chats will be saved here.</p>';}
   function paintKnow(){var o=cur.ref?EV.BYREF[cur.ref]:null,acc=o?EV.accuracy(o.ref):null;$('#kKnow').innerHTML=o?'<div><span>Subject</span><b>'+esc(o.s.name)+'</b></div><div><span>Code</span><b class="code">'+esc(o.s.code)+'</b></div><div><span>Notes it reads</span><b>'+EV.notesOf(o).length+' sections</b></div><div><span>Your accuracy</span><b>'+(acc?acc.pct+'%':'—')+'</b></div>':'<p class="small muted">Choose a subject so Knovo reads its notes and paper pattern.</p>';}
-  function paintAllow(){var a=EV.allowance();$('#kAllow').innerHTML='<div><span>Messages (3 h)</span><b>'+a.m+' / '+a.mMax+'</b></div><div class="bar t"><i style="width:'+Math.round(100*a.m/a.mMax)+'%"></i></div><div><span>Photo scans (3 h)</span><b>'+a.s+' / '+a.sMax+'</b></div><button class="btn sm ghost" type="button" data-reset-allow2 style="justify-self:start">Reset allowance (test build)</button>';}
+  function paintAllow(){var a=EV.allowance();
+    $('#kAllow').innerHTML='<div><span>Plan</span><b>'+esc(EV.planLabel())+'</b></div>'+
+      (a.unlimited?'<div><span>Messages</span><b>Unlimited</b></div>':
+       a.blockedFor?'<div><span>Messages</span><b style="color:var(--warn)">Unlocks in '+esc(EVLive.fmtWait(a.blockedFor))+'</b></div>':
+       '<div><span>Messages left</span><b>'+(a.left==null?'Shown after your first message':a.left)+'</b></div>')+
+      '<p class="small muted" style="margin:0">Free accounts get a set number of Knovo messages in each time window. EduVerse\'s server keeps count, so it is the same on every device.</p>';}
   function paintDeck(){var d=ST.kdeck;$('#kDeck').innerHTML=d.length?'<div class="mini"><small>'+d.length+' cards</small><b>'+esc(d[d.length-1].q)+'</b><span class="muted">'+esc(d[d.length-1].a)+'</span></div><button class="btn sm" type="button" id="kPlay" style="justify-self:start">Practise deck</button>':'<p class="small muted">Press "Make flashcards" under any answer to save cards here.</p>';var p=$('#kPlay');if(p)p.addEventListener('click',function(){playDeck();});}
-  function paintAi(){$('#kAi').innerHTML=EV.K.sample?'Knovo is answering with Claude in this test build. On your live site it uses your own Knovo service.':(EV.K.checked?'Live AI is off in this view, so Knovo answers from the EduVerse notes. Open this page inside Claude for full AI replies.':'Connecting to Knovo…');}
+  function paintAi(){$('#kAi').innerHTML='Knovo is EduVerse\'s study tutor. It reads this subject\'s EduVerse notes and paper pattern, but it can make mistakes, so check important facts against your syllabus.';}
   function playDeck(){var host=document.createElement('div');log.innerHTML='';log.appendChild(host);EV.deck(host,ST.kdeck.map(function(c,i){return {q:c.q,a:c.a,key:'kn:'+c.t+'#'+i}}),'Knovo deck');var back=document.createElement('button');back.className='btn sm';back.type='button';back.textContent='← Back to chat';back.style.alignSelf='center';back.addEventListener('click',paintLog);log.appendChild(back);}
-  EV.onDeckChange=paintDeck;EV.onKnovoReady=paintAi;
+  EV.onDeckChange=paintDeck;EV.onKnovoUsage=function(){paintAllow();};
   paintLog();paintList();paintKnow();paintAllow();paintDeck();paintAi();
   var img=null;
   $('#kAtt').addEventListener('click',function(){$('#kFile').click();});
   $('#kFile').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;img=f;var pv=$('#kPv');pv.hidden=false;pv.innerHTML='<img alt="Attached photo" src="'+URL.createObjectURL(f)+'"><span class="grow">'+esc(f.name)+'</span><button class="btn sm ghost" type="button" id="kRm">Remove</button>';$('#kRm').addEventListener('click',function(){img=null;pv.hidden=true;pv.innerHTML='';$('#kFile').value='';});
     if(conv.mode!=='scan'){conv.mode='scan';cur.mode='scan';$$('#kModes button').forEach(function(b){b.classList.toggle('on',b.dataset.mode==='scan')});}
-    if(!EV.K.images&&EV.K.sample)EV.kBubble(log,'sys','Photo scanning needs image access, which this view does not have. Type the question instead.');});
+  });
   var ta=$('#kq');
   ta.addEventListener('input',function(){EV.autoGrow(ta)});
   ta.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#kform').requestSubmit();}});
-  $('#kform').addEventListener('submit',function(e){e.preventDefault();if(!conv.turns.length)log.innerHTML='';var send=img&&EV.K.images?img:null;EV.kSend(conv,ta.value,send);ta.value='';EV.autoGrow(ta);img=null;var pv=$('#kPv');pv.hidden=true;pv.innerHTML='';$('#kFile').value='';});
+  $('#kform').addEventListener('submit',function(e){e.preventDefault();if(!conv.turns.length)log.innerHTML='';EV.kSend(conv,ta.value,img);ta.value='';EV.autoGrow(ta);img=null;var pv=$('#kPv');pv.hidden=true;pv.innerHTML='';$('#kFile').value='';});
   $('#kStop').addEventListener('click',function(){if(conv.ctl)conv.ctl.abort();});
   $('#kModes').addEventListener('click',function(e){var b=e.target.closest('[data-mode]');if(!b)return;conv.mode=cur.mode=b.dataset.mode;$$('#kModes button').forEach(function(x){x.classList.toggle('on',x===b)});if(!conv.turns.length)paintLog();ta.placeholder={chat:'Ask anything about your syllabus…',mark:'Paste the question, marks and your answer…',scan:'Add a note about the photo (optional)…',lesson:'Name a topic to learn…'}[conv.mode];});
   $('#kSub').addEventListener('change',function(){cur.ref=this.value;EV.prevRef=this.value;conv.ctx=ctxFor();paintKnow();EV.toast(this.value?'Knovo is now reading '+EV.BYREF[this.value].s.name+' notes':'No subject selected');});
@@ -257,8 +348,7 @@ V.knovo=function(el){
     if(o){ST.chatCur=o.dataset.open;EV.save();EV.render();}
     if(d){ST.chats=ST.chats.filter(function(c){return c.id!==d.dataset.del});if(ST.chatCur===d.dataset.del)ST.chatCur='';EV.save();EV.render();}});
   log.addEventListener('click',function(e){var s=e.target.closest('[data-start-q]');if(!s)return;if(conv.mode==='scan'){$('#kAtt').click();return;}log.innerHTML='';EV.kSend(conv,s.dataset.startQ);});
-  el.addEventListener('click',function(e){if(e.target.closest('[data-reset-allow2]')){EV.resetAllowance();paintAllow();EV.toast('Allowance reset');}});
-  EV.cleanup=function(){EV.wsConv=null;EV.onDeckChange=null;EV.onKnovoReady=null;if(conv.ctl&&conv.busy)conv.ctl.abort();};
+  EV.cleanup=function(){EV.wsConv=null;EV.onDeckChange=null;EV.onKnovoUsage=null;if(conv.ctl&&conv.busy)conv.ctl.abort();};
 };
 
 /* =================== ABOUT =================== */
@@ -274,13 +364,40 @@ V.about=function(el){
 };
 
 /* =================== SIGN IN =================== */
-V.signin=function(el){
-  if(ST.profile){el.innerHTML='<div class="in page"><div class="card stack" style="max-width:520px;margin:30px auto;text-align:center;justify-items:center"><div class="avatar" style="width:64px;height:64px;font-size:1.6rem">'+esc(ST.profile.name.charAt(0).toUpperCase())+'</div><h2 class="h2" style="margin:0">Signed in as '+esc(ST.profile.name)+'</h2><p class="small muted">Test-build profile saved on this device. Your real site signs students in with your Supabase project.</p><div class="row" style="justify-content:center"><a class="btn gold" href="#dashboard">My dashboard</a><button class="btn" type="button" id="out">Sign out</button></div></div></div>';$('#out').addEventListener('click',function(){ST.profile=null;EV.save();EV.paintProfile();EV.toast('Signed out');EV.render();});return;}
-  el.innerHTML='<div class="in page"><div class="grid g2" style="align-items:center;gap:40px;margin-top:20px"><div class="stack"><span class="eyebrow"><b>EduVerse</b> · student account</span><h1 style="font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;line-height:1;letter-spacing:-.035em">Sign in to save your progress everywhere.</h1><p class="muted">Members unlock Knovo, timed mocks and genuine rankings. Core notes, study books, flashcards and practice stay open without an account.</p></div>'+
-  '<div class="card stack" style="gap:14px"><h3>Sign in</h3><form id="realForm" class="stack" style="gap:12px"><label class="field" for="em">Email<input id="em" type="email" placeholder="you@example.com" autocomplete="email"></label><label class="field" for="pw">Password<input id="pw" type="password" placeholder="••••••••" autocomplete="current-password"></label><button class="btn gold" type="submit">Sign in</button><p class="small muted" id="realNote">On the live site this connects to your Supabase project. This test build cannot reach it.</p></form>'+
-  '<div style="border-top:1px solid var(--rim);padding-top:14px" class="stack"><b>Test as a student</b><form id="guestForm" class="row"><label for="gn" class="sr">Display name</label><input class="inp grow" id="gn" placeholder="Display name, e.g. Ayesha" maxlength="30" required><button class="btn teal" type="submit">Continue</button></form><p class="small muted">Creates a local test profile so you can try members-only pages.</p></div></div></div></div>';
-  $('#realForm').addEventListener('submit',function(e){e.preventDefault();$('#realNote').textContent='Real sign-in is not connected in this test build. Use "Test as a student" below.';$('#realNote').style.color='var(--warn)';});
-  $('#guestForm').addEventListener('submit',function(e){e.preventDefault();var n=$('#gn').value.trim();if(!n)return;ST.profile={name:n};EV.save();EV.paintProfile();EV.toast('Welcome, '+n+'!');EV.go('dashboard');});
+V.signin=function(el,r){
+  if(ST.profile){el.innerHTML='<div class="in page"><div class="card stack" style="max-width:520px;margin:30px auto;text-align:center;justify-items:center"><div class="avatar" style="width:64px;height:64px;font-size:1.6rem">'+esc(ST.profile.name.charAt(0).toUpperCase())+'</div><h2 class="h2" style="margin:0">Signed in as '+esc(ST.profile.name)+'</h2><p class="small muted">'+esc(ST.profile.email||'')+' · '+esc(EV.planLabel())+'</p><p class="small muted">'+(EVLive.lbOptIn()?'You appear on the XP leaderboard with your display name.':'You chose not to appear on the XP leaderboard.')+' You can change this in the ☰ menu.</p><div class="row" style="justify-content:center"><a class="btn gold" href="#dashboard">My dashboard</a><button class="btn" type="button" id="out">Sign out</button></div></div></div>';$('#out').addEventListener('click',EV.signOut);return;}
+  var tab=EV.signTab||'in';
+  var lb=function(id){return '<label class="lbOpt"><input type="checkbox" id="'+id+'"'+(EVLive.lbOptIn()?' checked':'')+'><span><b>Show me on the XP leaderboard</b><small>Only your display name and XP are shown, never your email. You can change this any time in the ☰ menu.</small></span></label>';};
+  var inForm='<form id="inForm" class="stack" style="gap:12px" novalidate><label class="field" for="em">Email<input id="em" type="email" placeholder="you@example.com" autocomplete="email" required></label><label class="field" for="pw">Password<input id="pw" type="password" placeholder="••••••••" autocomplete="current-password" required></label>'+lb('lbOpt')+'<button class="btn gold" type="submit" id="siBtn">Sign in</button><p class="small" id="note" role="status" aria-live="polite"></p><button class="lnk small" type="button" id="forgot" style="justify-self:start">Forgot your password?</button></form>';
+  var upForm='<form id="upForm" class="stack" style="gap:12px" novalidate><div class="grid g2" style="gap:12px"><label class="field" for="rName">Full name<input id="rName" autocomplete="name" maxlength="40" required></label><label class="field" for="rUser">Username<input id="rUser" autocomplete="username" maxlength="20" placeholder="letters, numbers, _" required></label></div><label class="field" for="rEmail">Email<input id="rEmail" type="email" autocomplete="email" required></label><div class="grid g2" style="gap:12px"><label class="field" for="rPw">Password<input id="rPw" type="password" autocomplete="new-password" placeholder="8+ letters and numbers" required></label><label class="field" for="rPw2">Repeat password<input id="rPw2" type="password" autocomplete="new-password" required></label></div><div class="grid g2" style="gap:12px"><label class="field" for="rBoard">Exam board<select id="rBoard"><option value="">Choose…</option><option value="cambridge">Cambridge International</option><option value="edexcel">Pearson Edexcel</option></select></label><label class="field" for="rQual">Qualification<select id="rQual"><option value="">Choose…</option><option>O Level</option><option>IGCSE</option><option>AS Level</option><option>A Level</option></select></label></div><label class="field" for="rRole">I am a<select id="rRole"><option value="student">Student</option><option value="teacher">Teacher</option></select></label>'+lb('lbOpt2')+'<button class="btn gold" type="submit" id="upBtn">Create my free account</button><p class="small" id="note" role="status" aria-live="polite"></p></form>';
+  el.innerHTML='<div class="in page"><div class="grid g2 signGrid"><div class="stack"><span class="eyebrow"><b>EduVerse</b> · members only</span><h1 class="signH1">'+(r&&r.gated?'Sign in to open EduVerse.':'Your EduVerse account.')+'</h1><p class="muted">EduVerse is for signed-in students. One free account opens every subject, note, flashcard and practice question, plus Knovo, timed mocks and genuine rankings.</p><ul class="signPerks"><li>📚 Every O Level, IGCSE, A Level and Edexcel IAL subject</li><li>✦ Knovo, your study tutor</li><li>🏆 XP for real effort, and season rewards for the top 3</li></ul></div>'+
+  '<div class="card stack" style="gap:14px"><div class="seg" role="tablist"><button type="button" role="tab" data-st="in" class="'+(tab==='in'?'on':'')+'" aria-selected="'+(tab==='in')+'">Sign in</button><button type="button" role="tab" data-st="up" class="'+(tab==='up'?'on':'')+'" aria-selected="'+(tab==='up')+'">Create account</button></div>'+(tab==='in'?inForm:upForm)+
+  '<p class="small muted" style="border-top:1px solid var(--rim);padding-top:12px;margin:0">One EduVerse account works on both the new and the classic design.</p></div></div></div>';
+  $$('[data-st]',el).forEach(function(b){b.addEventListener('click',function(){EV.signTab=b.dataset.st;EV.render();});});
+  var note=$('#note');function say(t,bad){note.textContent=t;note.style.color=bad?'var(--warn)':'var(--teal)';}
+  function welcome(optIn){EV.syncProfile();EV.save();EV.paintProfile();EVLive.setLbOptIn(optIn);EV.toast('Welcome, '+ST.profile.name+'!');
+    EVLive.checkOwner().then(function(){EV.paintProfile();if(EV.paintBell)EV.paintBell();});if(optIn)EVLive.xpSync(true);var to=EV.afterSignin;EV.afterSignin=null;EV.go(to&&to!=='signin'?to:'home');}
+  if(tab==='in'){
+    $('#inForm').addEventListener('submit',function(e){e.preventDefault();
+      var em=$('#em').value.trim(),pw=$('#pw').value,btn=$('#siBtn');
+      if(!em||!pw){say('Enter your email and password.',true);return;}
+      btn.disabled=true;btn.textContent='Signing in…';say('');
+      EVLive.signIn(em,pw).then(function(x){btn.disabled=false;btn.textContent='Sign in';if(!x.ok){say(x.error,true);return;}welcome($('#lbOpt').checked);});
+    });
+    $('#forgot').addEventListener('click',function(){var em=$('#em').value.trim();if(!em){say('Type your email above first, then press "Forgot your password?" again.',true);$('#em').focus();return;}
+      say('Sending a reset link…');EVLive.recover(em).then(function(x){say(x.ok?'If that email has an account, a password-reset link is on its way. Check your inbox.':x.error,!x.ok);});});
+  }else{
+    $('#upForm').addEventListener('submit',function(e){e.preventDefault();
+      var f={name:$('#rName').value.trim(),username:$('#rUser').value.trim(),email:$('#rEmail').value.trim(),password:$('#rPw').value,board:$('#rBoard').value,qualification:$('#rQual').value,role:$('#rRole').value};
+      var bad=f.name.length<2?'Please enter your full name.':!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)?'Please enter a valid email address.':EVLive.usernameOk(f.username)||((f.password.length<8||!/[A-Za-z]/.test(f.password)||!/\d/.test(f.password))?'Use a password of at least 8 characters with letters and numbers.':f.password!==$('#rPw2').value?'The two passwords do not match.':!f.board?'Please choose your exam board.':!f.qualification?'Please choose your qualification.':'');
+      if(bad){say(bad,true);return;}
+      var btn=$('#upBtn'),opt=$('#lbOpt2').checked;btn.disabled=true;btn.textContent='Creating your account…';say('');
+      EVLive.signUp(f).then(function(x){btn.disabled=false;btn.textContent='Create my free account';$('#rPw').value='';$('#rPw2').value='';
+        if(!x.ok){say(x.error,true);return;}
+        if(x.needsConfirm){try{localStorage.setItem('ev_lb_optin',opt?'1':'0');}catch(_){}EV.signTab='in';EV.render();var n=$('#note');if(n){n.textContent='Account created. Check your inbox to confirm your email, then sign in here.';n.style.color='var(--teal)';}return;}
+        welcome(opt);});
+    });
+  }
 };
 
 /* =================== WHAT TO ADD =================== */

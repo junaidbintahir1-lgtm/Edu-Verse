@@ -1,4 +1,4 @@
-/* EduVerse test build — views part 1: home, subjects, level, subject hub (all tabs), topic engine */
+/* EduVerse new design — views part 1: home, subjects, level, subject hub (all tabs), topic engine */
 (function(){
 "use strict";
 var EV=window.EV,$=EV.$,$$=EV.$$,esc=EV.esc,ST=EV.ST,V=EV.views;
@@ -105,7 +105,7 @@ V.home=function(el){
     '<div class="cell quizCell"><div class="hd"><h3>Daily quiz</h3><span class="pill gold" id="qCount">1 of '+quiz.length+'</span></div><p class="small muted" style="margin-top:-8px">3 questions from 2 different subjects, drawn from every subject on EduVerse.</p><div class="qstack" id="qstack">'+
     quiz.map(function(q,i){var o=EV.BYREF[q.ref];QREG[q.id]=q;return '<div class="qc" data-pos="'+Math.min(i,2)+'" data-qi="'+i+'" tabindex="'+(i?-1:0)+'" role="button" aria-label="Question '+(i+1)+'. Press to flip"><div class="fc"><span class="pill gold" style="width:max-content">'+o.s.icon+' '+esc(o.s.name)+' <span class="code">'+esc(o.s.code)+'</span></span><p>'+esc(q.q)+'</p><div class="foot"><span>Tap to flip</span><span>'+esc(q.kind)+'</span></div></div><div class="bc"><span class="pill gold" style="width:max-content">Answer</span>'+(q.steps.length?'<ol class="small" style="margin:0;padding-left:18px">'+q.steps.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ol>':'')+'<p><b>'+esc(q.a)+'</b></p></div></div>';}).join('')+
     '</div><div class="quizCtl"><button type="button" id="qGot">✓ I got it</button><button type="button" id="qMiss">✗ Missed it</button><button type="button" class="k" id="qWhy">Ask Knovo why</button></div></div>'+
-    '<div class="cell"><div class="hd"><h3>Streak</h3><span class="pill gold">+20 XP per new day</span></div><div class="big">'+ST.streak.count+' <small>day'+(ST.streak.count===1?'':'s')+'</small></div><div class="week" id="week"></div></div>'+
+    '<div class="cell"><div class="hd"><h3>Streak</h3><span class="pill gold">streaks keep you going</span></div><div class="big">'+ST.streak.count+' <small>day'+(ST.streak.count===1?'':'s')+'</small></div><div class="week" id="week"></div></div>'+
     '<div class="cell"><div class="hd"><h3>Daily goal</h3><a class="small muted" href="#dashboard">Change</a></div><div class="big">'+Math.min(ST.today.d===EV.today()?ST.today.q:0,999)+'<small> / '+ST.goal+' questions</small></div><div class="bar"><i style="width:'+Math.min(100,Math.round(100*(ST.today.d===EV.today()?ST.today.q:0)/ST.goal))+'%"></i></div></div>'+
     '<div class="cell"><div class="hd"><h3>Exam countdown</h3></div><div class="count"><div><b id="cD">0</b><span>days</span></div><div><b id="cH">0</b><span>hours</span></div><div><b id="cM">0</b><span>mins</span></div></div><label class="field" for="exDate">Your first paper<input type="date" id="exDate" value="'+esc(ST.exam._global||'')+'"></label></div>'+
     '<div class="cell"><div class="hd"><h3>Focus session</h3><span class="tag">New idea</span></div><div class="timer"><div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="#12171d" stroke-width="8"/><circle id="tArc" cx="50" cy="50" r="44" fill="none" stroke="#f0b429" stroke-width="8" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="0"/></svg><b id="tTxt">25:00</b></div><div class="btns"><button class="btn gold sm" type="button" id="tGo">Start focus</button><button class="btn sm" type="button" id="tReset">Reset</button></div></div></div>'+
@@ -117,8 +117,45 @@ V.home=function(el){
     '<div class="kfeat"><div><b>Mark my answer</b><span>Paste an answer and get marks point by point against mark-scheme style criteria.</span></div><div><b>Scan a question</b><span>Photograph a question and get a worked solution.</span></div><div><b>Live Lessons</b><span>A guided lesson that checks you understood each part.</span></div><div><b>Chat to flashcards</b><span>Turn any explanation into a flashcard deck in one tap.</span></div></div>'+
     '<div class="row" style="margin-top:20px"><a class="btn teal" href="#knovo">Open the Knovo workspace →</a><button class="btn ghost" type="button" data-plans>See Knovo Pro plans</button></div></div></div></section>';
 
-  h+='<section class="sect"><span class="eyebrow">Questions students ask</span><h2>Frequently asked questions</h2><div class="faq">'+EV.D.extra.faq.map(function(f){return '<details><summary>'+esc(f.q)+'</summary><p>'+esc(f.a)+'</p></details>';}).join('')+'</div></section></div>';
+  h+='<section class="sect"><span class="eyebrow">Questions students ask</span><h2>Frequently asked questions</h2><div class="faq">'+EV.D.extra.faq.map(function(f){return '<details><summary>'+esc(f.q)+'</summary><p>'+esc(f.a)+'</p></details>';}).join('')+'</div></section>';
+
+  /* Contact EduVerse: same fixed inbox and the same sending service as the classic site */
+  var me=ST.profile||{};
+  h+='<section class="sect" id="contact"><span class="eyebrow">Contact us</span><h2>Contact EduVerse</h2><p class="sub">A short note is enough. Support, partnership ideas, resource reports and subject requests all land in the same inbox.</p>'+
+  '<div class="contactWrap"><div class="cCards">'+
+    '<div class="cCard"><span class="ci">✉️</span><div><b>Direct email</b><p>educationalverse2027@gmail.com</p><a href="mailto:educationalverse2027@gmail.com?subject=EduVerse%20website%20enquiry">Write to us →</a></div></div>'+
+    '<div class="cCard"><span class="ci">📸</span><div><b>Instagram</b><p>Sneak peeks, study tips, new resources and behind-the-scenes updates.</p><a href="https://www.instagram.com/eduverse.27" target="_blank" rel="noopener">Follow @eduverse.27 →</a></div></div>'+
+    '<div class="cCard"><span class="ci">?</span><div><b>Check the FAQ first</b><p>Pricing, boards and syllabus years are answered above.</p><button class="lnk" type="button" id="toFaq">Read the FAQ →</button></div></div>'+
+  '</div>'+
+  '<form class="cForm" id="cForm" novalidate><div class="cHead"><span class="ci">✦</span><div><b style="font-size:1.15rem">Send a quick message</b><div class="small muted">Usually takes less than a minute.</div></div></div>'+
+    '<input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">'+
+    '<div class="grid g2" style="gap:12px"><label class="field" for="cName">Your name<input class="inp" id="cName" name="Name" maxlength="60" autocomplete="name" required placeholder="How should we address you?" value="'+esc(me.name||'')+'"></label>'+
+    '<label class="field" for="cEmail">Your email<input class="inp" id="cEmail" name="Email" type="email" maxlength="120" autocomplete="email" required placeholder="So we can reply" value="'+esc(me.email||'')+'"></label></div>'+
+    '<label class="field" for="cType">What is this about?<select class="inp" id="cType" name="Enquiry type"><option>General support</option><option>Partnership or author enquiry</option><option>Report a resource or website problem</option><option>Suggest a subject or resource</option></select></label>'+
+    '<label class="field" for="cMsg">Message<textarea class="inp" id="cMsg" name="Message" maxlength="700" required placeholder="For a report, include the subject and what needs fixing. For a partnership, tell us what you would like to offer."></textarea></label>'+
+    '<div class="cFixed"><span>Sends to <b>educationalverse2027@gmail.com</b></span><span>🔒 Recipient fixed</span></div>'+
+    '<button class="btn gold" type="submit" id="cSend">Send to EduVerse Support →</button><p class="small" id="cStatus" role="status" aria-live="polite" style="margin:0"></p>'+
+    '<a class="small muted" id="cMail" href="mailto:educationalverse2027@gmail.com?subject=EduVerse%20website%20enquiry">Or open your email app</a></form></div></section></div>';
   el.innerHTML=h;
+
+  /* contact form */
+  $('#toFaq').addEventListener('click',function(){var f=$('.faq');if(f)f.scrollIntoView({behavior:EV.reduce?'auto':'smooth',block:'start'});});
+  $('#cForm').addEventListener('submit',function(e){e.preventDefault();
+    var f=e.currentTarget,st=$('#cStatus'),btn=$('#cSend');
+    var name=$('#cName').value.trim(),email=$('#cEmail').value.trim(),type=$('#cType').value,msg=$('#cMsg').value.trim();
+    if(f._honey.value)return;
+    if(!name||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!msg){st.textContent='Please fill in your name, a valid email and your message.';st.style.color='var(--warn)';return;}
+    $('#cMail').href='mailto:educationalverse2027@gmail.com?subject='+encodeURIComponent('EduVerse · '+type)+'&body='+encodeURIComponent('Name: '+name+'\nEmail: '+email+'\nType: '+type+'\n\n'+msg);
+    var data=new FormData();data.append('Name',name);data.append('Email',email);data.append('Enquiry type',type);data.append('Message',msg);
+    data.append('_subject','EduVerse · '+type+' · '+name);data.append('_template','table');data.append('_captcha','false');data.append('Page',location.href);
+    btn.disabled=true;btn.textContent='Sending…';st.style.color='';st.textContent='Sending securely to EduVerse Support…';
+    var ctrl=new AbortController(),tm=setTimeout(function(){ctrl.abort();},15000);
+    fetch('https://formsubmit.co/ajax/educationalverse2027@gmail.com',{method:'POST',body:data,headers:{Accept:'application/json'},signal:ctrl.signal})
+      .then(function(r){return r.json().catch(function(){return {};}).then(function(j){if(!r.ok)throw new Error(j.message||'failed');return j;});})
+      .then(function(){st.style.color='var(--teal)';st.textContent='Thanks! Your message has been sent to EduVerse Support.';$('#cMsg').value='';})
+      .catch(function(){st.style.color='var(--warn)';st.textContent='We could not send this automatically. Use "Or open your email app" below; your message is ready there.';})
+      .then(function(){clearTimeout(tm);btn.disabled=false;btn.textContent='Send to EduVerse Support →';});
+  });
 
   /* hero */
   var stop=EV.mountHero($('#scene'));
@@ -238,14 +275,14 @@ TAB.notes=function(o,b){
   var notes=EV.notesOf(o),openI=EV.openNote!=null?EV.openNote:0;EV.openNote=null;
   var h='<div class="hd"><div><h2 class="h2" style="margin:0;font-size:1.7rem">'+esc(o.s.name)+' notes</h2><p class="sub" style="margin-top:6px">'+(o.deep?'Expanded edition: '+notes.length+' detailed sections.':notes.length+' short-note sections covering the syllabus.')+' Mark a section as learned when you could teach it back from memory.</p></div><span class="pill ok">Free</span></div>';
   if(o.res&&o.res.detailed)h+='<div class="libGroup" style="margin-top:18px"><h3>📚 Full study book</h3>'+o.res.detailed.map(EV.pdfRow).join('')+'</div>';
-  h+='<div class="stack" style="margin-top:20px">'+notes.map(function(nt,i){var k=o.ref+'#n'+i,dn=ST.topicsDone.indexOf(k)>=0;return '<details class="note'+(dn?' done':'')+'" data-n="'+i+'"'+(i===openI?' open':'')+'><summary><span class="nn">'+String(i+1).padStart(2,'0')+'</span><b>'+esc(EV.strip(nt.t))+'</b>'+(dn?'<span class="pill ok">Learned</span>':'')+'<span class="chev" aria-hidden="true">›</span></summary><div class="nb"><div class="rich">'+nt.b+'</div><div class="row"><button class="btn sm '+(dn?'ok':'gold')+'" type="button" data-learn="'+i+'">'+(dn?'✓ Learned':'Mark as learned · +50 XP')+'</button><button class="btn sm teal" type="button" data-nask="'+i+'">Ask Knovo about this section</button></div></div></details>';}).join('')+'</div>';
+  h+='<div class="stack" style="margin-top:20px">'+notes.map(function(nt,i){var k=o.ref+'#n'+i,dn=ST.topicsDone.indexOf(k)>=0;return '<details class="note'+(dn?' done':'')+'" data-n="'+i+'"'+(i===openI?' open':'')+'><summary><span class="nn">'+String(i+1).padStart(2,'0')+'</span><b>'+esc(EV.strip(nt.t))+'</b>'+(dn?'<span class="pill ok">Learned</span>':'')+'<span class="chev" aria-hidden="true">›</span></summary><div class="nb"><div class="rich">'+nt.b+'</div><div class="row"><button class="btn sm '+(dn?'ok':'gold')+'" type="button" data-learn="'+i+'">'+(dn?'✓ Learned':'Mark as learned')+'</button><button class="btn sm teal" type="button" data-nask="'+i+'">Ask Knovo about this section</button></div></div></details>';}).join('')+'</div>';
   b.innerHTML=h;
   function seen(i){var k=o.ref+'#n'+i;if(ST.notesSeen.indexOf(k)<0){ST.notesSeen.push(k);EV.save();}}
   seen(openI);
   $$('.note',b).forEach(function(d){d.addEventListener('toggle',function(){if(d.open){seen(+d.dataset.n);EV.ctxExtra='Reading notes section: '+EV.strip(notes[+d.dataset.n].t);}});});
   if(openI>0){var t=$('.note[data-n="'+openI+'"]',b);if(t)setTimeout(function(){t.scrollIntoView({behavior:'smooth',block:'start'})},60);}
   b.addEventListener('click',function(e){
-    var l=e.target.closest('[data-learn]');if(l){var i=+l.dataset.learn,on=EV.completeTopic(o.ref+'#n'+i,o.ref);l.className='btn sm '+(on?'ok':'gold');l.textContent=on?'✓ Learned':'Mark as learned · +50 XP';l.closest('.note').classList.toggle('done',on);return;}
+    var l=e.target.closest('[data-learn]');if(l){var i=+l.dataset.learn,on=EV.completeTopic(o.ref+'#n'+i,o.ref);l.className='btn sm '+(on?'ok':'gold');l.textContent=on?'✓ Learned':'Mark as learned';l.closest('.note').classList.toggle('done',on);return;}
     var a=e.target.closest('[data-nask]');if(a){var nt=notes[+a.dataset.nask];EV.askKnovo('Explain the key ideas in "'+EV.strip(nt.t)+'" simply, then give me one exam-style question to check I understood.','Notes section: '+EV.strip(nt.t));}
   });
 };
@@ -265,7 +302,7 @@ TAB.cards=function(o,b){
   if(o.db)o.db.chapters.forEach(function(c){c.topics.forEach(function(t){(t.cards||[]).forEach(function(x,i){topic.push({q:x.q,a:x.a,key:'db:'+t.id+'#c'+i});});});});
   var kn=ST.kdeck.filter(function(c){return c.ref===o.ref}).map(function(c,i){return {q:c.q,a:c.a,key:'kn:'+c.t+'#'+i}});
   var decks=[['Subject cards',subj]];if(topic.length)decks.push(['All topic cards',topic]);if(kn.length)decks.push(['From Knovo chats',kn]);
-  var h='<div class="hd"><div><h2 class="h2" style="margin:0;font-size:1.7rem">Flashcards</h2><p class="sub" style="margin-top:6px">Flip, then be honest. "Again" sends a card back to level 0; "Got it" moves it up a level. +3 XP per card.</p></div></div>';
+  var h='<div class="hd"><div><h2 class="h2" style="margin:0;font-size:1.7rem">Flashcards</h2><p class="sub" style="margin-top:6px">Flip, then be honest. "Again" sends a card back to level 0; "Got it" moves it up a level.</p></div></div>';
   if(decks.length>1)h+='<div class="row" id="dk" style="margin-top:16px">'+decks.map(function(d,i){return '<button class="btn sm'+(i?'':' gold')+'" type="button" data-dk="'+i+'">'+d[0]+' ('+d[1].length+')</button>';}).join('')+'</div>';
   h+='<div id="deckHost" style="margin-top:12px"></div>';
   b.innerHTML=h;
@@ -290,11 +327,13 @@ TAB.technique=function(o,b){
   b.innerHTML=h;
 };
 TAB.library=function(o,b){
-  var h='<h2 class="h2" style="margin:0;font-size:1.7rem">PDF library</h2><p class="sub">Original EduVerse practice resources for '+esc(o.s.name)+' '+esc(o.s.code)+'. PDFs open from your public GitHub repository in a new tab.</p>';
+  var h='<h2 class="h2" style="margin:0;font-size:1.7rem">PDF library</h2><p class="sub">Original EduVerse practice resources for '+esc(o.s.name)+' '+esc(o.s.code)+'. PDFs open in a new tab.</p>';
   if(!o.res){h+='<div class="empty" style="margin-top:20px"><b>PDFs for this subject are being prepared</b><span>Notes, flashcards and questions are ready now.</span><a class="btn gold sm" href="#notes-'+o.slug+'">Open notes</a></div>';b.innerHTML=h;return;}
   var cats=RESCAT.filter(function(c){return o.res[c[0]]&&o.res[c[0]].length});
   Object.keys(o.res).forEach(function(k){if(!RESCAT.some(function(c){return c[0]===k}))cats.push([k,k]);});
-  h+='<div class="stack" style="margin-top:20px;gap:26px">'+cats.map(function(c){return '<div class="libGroup"><h3>'+esc(c[1])+' <span class="pill">'+o.res[c[0]].length+'</span></h3>'+o.res[c[0]].map(EV.pdfRow).join('')+'</div>';}).join('')+'</div>';
+  /* Same rule as the live site: topical banks and tests are part of EduVerse Pro */
+  var pro=EVLive.isPro(),PRO_CATS={topical:1,tests:1,mixed:1,assess:1};
+  h+='<div class="stack" style="margin-top:20px;gap:26px">'+cats.map(function(c){var locked=PRO_CATS[c[0]]&&!pro;return '<div class="libGroup"><h3>'+esc(c[1])+' <span class="pill">'+o.res[c[0]].length+'</span>'+(PRO_CATS[c[0]]?' <span class="pill gold">Pro</span>':'')+'</h3>'+(locked?'<div class="empty" style="padding:18px"><b>🔒 Part of EduVerse Pro</b><span>Topical question banks and topic tests are included with EduVerse Pro. Sales have not opened yet; early-access Pro accounts keep their access.</span>'+(ST.profile?'':'<a class="btn gold sm" href="#signin">Sign in</a>')+'</div>':o.res[c[0]].map(EV.pdfRow).join(''))+'</div>';}).join('')+'</div>';
   b.innerHTML=h;
 };
 TAB.tools=function(o,b){
@@ -338,7 +377,7 @@ V.topic=function(el,r){
   EV.ctxExtra='';EV.touchRecent(o.ref);
   var side='<nav class="tside" aria-label="Topics">'+m.chapters.map(function(cc){return '<h4>'+esc(cc.name)+'</h4>'+cc.topics.map(function(tt){var id=tt.id.toLowerCase().replace(/[^a-z0-9]/g,'');return '<a href="#topic-'+id+'" class="'+(tt===t?'on ':'')+(ST.topicsDone.indexOf('db:'+tt.id)>=0?'dn':'')+'"><i></i>'+esc(tt.name)+'</a>';}).join('');}).join('')+'</nav>';
   var h='<div class="in page"><a class="crumb" href="#topics-'+o.slug+'">← Mathematics 4024 topics</a><div class="topicLayout" style="margin-top:14px">'+side+'<div class="stack" style="gap:26px">';
-  h+='<div class="pageHead" style="padding:0"><span class="eyebrow"><b>'+esc(c.name)+'</b> · topic learning page</span><h1 style="font-size:clamp(1.8rem,4vw,2.8rem)">'+esc(t.name)+'</h1><div class="row"><button class="btn '+(done?'ok':'gold')+'" type="button" id="tDone">'+(done?'✓ Topic complete':'Mark topic complete · +50 XP')+'</button><button class="btn teal" type="button" data-ask="Teach me this topic step by step, then quiz me.">Ask Knovo to teach this</button></div></div>';
+  h+='<div class="pageHead" style="padding:0"><span class="eyebrow"><b>'+esc(c.name)+'</b> · topic learning page</span><h1 style="font-size:clamp(1.8rem,4vw,2.8rem)">'+esc(t.name)+'</h1><div class="row"><button class="btn '+(done?'ok':'gold')+'" type="button" id="tDone">'+(done?'✓ Topic complete':'Mark topic complete')+'</button><button class="btn teal" type="button" data-ask="Teach me this topic step by step, then quiz me.">Ask Knovo to teach this</button></div></div>';
   if(t.obj)h+='<section class="tsec"><h3>🎯 Learning objectives</h3><ul class="tlist">'+t.obj.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></section>';
   if(t.simple)h+='<section class="tsec"><h3>💡 The simple version</h3><div class="simple">'+esc(t.simple)+'</div></section>';
   if(t.detail)h+='<section class="tsec"><h3>📖 In detail</h3><div class="card rich">'+t.detail+'</div></section>';
@@ -355,6 +394,6 @@ V.topic=function(el,r){
   h+='</div></div></div>';
   el.innerHTML=h;
   if(t.cards&&t.cards.length)EV.deck($('#tDeck'),t.cards.map(function(x,i){return {q:x.q,a:x.a,key:'db:'+t.id+'#c'+i}}),t.name);
-  $('#tDone').addEventListener('click',function(){var on=EV.completeTopic(key,o.ref);this.className='btn '+(on?'ok':'gold');this.textContent=on?'✓ Topic complete':'Mark topic complete · +50 XP';var a=$('.tside a.on');if(a)a.classList.toggle('dn',on);});
+  $('#tDone').addEventListener('click',function(){var on=EV.completeTopic(key,o.ref);this.className='btn '+(on?'ok':'gold');this.textContent=on?'✓ Topic complete':'Mark topic complete';var a=$('.tside a.on');if(a)a.classList.toggle('dn',on);});
 };
 })();
