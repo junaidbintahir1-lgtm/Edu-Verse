@@ -1,0 +1,16 @@
+EDUVERSE — NEW ORBIT DESIGN
+===========================
+
+1. Unzip this folder.
+2. Double-click index.html. That's the new black 3D orbit design.
+3. Sign in with your EduVerse account (or create one on the sign-in page).
+
+What's in here:
+- index.html, core.js, views.js, views2.js, menu.js, live.js : the new design
+- data/snapshot.js : your subjects, notes, flashcards and questions (a copy of the live site's data)
+- resources/, notes/ : the PDFs
+- database-update.sql : run once in Supabase (SQL Editor) to switch on effort-only XP, seasons and the leaderboard choice
+- HANDOFF.md : how everything works
+
+Note: this copy carries a snapshot of your data. The version on GitHub
+(branch claude/new-design, folder new-design/) reads the live index.html directly instead.
