@@ -64,6 +64,7 @@ document.addEventListener('click',function(e){
 });
 document.addEventListener('click',function(e){var f=e.target.closest('[data-fav]');if(!f)return;e.preventDefault();e.stopPropagation();var on=EV.toggleFav(f.dataset.fav);f.classList.toggle('on',on);f.textContent=on?'♥':'♡';f.setAttribute('aria-pressed',on);EV.toast(on?'❤️ Liked. Find it in the ☰ menu':'Removed from liked subjects');},true);
 
+EV.greeting=function(){return greeting();};
 function greeting(){var h=new Date().getHours();return h<12?'Good morning':h<17?'Good afternoon':'Good evening';}
 function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
 
@@ -81,20 +82,9 @@ V.home=function(el){
   var subjN=EV.SUBJ.filter(function(o){return !o.soon}).length,pdfN=0,cardN=0;
   EV.SUBJ.forEach(function(o){pdfN+=EV.pdfCount(o);cardN+=(o.s.flash||[]).length;});
   if(EV.BYREF['olevel/math4024'].db)EV.BYREF['olevel/math4024'].db.chapters.forEach(function(c){c.topics.forEach(function(t){cardN+=(t.cards||[]).length;});});
-  var tags=[['olevel/phys5054',0],['olevel/chem5070',0],['olevel/math4024',0],['olevel/bio5090',0],['alevel/m9709',1],['alevel_edx/edx_chem_ych11',1],['alevel/eco9708',1]];
-  var name=ST.profile?ST.profile.name:'future achiever';
-  var h='<div class="hero"><div class="in"><div class="heroCopy">'+
-    '<span class="eyebrow"><b>Cambridge</b> O Level · IGCSE · A Level · <b>Pearson</b> Edexcel IAL</span>'+
-    '<span class="greet">'+greeting()+', '+esc(name)+'.</span>'+
-    '<h1>Your whole <span class="g">syllabus</span>,<br><span class="o">in orbit.</span></h1>'+
-    '<p class="lead">Short notes, full study books, question banks, flashcards and timed mocks for every subject, with free core revision and clearly marked Pro material. When you get stuck, Knovo explains it on the same page.</p>'+
-    '<form class="ask" id="heroAsk" autocomplete="off"><img src="assets/knovo-logo.png" alt="Knovo"><label for="heroQ" class="sr">Ask Knovo</label><input id="heroQ" placeholder="Ask Knovo: why does copper form at the cathode?"><button type="submit">Ask</button></form>'+
-    '<div class="chips"><button type="button" data-ask="Mark my answer: I will paste a question and my answer next.">Mark my answer</button><button type="button" data-ask="Make 5 flashcards on moments for Physics 5054.">Make flashcards</button><button type="button" data-ask="Explain electrolysis like I\'m revising tonight.">Explain a topic</button><button type="button" data-ask="Plan my revision for the next 4 weeks. Ask me my subjects and exam dates first.">Plan my revision</button></div>'+
-    '<div class="row"><a class="btn gold" href="#qualifications">📚 Start studying</a>'+(ST.profile?'<a class="btn" href="#dashboard">My dashboard</a>':'<a class="btn" href="#signin">✦ Sign in / Join free</a>')+'</div>'+
-    '<div class="heroFacts"><div><b>'+subjN+'</b><span>subjects across 3 boards</span></div><div><b>'+pdfN+'</b><span>PDF study resources</span></div><div><b>'+cardN+'</b><span>flashcards</span></div></div>'+
-    '</div><div class="scene" id="scene" aria-hidden="true"><div class="fallbackOrb"></div>'+
-    tags.map(function(t){var o=EV.BYREF[t[0]];return o?'<a class="tagSub'+(t[1]?' t':'')+'" href="#overview-'+o.slug+'" tabindex="-1"><span class="ti" aria-hidden="true">'+o.s.icon+'</span>'+esc(o.s.name)+' <span class="code">'+esc(o.s.code.split(' / ').pop())+'</span></a>':'';}).join('')+
-    '<div class="orbitKey"><span><i></i>O Level &amp; IGCSE orbit</span><span class="t"><i></i>A Level &amp; Edexcel orbit</span><span class="k">✦ Knovo</span></div></div></div></div>';
+  var qN=0,notesN=0;EV.SUBJ.forEach(function(o){if(o.soon)return;qN+=EV.allQuestions(o).length;notesN+=EV.notesOf(o).length;});
+  var st={subjN:subjN,pdfN:pdfN,cardN:cardN,notesN:notesN,qN:qN};
+  var h=EV.heroHTML(st)+EV.tickerHTML(st)+EV.statsHTML(st);
 
   h+='<div class="in"><section class="sect"><span class="eyebrow">Step 1 · <b>Choose your qualification</b></span><h2>Pick your qualification, then your subject.</h2><p class="sub">Each shelf holds the subjects for that qualification, with their paper patterns, notes and PDF libraries. Cambridge and Edexcel are ready now; IELTS, SAT and ACT are coming soon.</p><div class="quals" id="worlds">';
   EV.LEVELS.forEach(function(L){h+=EV.qualCard(L);});
@@ -158,7 +148,7 @@ V.home=function(el){
   });
 
   /* hero */
-  var stop=EV.mountHero($('#scene'));
+  var stop=EV.mountHero($('#hero2'),st);
   $('#heroAsk').addEventListener('submit',function(e){e.preventDefault();var i=$('#heroQ');EV.askKnovo(i.value||i.placeholder.replace('Ask Knovo: ',''));i.value='';});
   if(EV.fine&&!EV.reduce)$$('.qual').forEach(function(c){c.addEventListener('mousemove',function(e){var r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transform='rotateY('+(x*6)+'deg) rotateX('+(-y*5)+'deg) translateY(-3px)';});c.addEventListener('mouseleave',function(){c.style.transform='';});});
   /* week dots */

@@ -27,6 +27,8 @@ Google Fonts, the contact-form service (formsubmit.co) and, for photo scans, Tes
 | `eduverse-app.html` | Page shell and **all CSS** (design tokens on `:root`), top bar, ☰ drawer, bell, Knovo side sheet, Knovo plans modal |
 | `live.js` | **Every real connection** (`window.EVLive`): Supabase sign-in / sign-up / refresh / sign-out, Knovo edge function, XP ledger + leaderboard sync, leaderboard choice, seasons, owner tools, photo text reader, the live site's saved progress |
 | `core.js` | `window.EV`: live data loading, saved progress + the bridge to the live site, effort-only XP, router + members-only gate, Knovo engine (`EV.knovoAsk`, `EV.kSend`, `EV.kFlash`), Markdown, side sheet, 3D hero |
+| `hero.js` | **Home hero**: 4-slide slideshow (`EV.heroHTML`), the real Earth in WebGL, floating formula / equation / quote / fact cards, ticker and stats band. Defines `EV.mountHero` |
+| `tex/` | Earth textures used by `hero.js` (see the licence note in section 8) |
 | `views.js` | Home (with the Contact section), qualification shelves, level pages, subject hub tabs (PDF library with the Pro lock), Maths topic engine |
 | `views2.js` | Dashboard, technique, mistakes, mock, papers, ranks + seasons, **admin**, Knovo workspace, about, sign in / create account, ideas |
 | `menu.js` | ☰ side menu (plan, leaderboard switch, Instagram sneak peeks, owner admin link), notifications bell, text size |
@@ -117,5 +119,13 @@ season-end test with the clock set to August 2027.
 
 - Colours come from the two logos: **gold = EduVerse actions, teal = Knovo only**, navy for depth, true-black ground.
 - Fonts: Bricolage Grotesque (headings), Inter (text), JetBrains Mono (syllabus codes).
-- One 3D moment per screen: knowledge planet (home hero), book shelves (qualifications), star map (subject overview), flip cards (quiz and flashcards).
+- One 3D moment per screen: the Earth (home hero), book shelves (qualifications), star map (subject overview), flip cards (quiz and flashcards).
 - Honest labels: estimates are marked "indicative", payments say "coming soon", and original practice is not presented as official papers.
+
+## 8. The home hero (hero.js)
+
+- **Earth:** a custom three.js shader (day map, night city lights, ocean sun-glint, clouds, atmosphere glow). Each slide turns the globe to a region; visitors can drag to rotate.
+- **Cards:** content pools are in `hero.js` (`FORMULAS`, `CHEMS`, `QUOTES`, `FACTS`, `ELEMENTS`). Cards that would overlap are hidden automatically. The "Your progress" card shows the real streak and XP (`EV.shownXP`).
+- **Accuracy rule:** quotes must be word-for-word with a named source; facts and equations must be checkable.
+- **Fallbacks:** without WebGL the page shows a flat CSS Earth. With reduced-motion settings there is no autoplay.
+- **Earth image licence — confirm before launch:** the four files in `tex/` came from the open-source three-globe package and look like NASA Blue Marble data, but their original licence was not confirmed. Before launch, re-download the originals from NASA Visible Earth (public domain), replace the files in `tex/`, and update the footer credit.
