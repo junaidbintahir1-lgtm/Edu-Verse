@@ -11,7 +11,7 @@ This repository is the static EduVerse website (no build step).
 - `resources/`, `notes/` — PDF study resources.
 - `HANDOFF.md` — how everything works, file by file.
 - `database-update.sql` — the one-time Supabase setup (Admin page → "Copy the setup code").
-- `ctrl-panel-x94k.html` and `admin-database-setup.txt` — the owner dashboard and its setup.
+- `admin-database-setup.txt` — the first-time owner setup (already done on the live project).
 
 Nothing is on sale on the site and it takes no payments. Topical past papers are EduVerse Pro, which only
 the owner can give (Admin → Gift EduVerse Pro).

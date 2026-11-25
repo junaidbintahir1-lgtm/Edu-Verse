@@ -38,8 +38,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 | `data/pastpapers.js` | `EV_PASTPAPERS`: past-paper question bank (still empty; the schema is in the file) |
 | `data/extra.js` | `EV_EXTRA`: exam command words and the home-page FAQ |
 | `sw.js`, `manifest.webmanifest` | Offline support and "install app". The worker is **network-first**, so updates always show at once; bump `CACHE` in `sw.js` only if you change how it works |
-| `signin.html` | A small forwarder: old links and the owner dashboard's `?next=` link land on the sign-in page inside `index.html` |
-| `ctrl-panel-x94k.html` | The owner dashboard (students, purchases, roles, XP resets, two-step owner check). Unchanged |
+| `signin.html` | A small forwarder: old links land on the sign-in page inside `index.html` |
 | `admin-database-setup.txt` | One-time Supabase setup for the owner dashboard and the owner check (run before `database-update.sql`; already done on the live project) |
 | `database-update.sql` | **The one database setup file. Run once in Supabase** (safe to run again): XP table and effort-only XP rules, leaderboard choice, seasons, mystery rewards, owner tools, and Gift Pro. Admin has a "Copy the setup code" button for it |
 | `vendor/` | Three.js r128 and its licence |
@@ -108,9 +107,13 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   **Server features**: four lines (XP leaderboard, seasons and rewards, leaderboard choice, Gift Pro) that
   show ✓ On once `database-update.sql` has been run. Until then the card shows the steps with two buttons:
   "Copy the setup code" and "Open Supabase".
-- **Owner dashboard (`ctrl-panel-x94k.html`):** a separate, older page for the deeper tools: the list of
-  students, purchases recorded in the database, roles (co-owners) and XP resets, behind a two-step owner
-  check. When signed out it sends the owner through `signin.html?next=…` and back.
+- **Owner security:** the Admin page and every owner server function need two things: the owner (or
+  co-owner) role, checked in the database, and the **owner code**, a 6-digit code from the owner's
+  authenticator app (Supabase MFA; the session becomes `aal2`). `adminCodeLock` in `views2.js` asks for the
+  code (and sets the app up the first time); `eduverse_admin_code_ok()` in `database-update.sql` enforces it
+  on the server, so a stolen password alone can do nothing. Admin also holds the **Students** list (search,
+  Reset XP, make / remove co-owner). Only the owner can change roles, and nobody can be made a second owner.
+  The old separate page `ctrl-panel-x94k.html` was removed; these tools replace it.
 - **Contact:** the home page ends with the Contact EduVerse section. It sends through formsubmit.co to
   educationalverse2027@gmail.com, with an email-app fallback.
 
@@ -118,7 +121,8 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 
 1. Run the database setup once: Admin → "Server features" → **Copy the setup code** → **Open Supabase** →
    paste → Run. (It is the file `database-update.sql`; tested on PostgreSQL 16, safe to run twice.) Admin
-   should then show ✓ On for all four lines, and Gift Pro starts working.
+   should then show ✓ On for all five lines, and Gift Pro and the Students list start working.
+   Run it again after any update to `database-update.sql`.
 2. In Admin, set the three mystery rewards for Season 2027-H1 before it ends on 30 June 2027.
 3. Decide whether **topic tests** stay Pro (they are, as "topical" material) and whether solved/practice
    **questions** should also be Pro (this design keeps them open because the Questions tab, daily quiz and
