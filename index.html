@@ -896,7 +896,7 @@ body.signedOut #nav,body.signedOut #subjPick,body.signedOut #dock,body.signedOut
 @media(max-width:380px){.tabbar a{font-size:.6rem}.brand span{font-size:1rem}}
 
 /* ---------- signed-out page: preview + no duplicate Sign in button ---------- */
-body.onSignin #signBtn{display:none}
+body.onSignin #signBtn,body.signedOut #signBtn{display:none} /* members-only site: a signed-out visitor is always on the sign-in form */
 .signGrid{grid-template-areas:"intro form" "peek form";align-items:start}
 .signIntro{grid-area:intro}.signForm{grid-area:form;align-self:center}.peek{grid-area:peek}
 .peek{display:grid;gap:12px;min-width:0}
