@@ -83,10 +83,19 @@ L.signIn=function(email,password){
   email=String(email||"").trim();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return Promise.resolve({ok:false,error:"Please sign in with your email address."});
   return authPost("/auth/v1/token?grant_type=password",{email:email,password:String(password||"")}).then(function(x){
-    if(x.ok&&x.d&&x.d.access_token){storeSession(x.d,email);OWNER=null;XP.status="idle";return {ok:true,user:L.user()};}
-    return {ok:false,error:friendlyAuth(x.d&&(x.d.error_description||x.d.msg||x.d.message))};
+    if(x.ok&&x.d&&x.d.access_token){storeSession(x.d,email);OWNER=null;XP.status="idle";
+      /* a suspended account is signed straight out again */
+      return L.accountState().then(function(st){if(st&&st.banned){L.signOut();return {ok:false,banned:true,error:L.banText(st.reason)};}return {ok:true,user:L.user()};});}
+    var raw=x.d&&(x.d.error_description||x.d.msg||x.d.message)||"";
+    if(/banned/i.test(raw))return {ok:false,banned:true,error:L.banText("")};
+    return {ok:false,error:friendlyAuth(raw)};
   });
 };
+/* ---- Suspended accounts. The owner (or a developer) can ban an account in the owner site. ---- */
+L.banText=function(reason){return "This account has been suspended"+(reason?": "+reason:".")+" If you think this is a mistake, write to "+(L.SUPPORT_EMAIL||"educationalverse2027@gmail.com")+".";};
+/* {banned, reason} for the signed-in account, or null when it cannot be checked (offline, or not set up yet) */
+L.accountState=function(){if(!L.hasSession())return Promise.resolve(null);
+  return rpc("eduverse_account_state",{}).then(function(r){r=Array.isArray(r)?r[0]:r;return r?{banned:r.banned===true,reason:r.reason||""}:null;}).catch(function(){return null;});};
 /* Create an account: the same Supabase sign-up and the same rules as signin.html */
 var BANNED=["admin","administrator","eduverse","official","support","moderator","mod","staff","owner","cambridge","edx","hitler","nazi","isis","terror","fuck","shit","bitch","cunt","pussy","whore","slut","nigger","nigga","faggot","rape","rapist","porn","xxx","bastard","bloody","motherfucker","asshole","vagina","penis","boobs","retard","kike","chink","pedo","molest","incest","suicide","kys","jizz","wanker","twat","prick","dildo","clit","nude","nudes","hentai","nsfw","pedophile"];
 var RISKY=["ass","hoe","gay","lesbian","homo","sex","cum","dick","cock","anal","paki"];
@@ -280,6 +289,9 @@ L.educatorStatus=function(){
 L.educatorApply=function(f){return rpc("eduverse_teacher_apply",{p_school:f.school,p_city:f.city,p_subjects:f.subjects,p_school_email:f.schoolEmail,p_contact_name:f.contactName,p_contact:f.contact});};
 L.adminTeacherRequests=function(){return setupAware(rpc("eduverse_admin_teacher_requests",{}));};
 L.adminTeacherDecide=function(userId,approve,note,plan){return setupAware(rpc("eduverse_admin_teacher_decide",{p_user_id:userId,p_approve:!!approve,p_note:note||"",p_plan:plan||""}));};
+L.adminBan=function(userId,reason){return setupAware(rpc("eduverse_admin_ban",{p_user_id:userId,p_reason:reason||""}));};
+L.adminUnban=function(userId){return setupAware(rpc("eduverse_admin_unban",{p_user_id:userId}));};
+L.adminBanList=function(){return setupAware(rpc("eduverse_admin_ban_list",{}));};
 L.adminMakeCoowner=function(email){return setupAware(rpc("eduverse_admin_make_coowner",{p_email:email}));};
 /* students: list, wipe XP, co-owner role */
 L.adminStudents=function(){return setupAware(rpc("eduverse_admin_students_list",{}));};
@@ -332,6 +344,7 @@ L.askKnovo=function(opts){
     }).then(function(r){
       clearTimeout(timer);
       return r.json().catch(function(){return null;}).then(function(d){
+        if(r.status===403&&d&&d.error==="ACCOUNT_SUSPENDED"){clearAuth();throw kErr("banned");}
         if(r.status===401||r.status===403){clearAuth();throw kErr("auth");}
         if(r.status===429&&d&&d.error==="LIMIT_REACHED"){var ms=Number(d.msLeft)||0,cr=d.credits||null;
           /* credits: a big action (a Live Lesson) can be refused while small ones still fit */

@@ -60,12 +60,16 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 - **Educators:** in Create account the role list is "a Student" / "an Educator (teacher)". Choosing Educator
   shows extra fields (school, city, subjects, school email, a school contact) which travel in the sign-up
   metadata. It grants nothing by itself. `#educator` (`V.educator` in `views2.js`) shows the request: a personal
-  code such as `EV-7K2Q9M` and three ways to prove it by email (an email from the school address, a photo of a
+  request sent to the owner (who is also emailed through formsubmit.co), a "we check in about 24 hours"
+  message, and, as an optional faster route, a personal code such as `EV-7K2Q9M` with three ways to prove it by email (an email from the school address, a photo of a
   staff card with the handwritten code, or a photo of a Cambridge / Pearson teacher account with the code).
   The owner approves or rejects in the private owner site; approval lasts 12 months and shows a "Verified
   Educator" badge in the menu (`EVLive.isEducator`, cached in `ev_educator`). Server functions:
   `eduverse_teacher_status`, `eduverse_teacher_apply`, and for the owner `eduverse_admin_teacher_requests`,
   `eduverse_admin_teacher_decide`.
+- **Banned accounts:** the owner site can ban an account. When the site opens it calls
+  `eduverse_account_state` (`EVLive.accountState`); a banned account is signed out and the sign-in page shows
+  the reason and the support email. Sign-in is refused the same way, and Knovo answers `ACCOUNT_SUSPENDED`.
 - **Sign-in:** Supabase email + password through `live.js`, stored under `ev_auth_token`, `ev_auth_refresh`,
   `ev_auth_expires` and `ev_auth_user`. Sign-up keeps the classic
   site's fields and username rules. Tokens renew silently.

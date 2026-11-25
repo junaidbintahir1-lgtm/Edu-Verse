@@ -325,6 +325,7 @@ EV.knovoErr=function(e){
   var c=e&&e.code;
   if(c==='limit')return 'You have used your Knovo credits. They refill in '+LV.fmtWait(e.msLeft||0)+'. Get more with Knovo Plus or a top-up pack.';
   return {auth:'Please sign in again to keep using Knovo.',
+    banned:LV.banText(''),
     network:'Knovo could not be reached. Check your internet connection and try again.',
     timeout:'Knovo took too long to answer. Please try again.',
     server:'Knovo is very busy right now. Please try again in a minute.',
@@ -481,6 +482,7 @@ EV.kSend=function(conv,text,att){
     if(e&&e.code==='cancelled'){md.innerHTML='<span class="muted small">Stopped.</span>';return;}
     if(e&&e.code==='noText'){md.innerHTML='<p class="muted small">No clear printed text was found in what you sent. Try a sharper, well-lit photo of printed text, or type the question.</p>';return;}
     if(e&&e.code==='limit'){a.remove();limitBubble(conv.log,e.msLeft||0,e.credits);return;}
+    if(e&&e.code==='banned'){EV.banMsg=LV.banText('');ST.profile=null;EV.save();EV.paintProfile();EV.closeSheet&&EV.closeSheet();EV.render();return;}
     if(e&&e.code==='auth'){EV.syncProfile();EV.paintProfile();md.innerHTML='<p class="muted small">Your session has expired. <a href="#signin" data-close-sheet>Sign in again</a> to keep using Knovo.</p>';return;}
     md.innerHTML='<p class="muted small">'+esc(EV.knovoErr(e))+'</p>';})
   .then(function(){conv.busy=false;if(conv.onBusy)conv.onBusy(false);if(conv.onDone)conv.onDone();conv.log.scrollTop=conv.log.scrollHeight;});
@@ -562,6 +564,8 @@ EV.boot=function(){
     LV.getSession().then(function(sess){
       if(!sess){if(ST.profile){ST.profile=null;EV.paintProfile();EV.render();}return;}
       LV.checkOwner().then(function(){EV.paintProfile();if(/^(subject|knovo|papers|paperSubj|admin)$/.test(EV.route.name))EV.render();EV.refreshPlan();});
+      /* a suspended account is signed out wherever it is still open */
+      LV.accountState().then(function(st){if(st&&st.banned){EV.banMsg=LV.banText(st.reason);LV.signOut();ST.profile=null;EV.save();EV.paintProfile();EV.render();}});
       var eu=LV.user();if(eu&&eu.role==='teacher')LV.educatorStatus().then(function(){if(EV.route.name==='educator')EV.render();}).catch(function(){});
     });
     var sp=$('#subjPick');
