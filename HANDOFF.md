@@ -112,7 +112,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   Only a scrambled copy is stored (`admin_entry`); it is never in this repository or in the browser. Five
   wrong tries lock that account's entry for 15 minutes; the pass lasts 12 hours and is tied to one sign-in.
   `adminCodeLock` in `views2.js` is the screen; `eduverse_admin_code_ok()` in `database-update.sql` enforces
-  it on the server. Admin also holds the **Students** list (search, Reset XP, make a co-owner by email or
+  it on the server. Admin also holds the **Students** list (search, Reset XP, make a developer (stored as `co-owner`) by email or
   from the list). Only the owner can change roles or the entry password; nobody can be made a second owner;
   co-owners never see the owner's or other co-owners' names and emails.
   The old separate page `ctrl-panel-x94k.html` was removed; these tools replace it.
