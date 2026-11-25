@@ -299,7 +299,7 @@ V.knovo=function(el){
     '<div class="kmain"><div class="khead"><img src="assets/knovo-logo-sm.png" alt=""><div><b>Knovo</b><span class="s">EduVerse study tutor</span></div><div class="modes" id="kModes">'+MODES.map(function(m){return '<button type="button" data-mode="'+m[0]+'" class="'+(cur.mode===m[0]?'on':'')+'">'+m[1]+'</button>';}).join('')+'</div></div>'+
     '<div class="log" id="klog" aria-live="polite"></div>'+
     '<div class="compose"><div class="kCred" id="kCred"></div><div class="pv" id="kPv" hidden></div><form id="kform" autocomplete="off"><button class="att" type="button" id="kAtt" title="Attach up to 5 photos, or a zip (10 MB at most)" aria-label="Attach photos or a zip">📎</button><input type="file" id="kFile" accept="image/*,.zip,.txt,.md,.csv" multiple hidden><label for="kq" class="sr">Message Knovo</label><textarea id="kq" rows="1" placeholder="Ask anything about your syllabus…"></textarea><button class="stop" type="button" id="kStop" hidden>Stop</button><button class="send" type="submit" id="kSend">Send</button></form></div></div>'+
-    '<aside class="kctx" aria-label="Context"><div class="mini" style="margin-top:0"><small>Knovo Pro</small>No credit limit on messages, scans, images and Live Lessons. <button class="btn sm teal" type="button" data-plans style="justify-self:start">See plans</button></div><div id="kKnowWrap" hidden><h4>Knovo is reading</h4><div class="kv" id="kKnow"></div></div>'+
+    '<aside class="kctx" aria-label="Context"><div class="mini" style="margin-top:0"><small>Knovo Plus</small>1,500 credits a month with no daily limit, or add a 300-credit top-up pack. <button class="btn sm teal" type="button" data-plans style="justify-self:start">See plans</button></div><div id="kKnowWrap" hidden><h4>Knovo is reading</h4><div class="kv" id="kKnow"></div></div>'+
     '<h4>Your Knovo access</h4><div class="kv" id="kAllow"></div>'+
     '<h4>Your Knovo deck</h4><div id="kDeck"></div><div class="aiNote" id="kAi"></div></aside></div></div>';
   el.innerHTML=h;
@@ -317,19 +317,22 @@ V.knovo=function(el){
     else conv.turns.forEach(function(t){if(t.role==='user')EV.kBubble(log,'u','',t.content);else EV.kBubble(log,'a',EV.md(t.content));});}
   function paintList(){$('#kList').innerHTML=ST.chats.length?ST.chats.map(function(c){return '<div class="s'+(c.id===cur.id?' on':'')+'"><button class="o" type="button" data-open="'+c.id+'" title="'+esc(c.title)+'">'+esc(c.title)+'</button><button class="x" type="button" data-del="'+c.id+'" aria-label="Delete chat">×</button></div>';}).join(''):'<p class="small muted" style="padding:6px">Your chats will be saved here.</p>';}
   function paintKnow(){var o=cur.ref?EV.BYREF[cur.ref]:null,acc=o?EV.accuracy(o.ref):null;$('#kKnow').innerHTML=o?'<div><span>Subject</span><b>'+esc(o.s.name)+'</b></div><div><span>Code</span><b class="code">'+esc(o.s.code)+'</b></div><div><span>Notes it reads</span><b>'+EV.notesOf(o).length+' sections</b></div><div><span>Your accuracy</span><b>'+(acc?acc.pct+'%':'—')+'</b></div>':'';$('#kKnowWrap').hidden=!o;}
-  function paintAllow(){var a=EV.allowance();
-    $('#kAllow').innerHTML='<div><span>Plan</span><b>'+esc(EV.planLabel())+'</b></div>'+
-      (a.unlimited?'<div><span>Credits</span><b>Unlimited</b></div>':
-       a.blockedFor?'<div><span>Credits</span><b style="color:var(--warn)">Refill in '+esc(EVLive.fmtWait(a.blockedFor))+'</b></div>':
-       '<div><span>Credits today</span><b>'+(a.left==null?a.daily+' a day':a.left+' / '+a.daily)+'</b></div>')+
-      (a.unlimited?'':'<div><span>Message</span><b>1 credit</b></div><div><span>Live Lesson</span><b>10 credits</b></div><div><span>Image</span><b>10 credits</b></div>')+
-      '<p class="small muted" style="margin:0">'+(a.unlimited?'Your plan has no credit limit.':'Free accounts get '+a.daily+' Knovo credits every day. EduVerse\'s server keeps count, so it is the same on every device.')+'</p>';
-    var cl=$('#kCred');if(cl)cl.textContent=a.unlimited?'':a.blockedFor?'Credits refill in '+EVLive.fmtWait(a.blockedFor):(a.left==null?a.daily+' credits a day':a.left+' of '+a.daily+' credits left today');}
+  function paintAllow(){var a=EV.allowance(),C=EVLive.CREDIT_COSTS,n=function(x){return Number(x).toLocaleString('en-US');};
+    var bal=a.unlimited?'<div><span>Credits</span><b>Unlimited (owner)</b></div>':
+      a.paid?'<div><span>Credits '+(a.type==='season'?'on your pass':'this month')+'</span><b>'+(a.left==null?n(a.poolSize):n(a.left)+' / '+n(a.poolSize))+'</b></div>'+(a.poolResetsAt?'<div><span>'+(a.type==='season'?'Valid until':'Refills on')+'</span><b>'+esc(EV.fmtDay(a.poolResetsAt))+'</b></div>':''):
+      a.blockedFor&&!a.topupLeft?'<div><span>Credits today</span><b style="color:var(--warn)">Refill in '+esc(EVLive.fmtWait(a.blockedFor))+'</b></div>':
+      '<div><span>Credits today</span><b>'+(a.left==null?a.daily+' a day':a.left+' / '+a.daily)+'</b></div>';
+    $('#kAllow').innerHTML='<div><span>Plan</span><b>'+esc(EV.planLabel())+'</b></div>'+bal+
+      (a.topupLeft?'<div><span>Top-up credits</span><b>+ '+n(a.topupLeft)+'</b></div>':'')+
+      (a.unlimited?'':'<div><span>Message</span><b>'+C.chat+' credit</b></div><div><span>Live Lesson</span><b>'+C.whiteboard+' credits</b></div><div><span>Image</span><b>'+C.image+' credits</b></div>')+
+      '<p class="small muted" style="margin:0">'+(a.unlimited?'The owner account is not charged credits.':a.paid?'Your plan credits are a pool with no daily limit. Top-up credits are used after them.':'Free accounts get '+a.daily+' Knovo credits every day. EduVerse\'s server keeps count, so it is the same on every device.')+'</p>';
+    var cl=$('#kCred');if(cl)cl.textContent=a.unlimited?'':(!a.paid&&a.blockedFor&&!a.topupLeft?'Credits refill in '+EVLive.fmtWait(a.blockedFor):EV.creditLine(a));}
   function paintDeck(){var d=ST.kdeck;$('#kDeck').innerHTML=d.length?'<div class="mini"><small>'+d.length+' cards</small><b>'+esc(d[d.length-1].q)+'</b><span class="muted">'+esc(d[d.length-1].a)+'</span></div><button class="btn sm" type="button" id="kPlay" style="justify-self:start">Practise deck</button>':'<p class="small muted">Press "Make flashcards" under any answer to save cards here.</p>';var p=$('#kPlay');if(p)p.addEventListener('click',function(){playDeck();});}
   function paintAi(){$('#kAi').innerHTML='Knovo is EduVerse\'s study tutor. It reads this subject\'s EduVerse notes and paper pattern, but it can make mistakes, so check important facts against your syllabus.';}
   function playDeck(){var host=document.createElement('div');log.innerHTML='';log.appendChild(host);EV.deck(host,ST.kdeck.map(function(c,i){return {q:c.q,a:c.a,key:'kn:'+c.t+'#'+i}}),'Knovo deck');var back=document.createElement('button');back.className='btn sm';back.type='button';back.textContent='← Back to chat';back.style.alignSelf='center';back.addEventListener('click',paintLog);log.appendChild(back);}
   EV.onDeckChange=paintDeck;EV.onKnovoUsage=function(){paintAllow();};
   paintLog();paintList();paintKnow();paintAllow();paintDeck();paintAi();
+  if(!EVLive.lastUsage)EVLive.loadCredits().then(function(u){if(u&&$('#kAllow'))paintAllow();});
   var att=null;
   function paintAtt(notes){var pv=$('#kPv');if(!pv)return;var n=att?att.images.length+att.texts.length:0;
     if(!n&&!(notes&&notes.length)){pv.hidden=true;pv.innerHTML='';return;}

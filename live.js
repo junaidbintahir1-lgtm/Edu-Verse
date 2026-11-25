@@ -253,6 +253,9 @@ L.adminSetRewardOption=function(season,slot,title,details){return setupAware(rpc
 L.adminMarkDelivered=function(id,done){return setupAware(rpc("eduverse_admin_mark_reward_delivered",{p_id:id,p_delivered:!!done}));};
 /* gift Pro: by email, or straight to a season winner; days 0 = until the owner removes it */
 L.adminGiftPro=function(email,days){return setupAware(rpc("eduverse_admin_gift_pro",{p_email:email,p_days:days||0}));};
+/* plan: "monthly" | "season" | "annual"; days 0 = the plan's usual length (30 / 120 / 365) */
+L.adminGiftPlan=function(email,plan,days){return setupAware(rpc("eduverse_admin_gift_plan",{p_email:email,p_plan:plan,p_days:days||0}));};
+L.adminGiftTopup=function(email){return setupAware(rpc("eduverse_admin_gift_topup",{p_email:email,p_credits:300}));};
 L.adminGiftWinner=function(rewardId,days){return setupAware(rpc("eduverse_admin_gift_pro_to_winner",{p_reward_id:rewardId,p_days:days||0}));};
 L.adminRemovePro=function(userId){return setupAware(rpc("eduverse_admin_remove_pro",{p_user_id:userId}));};
 L.adminProList=function(){return setupAware(rpc("eduverse_admin_pro_list",{}));};
@@ -271,10 +274,27 @@ L.sqlEditorUrl="https://supabase.com/dashboard/project/"+SUPA_URL.replace(/^http
 
 /* =============================== Knovo =============================== */
 function setChatBlocked(ms){lsSet("knovo_chat_blocked_until",String(Date.now()+Math.max(60000,ms||0)));}
-L.chatBlockedFor=function(){if(L.isKnovoPro())return 0;return Math.max(0,Number(lsGet("knovo_chat_blocked_until")||"0")-Date.now());};
-L.lastUsage=null; /* {plan, remaining, credits:{left,daily,cost,resetMs}} from the server's last reply */
-L.CREDIT_COSTS={chat:1,lesson_qa:1,whiteboard:10,image:10}; /* shown to students; the server decides the real cost */
-L.DAILY_CREDITS=100;
+L.chatBlockedFor=function(){if(L.isOwner())return 0;return Math.max(0,Number(lsGet("knovo_chat_blocked_until")||"0")-Date.now());};
+/* Knovo credits. 1 credit = 1 normal message. The server keeps the real count; these numbers are for display.
+   Free: DAILY_CREDITS a day. Paid plans: a pool (PLAN_POOL) with no daily cap. Top-up credits are used last.
+   L.lastUsage = {plan, remaining, credits:{plan:"free"|"monthly"|"season"|"annual", left, daily, cost, resetMs,
+                  poolLeft, poolSize, poolResetsAt, topupLeft}} from the server's last reply or from loadCredits(). */
+L.lastUsage=null;
+L.CREDIT_COSTS={chat:1,lesson_qa:1,whiteboard:10,image:3};
+L.DAILY_CREDITS=20;
+L.PLAN_POOL={monthly:1500,annual:1500,season:5000};
+L.PLAN_NAMES={monthly:"Knovo Plus Monthly",season:"Exam Season Pass",annual:"Knovo Plus Annual"};
+/* the balance before the first message of a visit (needs the eduverse_my_credits server function) */
+L.loadCredits=function(){
+  if(!L.hasSession()||L.isOwner())return Promise.resolve(null);
+  return rpc("eduverse_my_credits",{}).then(function(r){r=Array.isArray(r)?r[0]:r;if(!r||typeof r.my_plan!=="string"||r.daily_left==null)return null;
+    var paid=r.my_plan&&r.my_plan!=="free",left=paid?Number(r.pool_left)||0:Number(r.daily_left)||0,top=Number(r.topup_left)||0;
+    var resetMs=paid?(r.pool_resets_at?Math.max(0,Date.parse(r.pool_resets_at)-Date.now()):0):(r.daily_resets_at?Math.max(0,Date.parse(r.daily_resets_at)-Date.now()):0);
+    L.lastUsage={plan:paid?"pro":"free",remaining:left+top,credits:{plan:r.my_plan||"free",left:left,daily:Number(r.daily_size)||L.DAILY_CREDITS,cost:0,resetMs:resetMs,
+      poolLeft:paid?left:null,poolSize:paid?Number(r.pool_size)||0:null,poolResetsAt:paid?(r.pool_resets_at||null):null,topupLeft:top}};
+    if(left+top>0)lsDel("knovo_chat_blocked_until");
+    return L.lastUsage;}).catch(function(){return null;});
+};
 function kErr(code,extra){var e=new Error(code);e.code=code;if(extra)for(var k in extra)e[k]=extra[k];return e;}
 function replyText(d){
   var parts=(d&&d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts)||[];
@@ -300,7 +320,9 @@ L.askKnovo=function(opts){
         if(r.status===401||r.status===403){clearAuth();throw kErr("auth");}
         if(r.status===429&&d&&d.error==="LIMIT_REACHED"){var ms=Number(d.msLeft)||0,cr=d.credits||null;
           /* credits: a big action (a Live Lesson) can be refused while small ones still fit */
-          if(cr){L.lastUsage={plan:"free",remaining:cr.left,credits:{left:cr.left,daily:cr.daily,cost:0,resetMs:ms}};if(cr.left<1)setChatBlocked(ms);}else setChatBlocked(ms);
+          if(cr){var paid=cr.plan&&cr.plan!=="free",top=Number(cr.topupLeft)||0,own=Math.max(0,(Number(cr.left)||0)-top);
+            L.lastUsage={plan:paid?"pro":"free",remaining:cr.left,credits:{plan:cr.plan||"free",left:own,daily:cr.daily||L.DAILY_CREDITS,cost:0,resetMs:ms,poolLeft:paid?own:null,poolSize:paid?(cr.poolSize||null):null,poolResetsAt:cr.poolResetsAt||null,topupLeft:top}};
+            if(cr.left<1)setChatBlocked(ms);}else setChatBlocked(ms);
           throw kErr("limit",{msLeft:ms,credits:cr});}
         if(!r.ok)throw kErr("server",{detail:(d&&d.error&&(d.error.message||d.error))||("HTTP "+r.status)});
         if(d&&d.usage)L.lastUsage=d.usage;

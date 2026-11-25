@@ -41,6 +41,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 | `signin.html` | A small forwarder: old links land on the sign-in page inside `index.html` |
 | `vendor/` | Three.js r128 and its licence |
 | `assets/` | `eduverse-logo.png`, `knovo-logo-sm.png`, and `eduverse-social.png` (the picture shown when the site link is shared) |
+| `server-changes/knovo-credits.md` | The by-hand Supabase steps for Knovo plans and credits: the SQL, the edge-function logic and the cost log |
 | `resources/`, `notes/` | The PDFs listed in `EV_RESOURCES` |
 
 ## 3. How it works
@@ -78,11 +79,21 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   season standings. After a season ends, the top 3 by season XP each pick one of three mystery rewards that the
   owner sets in Admin. Server functions: `eduverse_season_board`, `eduverse_my_season_reward`,
   `eduverse_claim_season_reward`.
-- **Knovo credits:** free accounts get 100 credits a day (message 1, Live Lesson question 1, Live Lesson 10,
-  image 10, +1 for a very long message). The Knovo server counts them (`credits_used`,
-  `credits_window_start` in `user_limits`) and returns `usage.credits`; the numbers are constants at the top of
-  the edge function. Pro and the owner are not charged. If the two columns are missing the server falls back to
-  the old per-feature limits.
+- **Knovo credits:** 1 credit = 1 normal message. Costs: message 1 (+1 if very long), Live Lesson question 1,
+  Live Lesson 10, image 3 (`EVLive.CREDIT_COSTS`). **Free** accounts get 20 credits a day
+  (`EVLive.DAILY_CREDITS`), refilled 24 hours after the first use. **Paid plans** have a pool with no daily
+  limit: Knovo Plus Monthly and Annual 1,500 a month, Exam Season Pass 5,000 for 120 days
+  (`EVLive.PLAN_POOL`). **Top-up** credits (300 per pack, valid 12 months) are spent after the daily or plan
+  credits. Only the owner is unlimited. The Knovo server does the counting and returns
+  `usage.credits = {plan, left, daily, cost, resetMs, poolLeft, poolSize, poolResetsAt, topupLeft}`, kept in
+  `EVLive.lastUsage`; `EVLive.loadCredits()` reads the same balance from `eduverse_my_credits` before the
+  first message. `EV.allowance()` and `EV.creditLine()` in `core.js` turn it into the text students see.
+  The server steps (SQL and edge function) are in `server-changes/knovo-credits.md`.
+- **Knovo plans window** (`#plans` in `index.html`): Free, Knovo Plus Monthly, Exam Season Pass ("Best for
+  exams"), Knovo Plus Annual and the Top-up pack. Each price is written twice on the element
+  (`data-pkr`, `data-usd`); `EV.paintPrices` shows rupees when the browser's time zone is Asia/Karachi or
+  its language is Urdu, dollars otherwise, and the two buttons at the top switch by hand. Every paid button
+  is disabled and says "Not on sale yet".
 - **Knovo attachments:** up to 5 photos, text files, or one zip, 10 MB at most (`EV.readAttachments` in
   `core.js`). Photos are read with the in-browser scanner; a zip is opened in the browser and only its photos
   and text files are used.
@@ -105,14 +116,15 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   in `views2.js`) next to the interactive timed papers. `EVLive.isPro()` is true for the owner, for accounts
   the owner gave Pro to, and for old early-access accounts (`ev_state_v1.plan.tier === "pro"`). This is a
   display lock; the PDF files are still public in the repository.
-- **No purchases:** nothing is on sale and there is no checkout code anywhere. Price tags for paper folders
-  were removed; the Knovo plans window shows the planned plans with every button disabled ("Not on sale
-  yet"). The only way to get Pro is a gift from the owner.
-- **Gift Pro:** Admin → "Gift EduVerse Pro": type the student's sign-up email, choose how long (30 days to
-  1 year, or no end date), press Give Pro. It sets `user_limits.plan = 'pro'` (and `pro_until`), which the
-  Knovo server already treats as unlimited. The student sees "You now have EduVerse Pro" next time they open
-  the site (`EVLive.loadPlan` → `eduverse_my_plan`, cached in `ev_plan`). The same card lists every Pro
-  account with a Remove button, and season winners have a one-press "Give Pro" button.
+- **No purchases:** nothing is on sale and there is no checkout code anywhere. The Knovo plans window shows
+  the plans and prices with every paid button disabled ("Not on sale yet"). A plan or a top-up reaches a
+  student only when the owner gives it.
+- **Paid plans and gifts:** every paid plan sets `user_limits.plan = 'pro'` (with `pro_until`), which opens
+  the topical material, plus `plan_type` (monthly / season / annual) and a credit pool for Knovo. In the
+  private owner site, "Gift a plan or credits" takes the student's email, a plan and a length, and has a
+  "Give 300 top-up credits" button (`EVLive.adminGiftPlan`, `EVLive.adminGiftTopup`). Accounts gifted Pro
+  before plans existed, and season winners given Pro, get the Knovo Plus Monthly allowance. The student sees
+  "You now have EduVerse Pro" next time they open the site (`EVLive.loadPlan` → `eduverse_my_plan`).
 - **Admin (`#admin`):** owner and co-owner only (checked on the server with `eduverse_is_admin`). Site counts,
   Gift Pro, season reward options, winners and their choices, "mark delivered", the Students list, leaderboard snapshot, messages, and
   **Server features**: five lines (XP leaderboard, seasons and rewards, leaderboard choice, Gift Pro, students and roles) that
@@ -144,7 +156,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 
 | Item | Status |
 |---|---|
-| Payments | Switched off on purpose (no payment account is linked). No checkout code exists; Pro is given only by the owner in Admin |
+| Payments | Switched off on purpose (no payment account is linked). No checkout code exists; plans and top-ups are given only by the owner |
 | Email links | After a student confirms their email or asks for a password reset, Supabase sends them back to the site with a token in the address. Nothing reads that token yet, so they must sign in by hand, and a reset password cannot be set on the site |
 | Light theme | Black only |
 | Paid PDFs | Display lock only; real protection needs private storage (e.g. Cloudflare R2) and signed links |

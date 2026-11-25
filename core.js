@@ -167,7 +167,7 @@ EV.syncToLive=function(){
 
 /* ---------------- Who is signed in (real Supabase session from live.js) ---------------- */
 EV.syncProfile=function(){var u=LV.user();if(!u){ST.profile=null;return;}var LS=LV.liveState();ST.profile={name:(ST.profile&&ST.profile.email===u.email&&ST.profile.name)||u.name||LS.profileName||u.email.split('@')[0]||'Student',email:u.email};};
-EV.planLabel=function(){if(LV.isOwner())return '👑 Owner · unlimited';if(LV.isPro()){var u=LV.proUntil();return '⭐ EduVerse Pro'+(u?' · until '+new Date(u).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'');}return LV.isKnovoPro()?'✦ Knovo Pro':'🌱 Free plan';};
+EV.planLabel=function(){if(LV.isOwner())return '👑 Owner · unlimited';if(LV.isPro()){var u=LV.proUntil(),pc=LV.lastUsage&&LV.lastUsage.credits,pn=pc&&LV.PLAN_NAMES[pc.plan];return '⭐ '+(pn||'Knovo Plus')+(u?' · until '+new Date(u).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'');}return '🌱 Free plan';};
 /* read the account's plan from the server; say so when Pro has just arrived (a gift from the owner) */
 EV.refreshPlan=function(){return LV.loadPlan().then(function(p){EV.paintProfile();if(p.gained&&!LV.isOwner())EV.toast('🎁 You now have EduVerse Pro!');if(p.gained||/^(subject|knovo|papers|paperSubj)$/.test(EV.route.name||''))EV.render();return p;});};
 EV.signOut=function(){LV.signOut();ST.profile=null;EV.save();EV.paintProfile();EV.toast('Signed out. Your study progress stays saved on this device.');EV.render();};
@@ -323,7 +323,7 @@ EV.knovoAsk=function(turns,opts){
 };
 EV.knovoErr=function(e){
   var c=e&&e.code;
-  if(c==='limit')return 'Free Knovo limit reached. Knovo unlocks again in '+LV.fmtWait(e.msLeft||0)+'. Knovo Pro removes this wait.';
+  if(c==='limit')return 'You have used your Knovo credits. They refill in '+LV.fmtWait(e.msLeft||0)+'. Get more with Knovo Plus or a top-up pack.';
   return {auth:'Please sign in again to keep using Knovo.',
     network:'Knovo could not be reached. Check your internet connection and try again.',
     timeout:'Knovo took too long to answer. Please try again.',
@@ -386,7 +386,21 @@ EV.readAttachments=function(files,already){
   return chain.then(function(){return out;});
 };
 function attCount(att){return att?(att.images?att.images.length:0)+(att.texts?att.texts.length:0):0;}
-EV.allowance=function(){var u=LV.lastUsage||{},unl=LV.isKnovoPro()||u.remaining==='unlimited',c=u.credits||null;return {unlimited:unl,left:unl?null:(c?c.left:(typeof u.remaining==='number'?u.remaining:null)),daily:c?c.daily:LV.DAILY_CREDITS,credits:!!c,resetMs:c?c.resetMs:0,blockedFor:LV.chatBlockedFor(),plan:u.plan||null};};
+/* Only the owner is unlimited. Free = a daily balance; paid plans = a pool with no daily cap; top-ups are extra. */
+EV.allowance=function(){var u=LV.lastUsage||{},unl=LV.isOwner(),c=u.credits||null,type=c&&c.plan&&c.plan!=='free'?c.plan:(LV.isPro()&&!unl?'monthly':'free'),paid=type!=='free';
+  return {unlimited:unl,paid:paid,type:type,known:!!c,
+    left:unl?null:(c?(paid?c.poolLeft:c.left):(typeof u.remaining==='number'?u.remaining:null)), /* an older server sends only "remaining" */
+    daily:(c&&c.daily)||LV.DAILY_CREDITS,
+    poolSize:paid?((c&&c.poolSize)||LV.PLAN_POOL[type]):null,
+    poolResetsAt:paid&&c?c.poolResetsAt:null,
+    topupLeft:c?Number(c.topupLeft)||0:0,
+    resetMs:c?c.resetMs:0,blockedFor:LV.chatBlockedFor(),plan:u.plan||null};};
+EV.fmtDay=function(d){return d?new Date(d).toLocaleDateString(undefined,{day:'numeric',month:'short'}):'';};
+/* one line of credit text, e.g. "17 / 20 credits today" or "1,420 / 1,500 credits this month, refills on 3 Jan" */
+EV.creditLine=function(a){a=a||EV.allowance();if(a.unlimited)return 'Unlimited (owner)';var n=function(x){return Number(x).toLocaleString('en-US');},t='';
+  if(a.paid){t=(a.left==null?n(a.poolSize):n(a.left)+' / '+n(a.poolSize))+(a.type==='season'?' credits on your pass'+(a.poolResetsAt?', until '+EV.fmtDay(a.poolResetsAt):''):' credits this month'+(a.poolResetsAt?', refills on '+EV.fmtDay(a.poolResetsAt):''));}
+  else t=(a.left==null?a.daily+' credits a day':a.left+' / '+a.daily+' credits today');
+  return t+(a.topupLeft?' + '+n(a.topupLeft)+' top-up credits':'');};
 
 /* Safe Markdown → HTML for AI answers */
 EV.md=function(src){
@@ -419,7 +433,7 @@ EV.kBubble=function(log,role,html,raw){
   else{d.textContent=raw||'';}
   log.appendChild(d);log.scrollTop=log.scrollHeight;return d;
 };
-function limitBubble(log,ms,cr){EV.kBubble(log,'sys',(cr&&cr.left>0?'<b>Not enough credits for this.</b> It needs '+cr.need+' and you have '+cr.left+' left today.':'<b>You have used today\'s Knovo credits.</b>')+' Your credits refill in <b>'+esc(LV.fmtWait(ms))+'</b>. Knovo Pro has no credit limit. <div class="row" style="justify-content:center;margin-top:8px"><button class="btn sm teal" type="button" data-plans>See Knovo Pro</button></div>');}
+function limitBubble(log,ms,cr){EV.kBubble(log,'sys',(cr&&cr.left>0?'<b>Not enough credits for this.</b> It needs '+cr.need+' and you have '+cr.left+' left.':(cr&&cr.plan&&cr.plan!=='free'?'<b>You have used your plan\'s Knovo credits.</b>':'<b>You have used today\'s Knovo credits.</b>'))+(ms?' Your credits refill in <b>'+esc(LV.fmtWait(ms))+'</b>.':'')+' Get more with Knovo Plus or a top-up pack. <div class="row" style="justify-content:center;margin-top:8px"><button class="btn sm teal" type="button" data-plans>See plans</button></div>');}
 /* Send one message in a conversation.
    conv: {turns:[], log:Element, mode?, onDone?}  text: string
    att: {images:[File], texts:[{name,text}]} from EV.readAttachments, or one photo File */
@@ -492,6 +506,7 @@ EV.kFlash=function(conv){
 /* Delegated clicks for Knovo actions anywhere on the page */
 document.addEventListener('click',function(e){
   var t=e.target.closest('[data-plans]');if(t){e.preventDefault();EV.openPlans();return;}
+  t=e.target.closest('[data-cur]');if(t){e.preventDefault();EV.paintPrices(t.dataset.cur==='pkr');return;}
   t=e.target.closest('[data-close]');if(t&&t.closest('.modal')){t.closest('.modal').hidden=true;return;}
   t=e.target.closest('[data-close-sheet]');if(t){EV.closeSheet();return;}
   t=e.target.closest('[data-ask]');if(t){e.preventDefault();EV.askKnovo(t.dataset.ask,t.dataset.askExtra);return;}
@@ -499,7 +514,12 @@ document.addEventListener('click',function(e){
   t=e.target.closest('[data-k]');if(t){var conv=t.closest('#sheet')?SHEET:(EV.wsConv||SHEET);EV.kSend(conv,t.dataset.k);return;}
   t=e.target.closest('[data-kflash]');if(t){var conv2=t.closest('#sheet')?SHEET:(EV.wsConv||SHEET);EV.kFlash(conv2);return;}
 });
-EV.openPlans=function(){var m=$('#plans');m.hidden=false;var x=m.querySelector('.x');if(x)x.focus();};
+/* Prices: rupees for visitors in Pakistan (browser time zone Asia/Karachi, or Urdu as the language), US dollars elsewhere. */
+EV.inPakistan=function(){try{var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';if(tz==='Asia/Karachi')return true;}catch(e){}
+  var l=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'']);for(var i=0;i<l.length;i++)if(/^ur\b/i.test(l[i]||''))return true;return false;};
+EV.paintPrices=function(pk){pk=pk==null?EV.inPakistan():pk;$$('[data-pkr]').forEach(function(e){e.textContent=pk?e.dataset.pkr:e.dataset.usd;});var c=$('#plansCur');if(c)c.textContent=pk?'Prices in Pakistani rupees':'Prices in US dollars';
+  $$('[data-cur]').forEach(function(b){b.classList.toggle('on',(b.dataset.cur==='pkr')===pk);});};
+EV.openPlans=function(){EV.paintPrices();var m=$('#plans');m.hidden=false;var x=m.querySelector('.x');if(x)x.focus();};
 $('#plans').addEventListener('click',function(e){if(e.target.id==='plans')e.currentTarget.hidden=true;});
 
 /* Side sheet */

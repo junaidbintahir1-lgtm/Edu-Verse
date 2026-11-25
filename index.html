@@ -795,9 +795,10 @@ body.inKnovo .dock,body.inMock .dock{display:none}
 .scrim.on{opacity:1;pointer-events:auto}
 .modal{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;padding-top:calc(20px + env(safe-area-inset-top,0px));padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,.7);overflow:auto}
 .modal[hidden]{display:none!important}
-.modalBox{width:min(1080px,100%);border-radius:24px;border:1px solid var(--tealline);background:radial-gradient(600px 300px at 20% 0%,rgba(47,224,205,.12),transparent 70%),#06090b;padding:28px;display:grid;gap:18px;position:relative}
+.modalBox{width:min(1240px,100%);border-radius:24px;border:1px solid var(--tealline);background:radial-gradient(600px 300px at 20% 0%,rgba(47,224,205,.12),transparent 70%),#06090b;padding:28px;display:grid;gap:18px;position:relative}
 .modalBox .x{position:absolute;top:14px;right:14px;border:1px solid var(--rim);background:transparent;border-radius:10px;width:36px;height:36px;font-size:1.1rem}
-.plans{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.plans{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+@media(max-width:1180px){.plans{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .plan{padding:18px;border-radius:16px;border:1px solid var(--rim);background:var(--deck);display:flex;flex-direction:column;gap:8px}
 .plan.best{border-color:var(--tealline);background:rgba(47,224,205,.06)}
 .plan .pr{font-family:var(--display);font-size:1.9rem;font-weight:800;line-height:1}
@@ -935,7 +936,7 @@ body.onSignin #signBtn{display:none}
     <div class="tbR">
       <button class="bellBtn" id="bellBtn" type="button" aria-label="Notifications" aria-controls="bellDrop" aria-expanded="false"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="bellBadge" id="bellBadge" hidden>0</span></button>
       <a class="xpChip" href="#dashboard" id="xpChip" title="Your XP">⭐ <span id="xpNum">0 XP</span></a>
-      <button class="proBtn" type="button" data-plans>✦ Knovo Pro</button>
+      <button class="proBtn" type="button" data-plans>✦ Knovo Plus</button>
       <a class="btn gold sm" href="#signin" id="signBtn">Sign in</a>
     </div>
   </div>
@@ -978,17 +979,19 @@ body.onSignin #signBtn{display:none}
   <div class="modalBox">
     <button class="x" type="button" data-close aria-label="Close">×</button>
     <div class="stack" style="gap:8px">
-      <span class="eyebrow"><b class="k">✦ Knovo AI plans</b> · Global USD</span>
-      <h2 id="plansT" style="font-size:clamp(1.7rem,3.6vw,2.6rem);font-weight:800;line-height:1.05">Study without the wait.</h2>
-      <p class="muted">More chats, more photo scans, unlimited follow-ups and Live Lessons through exam season. These are the planned Pro plans. <b>Nothing is on sale yet:</b> EduVerse takes no payments, so these plans cannot be bought.</p>
+      <span class="eyebrow"><b class="k">✦ Knovo plans</b> · <span id="plansCur">Prices in US dollars</span></span>
+      <h2 id="plansT" style="font-size:clamp(1.7rem,3.6vw,2.6rem);font-weight:800;line-height:1.05">More Knovo, when you need it.</h2>
+      <p class="muted">1 credit = 1 Knovo message. A Live Lesson costs 10 credits and an image 3. Every paid plan also opens the topical past papers. <b>Nothing is on sale yet:</b> EduVerse takes no payments, so these plans cannot be bought.</p>
+      <div class="seg" role="group" aria-label="Currency" style="justify-self:start"><button type="button" data-cur="pkr">Rs · Pakistan</button><button type="button" data-cur="usd" class="on">$ · Other countries</button></div>
     </div>
     <div class="plans">
-      <div class="plan"><span class="eyebrow">Knovo Free</span><b>Built-in tutor</b><div class="pr">Free</div><ul><li>Saved chats on this device</li><li>Photo and voice tools</li><li>100 credits every day</li><li>Message 1 · Live Lesson 10 · Image 10</li></ul><a class="btn" href="#knovo" data-close>Use Knovo free</a></div>
-      <div class="plan"><span class="eyebrow">Monthly</span><b>Knovo Pro Monthly</b><div class="pr">$3.50 <small>/ month</small></div><span class="small muted">Standard later: $5.25/month</span><ul><li>2,000 messages per month</li><li>100 photo scans per month</li><li>Parallel replies and unlimited follow-ups</li><li>Planned mock review and essay feedback</li></ul><button class="btn" type="button" disabled>Not on sale yet</button></div>
-      <div class="plan best"><span class="eyebrow">4 months · Exam season</span><b>Exam Season Pass</b><div class="pr">$10.50 <small>one-time</small></div><span class="small muted">About $2.63/month · save 25%</span><ul><li>6,000 messages across the season</li><li>300 photo scans</li><li>No automatic renewal</li></ul><button class="btn" type="button" disabled>Not on sale yet</button></div>
-      <div class="plan"><span class="eyebrow">12 months · Best value</span><b>Knovo Pro Annual</b><div class="pr">$28 <small>/ year</small></div><span class="small muted">About $2.33/month · save 33%</span><ul><li>Unlimited fair-use messages</li><li>1,000 photo scans per year</li><li>One payment for the school year</li></ul><button class="btn" type="button" disabled>Not on sale yet</button></div>
+      <div class="plan"><span class="eyebrow">Knovo Free</span><b>Built-in tutor</b><div class="pr">Free</div><ul><li>20 credits every day</li><li>Resets every 24 hours</li><li>Photos, zips and voice tools</li></ul><a class="btn" href="#knovo" data-close>Use Knovo free</a></div>
+      <div class="plan"><span class="eyebrow">Monthly</span><b>Knovo Plus Monthly</b><div class="pr"><span data-pkr="Rs 799" data-usd="$2.99">$2.99</span> <small>/ month</small></div><ul><li>1,500 credits a month</li><li>Use them on any day: no daily limit</li><li>Topical past papers included</li></ul><button class="btn" type="button" disabled>Not on sale yet</button></div>
+      <div class="plan best"><span class="eyebrow">4 months · Best for exams</span><b>Exam Season Pass</b><div class="pr"><span data-pkr="Rs 2,199" data-usd="$7.99">$7.99</span> <small>one-time</small></div><ul><li>5,000 credits in total</li><li>Usable for 120 days</li><li>No automatic renewal</li><li>Topical past papers included</li></ul><button class="btn" type="button" disabled>Not on sale yet</button></div>
+      <div class="plan"><span class="eyebrow">12 months</span><b>Knovo Plus Annual</b><div class="pr"><span data-pkr="Rs 5,499" data-usd="$24.99">$24.99</span> <small>/ year</small></div><ul><li>1,500 credits a month</li><li>Refilled each month for 12 months</li><li>Topical past papers included</li></ul><button class="btn" type="button" disabled>Not on sale yet</button></div>
+      <div class="plan"><span class="eyebrow">Extra credits</span><b>Top-up pack</b><div class="pr"><span data-pkr="Rs 249" data-usd="$0.99">$0.99</span></div><ul><li>300 credits</li><li>Valid for 12 months</li><li>Used after your daily or plan credits</li><li>Works with any plan, including Free</li></ul><button class="btn" type="button" disabled>Not on sale yet</button></div>
     </div>
-    <p class="small muted">Savings compare launch prices: 4 × $3.50 = $14 and 12 × $3.50 = $42. AI feedback is study guidance, not an official examination grade.</p>
+    <p class="small muted">Knovo's answers are study guidance, not an official examination grade.</p>
   </div>
 </div>
 

@@ -105,7 +105,7 @@ V.home=function(el){
   h+='<section class="sect"><span class="eyebrow">Meet <b class="k">Knovo</b></span><div class="kshow"><div class="orbWrap" aria-hidden="true"><div class="orbit3d"><span class="o2"></span><span class="o1"></span><img src="assets/knovo-logo-sm.png" alt=""></div></div><div>'+
     '<h2 class="h2" style="margin-top:0">A tutor that knows <em>which page you\'re on.</em></h2><p class="sub">Open Knovo from any note, question or mock. It already knows the subject and topic and reads the EduVerse notes for it, so you can just ask "why?"</p>'+
     '<div class="kfeat"><div><b>Mark my answer</b><span>Paste an answer and get marks point by point against mark-scheme style criteria.</span></div><div><b>Scan a question</b><span>Photograph a question and get a worked solution.</span></div><div><b>Live Lessons</b><span>A guided lesson that checks you understood each part.</span></div><div><b>Chat to flashcards</b><span>Turn any explanation into a flashcard deck in one tap.</span></div></div>'+
-    '<div class="row" style="margin-top:20px"><a class="btn teal" href="#knovo">Open the Knovo workspace →</a><button class="btn ghost" type="button" data-plans>See Knovo Pro plans</button></div></div></div></section>';
+    '<div class="row" style="margin-top:20px"><a class="btn teal" href="#knovo">Open the Knovo workspace →</a><button class="btn ghost" type="button" data-plans>See Knovo plans</button></div></div></div></section>';
 
   h+='<section class="sect"><span class="eyebrow">Questions students ask</span><h2>Frequently asked questions</h2><div class="faq">'+EV.D.extra.faq.map(function(f){return '<details><summary>'+esc(f.q)+'</summary><p>'+esc(f.a)+'</p></details>';}).join('')+'</div></section>';
 
