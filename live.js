@@ -50,34 +50,6 @@ function refresh(){
   return refreshing;
 }
 L.refresh=refresh;
-/* ---- Owner code: a 6-digit code from the owner's authenticator app (Supabase MFA, level "aal2").
-   The server refuses every owner tool without it (database-update.sql, eduverse_admin_code_ok). ---- */
-function jwtClaim(t,k){try{return JSON.parse(atob(String(t).split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))[k];}catch(e){return null;}}
-L.codePassed=function(){return jwtClaim(lsGet("ev_auth_token")||"","aal")==="aal2";};
-function authCall(method,path,body){
-  return L.getSession().then(function(s){
-    if(!s){var e=new Error("Your session has expired. Please sign in again.");e.status=401;throw e;}
-    return fetch(SUPA_URL+"/auth/v1"+path,{method:method,headers:{apikey:SUPA_KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined})
-      .catch(function(){throw new Error("Could not connect. Check your internet and try again.");})
-      .then(function(r){return r.json().catch(function(){return null;}).then(function(d){
-        if(!r.ok){var e=new Error(d&&(d.msg||d.message||d.error_description||d.error)||("Request failed ("+r.status+")"));e.status=r.status;throw e;}
-        return d||{};});});
-  });
-}
-/* the owner's authenticator apps: {ready:[ids that work], pending:[ids started but never finished]} */
-L.codeFactors=function(){return authCall("GET","/user").then(function(u){var f=(u&&u.factors)||[],t=f.filter(function(x){return (x.factor_type||"totp")==="totp";});
-  return {ready:t.filter(function(x){return x.status==="verified";}).map(function(x){return x.id;}),pending:t.filter(function(x){return x.status!=="verified";}).map(function(x){return x.id;})};});};
-/* first time only: returns {id, secret, qr} to add EduVerse to an authenticator app */
-L.codeSetup=function(){
-  return L.codeFactors().then(function(f){return Promise.all(f.pending.map(function(id){return authCall("DELETE","/factors/"+id).catch(function(){});}));})
-    .then(function(){return authCall("POST","/factors",{factor_type:"totp",friendly_name:"EduVerse owner "+Date.now()});})
-    .then(function(d){var t=d.totp||{};return {id:d.id,secret:t.secret||"",qr:t.qr_code||""};});
-};
-/* check a 6-digit code; on success the session is upgraded (the new tokens replace the old ones) */
-L.codeVerify=function(factorId,code){
-  return authCall("POST","/factors/"+factorId+"/challenge",{}).then(function(c){return authCall("POST","/factors/"+factorId+"/verify",{challenge_id:c.id,code:String(code)});})
-    .then(function(d){if(!d.access_token)throw new Error("That code was not accepted. Try the newest code.");storeSession(d);return L.codePassed();});
-};
 /* A fresh, unexpired access token, renewed silently with the stored refresh token. null = signed out. */
 L.getSession=function(){
   var a=stored();if(!a.access)return Promise.resolve(null);
@@ -278,7 +250,7 @@ function setupAware(p){return p.catch(function(e){var missing=e.status===404||e.
 L.seasonBoard=function(){return setupAware(rpc("eduverse_season_board",{}));};
 L.mySeasonReward=function(){return setupAware(rpc("eduverse_my_season_reward",{})).then(one);};
 L.claimSeasonReward=function(slot){return setupAware(rpc("eduverse_claim_season_reward",{p_slot:slot})).then(one);};
-/* owner tools (each server function checks the owner role AND the owner code itself) */
+/* owner tools (each server function checks the role AND the entry password itself) */
 L.adminSeasonRewards=function(){return setupAware(rpc("eduverse_admin_season_rewards",{}));};
 L.adminSetRewardOption=function(season,slot,title,details){return setupAware(rpc("eduverse_admin_set_reward_option",{p_season:season,p_slot:slot,p_title:title,p_details:details}));};
 L.adminMarkDelivered=function(id,done){return setupAware(rpc("eduverse_admin_mark_reward_delivered",{p_id:id,p_delivered:!!done}));};
@@ -287,6 +259,13 @@ L.adminGiftPro=function(email,days){return setupAware(rpc("eduverse_admin_gift_p
 L.adminGiftWinner=function(rewardId,days){return setupAware(rpc("eduverse_admin_gift_pro_to_winner",{p_reward_id:rewardId,p_days:days||0}));};
 L.adminRemovePro=function(userId){return setupAware(rpc("eduverse_admin_remove_pro",{p_user_id:userId}));};
 L.adminProList=function(){return setupAware(rpc("eduverse_admin_pro_list",{}));};
+/* Owner entry password: a second password typed after sign-in. Checked only on the server.
+   entryState(): "open" | "locked" | "unset" (owner must create it) | "wait" (co-owner, owner has not
+   created it yet) | "setup" (database setup not run yet, nothing to check against) */
+L.entryState=function(){return rpc("eduverse_admin_entry_state",{}).then(function(r){return String(Array.isArray(r)?r[0]:r);}).catch(function(e){if(e.status===404||e.code==="PGRST202"||/could not find|schema cache/i.test(e.message||""))return "setup";throw e;});};
+L.entryUnlock=function(pw){return rpc("eduverse_admin_unlock",{p_password:pw}).then(function(r){return r===true;});};
+L.entrySet=function(pw){return rpc("eduverse_admin_set_entry_password",{p_password:pw});};
+L.adminMakeCoowner=function(email){return setupAware(rpc("eduverse_admin_make_coowner",{p_email:email}));};
 /* students: list, wipe XP, co-owner role */
 L.adminStudents=function(){return setupAware(rpc("eduverse_admin_students_list",{}));};
 L.adminResetXp=function(userId){return setupAware(rpc("eduverse_admin_student_reset_xp",{p_user_id:userId}));};

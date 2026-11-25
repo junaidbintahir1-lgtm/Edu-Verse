@@ -106,12 +106,15 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   **Server features**: five lines (XP leaderboard, seasons and rewards, leaderboard choice, Gift Pro, students and roles) that
   show ✓ On once `database-update.sql` has been run. Until then the card shows the steps with two buttons:
   "Copy the setup code" and "Open Supabase".
-- **Owner security:** the Admin page and every owner server function need two things: the owner (or
-  co-owner) role, checked in the database, and the **owner code**, a 6-digit code from the owner's
-  authenticator app (Supabase MFA; the session becomes `aal2`). `adminCodeLock` in `views2.js` asks for the
-  code (and sets the app up the first time); `eduverse_admin_code_ok()` in `database-update.sql` enforces it
-  on the server, so a stolen password alone can do nothing. Admin also holds the **Students** list (search,
-  Reset XP, make / remove co-owner). Only the owner can change roles, and nobody can be made a second owner.
+- **Owner security:** the Admin page and every owner server function need two things: the owner or
+  co-owner role (checked in the database), and the **owner entry password**, a second password typed once
+  per sign-in. The owner creates it the first time they open Admin and shares it privately with co-owners.
+  Only a scrambled copy is stored (`admin_entry`); it is never in this repository or in the browser. Five
+  wrong tries lock that account's entry for 15 minutes; the pass lasts 12 hours and is tied to one sign-in.
+  `adminCodeLock` in `views2.js` is the screen; `eduverse_admin_code_ok()` in `database-update.sql` enforces
+  it on the server. Admin also holds the **Students** list (search, Reset XP, make a co-owner by email or
+  from the list). Only the owner can change roles or the entry password; nobody can be made a second owner;
+  co-owners never see the owner's or other co-owners' names and emails.
   The old separate page `ctrl-panel-x94k.html` was removed; these tools replace it.
 - **Contact:** the home page ends with the Contact EduVerse section. It sends through formsubmit.co to
   educationalverse2027@gmail.com, with an email-app fallback.
