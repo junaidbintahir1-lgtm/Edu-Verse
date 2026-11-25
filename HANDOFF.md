@@ -32,7 +32,6 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 | `tex/` | Earth textures used by `hero.js` (see the licence note in section 8) |
 | `views.js` | Home (with the Contact section), qualification shelves, level pages, subject hub tabs (PDF library with the Pro lock on topical material), Maths topic engine |
 | `views2.js` | Dashboard, technique, mistakes, **mock area (free mock papers)**, **papers (topical, Pro only)**, ranks + seasons, **admin** (rewards, Gift Pro, database setup helper), Knovo workspace, about, sign in / create account, ideas |
-| `admin.js`, `admin.html` | **The owner's Admin, kept apart from the student site.** `index.html` does not load `admin.js`; it is downloaded only after the server confirms the account is the owner or a developer (`V.admin` in `views2.js`). `admin.html` is the owner's bookmark address and only forwards to `index.html#admin` |
 | `menu.js` | ☰ side menu (plan, leaderboard switch, Start a Live Lesson, Instagram sneak peeks, owner admin link), notifications bell, text size |
 | `lesson.js`, `lesson.css` | **Live Lesson board**: Knovo teaches a topic on a board with voice (`window.knovoLiveLesson(topic)`). Opened from Knovo's "Live lesson" mode, the ☰ menu, and the "✨ Live Lesson" button under any Knovo answer. Start screen (a lesson only starts after the student types a topic and presses Start), sentence-by-sentence voice engine, neat boards (tables and statements, working, graphs, flows, timelines, code, points), raise-hand questions with lesson memory |
 | `data/site-data.js` | **All study content, the single source of truth**: `EV_DB` (Maths topic engine), `EV_HUB` (every subject: papers, notes, flashcards, questions), `EV_HUB_DEEP` (longer notes), `EV_RESOURCES` (PDF lists). Edit content here |
@@ -40,8 +39,6 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 | `data/extra.js` | `EV_EXTRA`: exam command words and the home-page FAQ |
 | `sw.js`, `manifest.webmanifest` | Offline support and "install app". The worker is **network-first**, so updates always show at once; bump `CACHE` in `sw.js` only if you change how it works |
 | `signin.html` | A small forwarder: old links land on the sign-in page inside `index.html` |
-| `admin-database-setup.txt` | One-time Supabase setup for the owner check (`eduverse_is_admin`) and the profiles table (run before `database-update.sql`; already done on the live project) |
-| `database-update.sql` | **The one database setup file. Run once in Supabase** (safe to run again): XP table and effort-only XP rules, leaderboard choice, seasons, mystery rewards, owner tools, and Gift Pro. Admin has a "Copy the setup code" button for it |
 | `vendor/` | Three.js r128 and its licence |
 | `assets/` | `eduverse-logo.png`, `knovo-logo-sm.png`, and `eduverse-social.png` (the picture shown when the site link is shared) |
 | `resources/`, `notes/` | The PDFs listed in `EV_RESOURCES` |
@@ -107,16 +104,13 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   **Server features**: five lines (XP leaderboard, seasons and rewards, leaderboard choice, Gift Pro, students and roles) that
   show ✓ On once `database-update.sql` has been run. Until then the card shows the steps with two buttons:
   "Copy the setup code" and "Open Supabase".
-- **Owner security:** the Admin page and every owner server function need two things: the owner or
-  co-owner role (checked in the database), and the **owner entry password**, a second password typed once
-  per sign-in. The owner creates it the first time they open Admin and shares it privately with co-owners.
-  Only a scrambled copy is stored (`admin_entry`); it is never in this repository or in the browser. Five
-  wrong tries lock that account's entry for 15 minutes; the pass lasts 12 hours and is tied to one sign-in.
-  `adminCodeLock` in `admin.js` is the screen; `eduverse_admin_code_ok()` in `database-update.sql` enforces
-  it on the server. Admin also holds the **Students** list (search, Reset XP, make a developer (stored as `co-owner`) by email or
-  from the list). Only the owner can change roles or the entry password; nobody can be made a second owner;
-  co-owners never see the owner's or other co-owners' names and emails.
-  The old separate page `ctrl-panel-x94k.html` was removed; these tools replace it.
+- **Owner Admin (not in this repository):** the owner's tools (Gift Pro, Students, developers, season
+  rewards, database setup code) live on a separate private site that the owner uploads to Cloudflare. Its
+  files are encrypted behind an access password, then it asks for the EduVerse sign-in, then the owner
+  entry password. This repository holds no Admin page and no database setup files; `#admin` here shows
+  "Page not found". The database still checks every owner action (role + entry password,
+  `eduverse_admin_code_ok()`). The last public copy of the Admin source and SQL is in Git history at
+  commit `cee4888`; the owner keeps the current files privately.
 - **Contact:** the home page ends with the Contact EduVerse section. It sends through formsubmit.co to
   educationalverse2027@gmail.com, with an email-app fallback.
 

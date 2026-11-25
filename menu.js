@@ -25,7 +25,6 @@ EV.renderDrawer=function(){
   '<section class="dSec"><h4>🏆 XP leaderboard</h4><a class="btn" href="#ranks" data-dclose>View genuine student rankings</a></section>'+
   '<section class="dSec"><h4>✦ Get to know us</h4><a class="btn" href="#about" data-dclose>About EduVerse &amp; our mission</a></section>'+
   '<section class="dSec"><h4>🌐 Community</h4><a class="btn" href="https://www.instagram.com/eduverse.27" target="_blank" rel="noopener">📸 Sneak peeks on Instagram · @eduverse.27</a><p class="dEmpty">New features, study tips and behind-the-scenes previews land on Instagram first. Discord: <b>to be added</b></p></section>'+
-  (EVLive.isOwner()?'<section class="dSec"><h4>👑 Owner</h4><a class="btn gold" href="#admin" data-dclose>Open the EduVerse admin</a></section>':'')+
   '<section class="dSec">'+(p?'<button class="btn" type="button" id="dOut">🚪 Log out</button>':'<a class="btn gold" href="#signin" data-dclose>✦ Sign in / Join</a>')+'</section>'+
   '<p class="dFoot">EDUVERSE · Study Platform</p>';
   $('#drawer').innerHTML=h;

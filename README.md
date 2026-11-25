@@ -10,11 +10,9 @@ This repository is the static EduVerse website (no build step).
 - `lesson.js` — the Live Lesson board, where Knovo teaches a topic with voice.
 - `resources/`, `notes/` — PDF study resources.
 - `HANDOFF.md` — how everything works, file by file.
-- `database-update.sql` — the one-time Supabase setup (Admin page → "Copy the setup code").
-- `admin-database-setup.txt` — the first-time owner setup (already done on the live project).
 
 Nothing is on sale on the site and it takes no payments. Topical past papers are EduVerse Pro, which only
-the owner can give (Admin → Gift EduVerse Pro).
+the owner can give from the private owner site.
 
 ## Open it
 

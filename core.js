@@ -43,7 +43,7 @@ function dayDiff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12
    and not faster than one every 15 seconds), mastering a Maths topic (every question in it right),
    and finishing a timed mock seriously (at least half the time used and 40%+ scored, once per paper
    per week). Opening or ticking chapters, flipping flashcards and daily visits earn no XP.
-   The database update in database-update.sql makes the server enforce the same rules.
+   The server enforces the same rules.
    Every achievement is one ledger event with a unique key (topic:…, question:…, card:…, streak:<date>,
    mock:<time>), stored in the live site's ev_state_v1 and synced to the real leaderboard.
    The same achievement can never be counted twice, even across the old and new design. */

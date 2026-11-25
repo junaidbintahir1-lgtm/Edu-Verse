@@ -266,19 +266,8 @@ EV.seasonCard=function(host){
 };
 
 /* =================== ADMIN (owner and co-owner only) =================== */
-/* The owner's Admin is a separate file (admin.js). Students never download it: it is fetched only
-   after the server confirms this account is the owner or a developer. */
-V.admin=function(el){
-  if(!EVLive.isOwner()){el.innerHTML='<div class="in page"><div class="empty" style="margin-top:30px"><b>This page is for the EduVerse owner</b><span>Owner access is checked on the server for your account.</span><a class="btn gold sm" href="#home">Back to home</a></div></div>';
-    EVLive.checkOwner().then(function(o){if(o&&EV.route.name==='admin')EV.render();});return;}
-  if(EV.adminView){EV.adminView(el);return;}
-  el.innerHTML='<div class="in page"><p class="small muted" style="margin-top:30px">Opening the owner area…</p></div>';
-  if(EV.adminLoading)return;EV.adminLoading=true;
-  var s=document.createElement('script');s.src=EV.SITE+'admin.js';
-  s.onload=function(){if(EV.route.name==='admin')EV.render();};
-  s.onerror=function(){EV.adminLoading=false;el.innerHTML='<div class="in page"><div class="empty" style="margin-top:30px"><b>The owner area could not load</b><span>Check your internet and try again.</span><a class="btn gold sm" href="#home">Back to home</a></div></div>';};
-  document.head.appendChild(s);
-};
+/* The owner's Admin is not part of this website. It lives on a separate private site. */
+V.admin=function(el){el.innerHTML='<div class="in page"><div class="empty" style="margin-top:30px"><b>Page not found</b><span>This page does not exist.</span><a class="btn gold sm" href="#home">Back to home</a></div></div>';};
 
 /* =================== KNOVO WORKSPACE =================== */
 /* Live Lesson: the board studio in lesson.js. It opens on a start screen and begins only when the student taps Start. */
