@@ -16,7 +16,7 @@
 var SUPA_URL="https://yazzyldmohngmotiozlj.supabase.co";
 var SUPA_KEY="sb_publishable_1p58DjFzc2m-VsPOO1thuA_gjemaUpq"; /* publishable key: safe to ship, same as index.html */
 var EDGE=SUPA_URL+"/functions/v1/Knovo";
-var L=window.EVLive={SUPA_URL:SUPA_URL};
+var L=window.EVLive={SUPA_URL:SUPA_URL,SUPA_KEY:SUPA_KEY,EDGE:EDGE};
 
 function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
@@ -36,6 +36,7 @@ function storeSession(d,email){
     lsSet("ev_auth_user",JSON.stringify({email:email||(d.user&&d.user.email)||old.email||"",full_name:meta.full_name||meta.name||old.full_name||"",user_role:meta.user_role||old.user_role||""}));
   }
 }
+L.clearAuth=clearAuth;
 L.hasSession=function(){return !!lsGet("ev_auth_token");};
 L.user=function(){if(!L.hasSession())return null;var u=jsonGet("ev_auth_user",{})||{};return {email:u.email||"",name:u.full_name||"",role:u.user_role||""};};
 var refreshing=null;
@@ -48,6 +49,7 @@ function refresh(){
     .then(function(v){refreshing=null;return v;});
   return refreshing;
 }
+L.refresh=refresh;
 /* A fresh, unexpired access token, renewed silently with the stored refresh token. null = signed out. */
 L.getSession=function(){
   var a=stored();if(!a.access)return Promise.resolve(null);
@@ -111,11 +113,9 @@ L.recover=function(email){
 L.signOut=function(){
   var a=stored();
   var p=a.access?fetch(SUPA_URL+"/auth/v1/logout",{method:"POST",headers:{apikey:SUPA_KEY,Authorization:"Bearer "+a.access}}).catch(function(){}):Promise.resolve();
-  clearAuth();XP.status="guest";XP.leaders=[];XP.me=null;XP.pending={};
+  clearAuth();lsDel("ev_plan");XP.status="guest";XP.leaders=[];XP.me=null;XP.pending={};
   return p;
 };
-/* where the old site's own sign-in / register page lives */
-L.signinPage=function(site,hash){return site+"signin.html"+(hash?"?next="+encodeURIComponent(hash):"");};
 
 /* owner / co-owner, checked on the server like the live site */
 var OWNER=null;
@@ -129,7 +129,18 @@ L.checkOwner=function(){
 };
 L.isOwner=function(){return OWNER===true;};
 /* Pro = owner, early-access Pro plan, or an active Knovo plan (same rules as index.html isPro / isKnovoPro) */
-L.isPro=function(){var s=L.liveState();return L.isOwner()||!!(s.plan&&s.plan.tier==="pro");};
+/* Pro = the owner, an early-access Pro plan saved on this device, or Pro on the account (bought later, or gifted by the owner) */
+function planCache(){var p=jsonGet("ev_plan",null),u=L.user();if(!p||p.plan!=="pro"||!u||p.email!==u.email)return null;return (p.until&&p.until<Date.now())?null:p;}
+L.isPro=function(){var s=L.liveState();return L.isOwner()||!!(s.plan&&s.plan.tier==="pro")||!!planCache();};
+L.proUntil=function(){var p=planCache();return p?p.until:0;};
+/* ask the server for this account's plan (also ends a gift whose time is up). gained = Pro is new on this device */
+L.loadPlan=function(){
+  var had=!!planCache();
+  return rpc("eduverse_my_plan",{}).then(function(r){
+    r=one(r)||{};var u=L.user()||{},p={plan:r.my_plan||"free",until:r.my_pro_until?Date.parse(r.my_pro_until):0,email:u.email||""};
+    lsSet("ev_plan",JSON.stringify(p));return {plan:p.plan,until:p.until,gained:p.plan==="pro"&&!had};
+  }).catch(function(){return {plan:had?"pro":"free",until:0,gained:false,unknown:true};});
+};
 L.isKnovoPro=function(){var s=L.liveState();return L.isPro()||!!(s.knovoPlan&&s.knovoPlan.status==="active");};
 
 /* ======================= the live site's saved progress ======================= */
@@ -243,6 +254,12 @@ L.claimSeasonReward=function(slot){return setupAware(rpc("eduverse_claim_season_
 L.adminSeasonRewards=function(){return setupAware(rpc("eduverse_admin_season_rewards",{}));};
 L.adminSetRewardOption=function(season,slot,title,details){return setupAware(rpc("eduverse_admin_set_reward_option",{p_season:season,p_slot:slot,p_title:title,p_details:details}));};
 L.adminMarkDelivered=function(id,done){return setupAware(rpc("eduverse_admin_mark_reward_delivered",{p_id:id,p_delivered:!!done}));};
+/* gift Pro: by email, or straight to a season winner; days 0 = until the owner removes it */
+L.adminGiftPro=function(email,days){return setupAware(rpc("eduverse_admin_gift_pro",{p_email:email,p_days:days||0}));};
+L.adminGiftWinner=function(rewardId,days){return setupAware(rpc("eduverse_admin_gift_pro_to_winner",{p_reward_id:rewardId,p_days:days||0}));};
+L.adminRemovePro=function(userId){return setupAware(rpc("eduverse_admin_remove_pro",{p_user_id:userId}));};
+L.adminProList=function(){return setupAware(rpc("eduverse_admin_pro_list",{}));};
+L.sqlEditorUrl="https://supabase.com/dashboard/project/"+SUPA_URL.replace(/^https:\/\//,"").split(".")[0]+"/sql/new";
 
 /* =============================== Knovo =============================== */
 function setChatBlocked(ms){lsSet("knovo_chat_blocked_until",String(Date.now()+Math.max(60000,ms||0)));}

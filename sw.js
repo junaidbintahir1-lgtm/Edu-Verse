@@ -1,14 +1,13 @@
-/* EduVerse service worker — app-shell cache so the site installs and loads fast,
-   with offline access to the pages you have already opened. PDFs are NOT cached
-   (they are large and always fetched fresh). */
-const CACHE = "eduverse-v30";
-const SHELL = ["./", "index.html", "signin.html", "manifest.webmanifest", "xp-leaderboard.js", "leaderboard-database-setup.txt",
-               "icons/icon-192.png", "icons/icon-512.png",
-               "icons/favicon-32.png", "icons/icon-maskable-512.png",
-               "assets/eduverse_logo.png", "assets/knovo-logo.png"];
+/* EduVerse service worker: offline support and "install app".
+   Strategy: ALWAYS try the network first, so students see updates at once; the saved copy is only
+   used when they are offline. Pictures and fonts are served from the saved copy and refreshed in the
+   background. PDFs and anything on another website (Supabase, fonts, Knovo) are never touched. */
+const CACHE = "eduverse-v40";
+const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/favicon-32.png",
+               "assets/eduverse-logo.png", "assets/knovo-logo-sm.png"];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {
@@ -19,29 +18,29 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+function save(request, response) {
+  if (response && response.ok && response.type === "basic") {
+    const copy = response.clone();
+    caches.open(CACHE).then((c) => c.put(request, copy)).catch(() => {});
+  }
+  return response;
+}
+
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
-  if (/\.pdf(\?|$)/i.test(url.pathname)) return;              // never cache PDFs
-  if (e.request.mode === "navigate") {
-    /* pages: try network first, fall back to cache (offline) */
-    e.respondWith(
-      fetch(e.request)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, copy));
-          return res;
-        })
-        .catch(() => caches.match(e.request).then((m) => m || caches.match("index.html")))
-    );
+  if (/\.pdf$/i.test(url.pathname)) return;                       // PDFs: always straight from the network
+  if (/\.(png|jpe?g|webp|svg|gif|ico|woff2?)$/i.test(url.pathname)) {
+    /* pictures and fonts: saved copy first, refreshed in the background */
+    e.respondWith(caches.match(e.request).then((hit) => {
+      const fresh = fetch(e.request).then((res) => save(e.request, res)).catch(() => hit);
+      return hit || fresh;
+    }));
     return;
   }
-  /* assets: cache first, then network */
+  /* pages, scripts, styles and data: network first, saved copy when offline */
   e.respondWith(
-    caches.match(e.request).then((m) => m || fetch(e.request).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, copy));
-      return res;
-    }))
+    fetch(e.request).then((res) => save(e.request, res))
+      .catch(() => caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || (e.request.mode === "navigate" ? caches.match("index.html") : Response.error())))
   );
 });

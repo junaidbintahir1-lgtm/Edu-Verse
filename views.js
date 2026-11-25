@@ -109,7 +109,7 @@ V.home=function(el){
 
   h+='<section class="sect"><span class="eyebrow">Questions students ask</span><h2>Frequently asked questions</h2><div class="faq">'+EV.D.extra.faq.map(function(f){return '<details><summary>'+esc(f.q)+'</summary><p>'+esc(f.a)+'</p></details>';}).join('')+'</div></section>';
 
-  /* Contact EduVerse: same fixed inbox and the same sending service as the classic site */
+  /* Contact EduVerse: messages go to the fixed EduVerse inbox through formsubmit.co */
   var me=ST.profile||{};
   h+='<section class="sect" id="contact"><span class="eyebrow">Contact us</span><h2>Contact EduVerse</h2><p class="sub">A short note is enough. Support, partnership ideas, resource reports and subject requests all land in the same inbox.</p>'+
   '<div class="contactWrap"><div class="cCards">'+
@@ -244,7 +244,6 @@ TAB.overview=function(o,b){
   if(o.db)o.db.chapters.forEach(function(c){c.topics.forEach(function(t){flashN+=(t.cards||[]).length;});});
   var h='<div class="stats">'+
     [[s.papers.length,'Exam papers'],[notes.length,'Notes sections'+(o.deep?' · expanded':'')],[flashN,'Flashcards'],[qN,'Questions with answers'],[EV.pdfCount(o),'PDF resources'],[acc?acc.pct+'%':'—',acc?'Your accuracy ('+acc.n+')':'Your accuracy']].map(function(x){return '<div class="stat"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>';}).join('')+'</div>';
-  if(s.oneTimeLaunch)h+='<div class="card" style="margin-top:16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-color:var(--goldline);background:var(--goldsoft)"><b style="font-family:var(--display);font-size:1.4rem">$'+s.oneTimeLaunch+'</b><span class="grow small">One-time folder access · global USD launch price · standard later $'+s.oneTimeStandard+'.'+(s.sharedFolder?' One folder covers both listed codes.':'')+' Checkout is coming soon; no payment is taken.</span><span class="pill">Coming soon</span></div>';
   h+='<section class="sect" style="padding-top:36px"><span class="eyebrow">Your study path</span><div class="steps4" style="margin-top:14px">'+
     '<a class="step" href="#notes-'+o.slug+'"><small>1 · Learn</small><b>Notes &amp; study book</b><span>'+notes.length+' sections'+(o.res&&o.res.detailed?' + PDF study book':'')+'</span></a>'+
     '<a class="step" href="#cards-'+o.slug+'"><small>2 · Recall</small><b>Flashcards</b><span>'+flashN+' cards with levels</span></a>'+
@@ -280,7 +279,7 @@ TAB.questions=function(o,b){
   var all=EV.allQuestions(o),kinds=['All'];['Solved','Practice','Topic'].forEach(function(k){if(all.some(function(q){return q.kind===k}))kinds.push(k);});
   var h='<div class="hd"><div><h2 class="h2" style="margin:0;font-size:1.7rem">Questions &amp; mark schemes</h2><p class="sub" style="margin-top:6px">Attempt each on paper first, then reveal the worked solution and mark yourself. Anything you miss goes to your Mistakes notebook.</p></div></div>';
   var pdfs=[].concat(o.res&&o.res.topical||[],o.res&&o.res.compiled||[]);
-  if(pdfs.length)h+='<div class="libGroup" style="margin-top:18px"><h3>📘 Topical question bank PDFs</h3>'+pdfs.map(EV.pdfRow).join('')+'</div>';
+  if(pdfs.length)h+='<div class="libGroup" style="margin-top:18px"><h3>📘 Topical question bank PDFs <span class="pill gold">Pro</span></h3>'+(EVLive.isPro()?pdfs.map(EV.pdfRow).join(''):'<p class="small muted" style="margin:0">🔒 '+pdfs.length+' topical PDF'+(pdfs.length>1?'s are':' is')+' part of EduVerse Pro. The questions below are free.</p>')+'</div>';
   h+='<div class="row" style="margin-top:22px" id="qf">'+kinds.map(function(k,i){return '<button class="btn sm'+(i?'':' gold')+'" type="button" data-f="'+k+'">'+k+' ('+(k==='All'?all.length:all.filter(function(q){return q.kind===k}).length)+')</button>';}).join('')+'</div><div class="stack" id="qList" style="margin-top:16px"></div>';
   b.innerHTML=h;
   function paint(k){$('#qList').innerHTML=all.filter(function(q){return k==='All'||q.kind===k}).map(function(q,i){return EV.qCard(q,i+1)}).join('');}
@@ -321,9 +320,9 @@ TAB.library=function(o,b){
   if(!o.res){h+='<div class="empty" style="margin-top:20px"><b>PDFs for this subject are being prepared</b><span>Notes, flashcards and questions are ready now.</span><a class="btn gold sm" href="#notes-'+o.slug+'">Open notes</a></div>';b.innerHTML=h;return;}
   var cats=RESCAT.filter(function(c){return o.res[c[0]]&&o.res[c[0]].length});
   Object.keys(o.res).forEach(function(k){if(!RESCAT.some(function(c){return c[0]===k}))cats.push([k,k]);});
-  /* Same rule as the live site: topical banks and tests are part of EduVerse Pro */
-  var pro=EVLive.isPro(),PRO_CATS={topical:1,tests:1,mixed:1,assess:1};
-  h+='<div class="stack" style="margin-top:20px;gap:26px">'+cats.map(function(c){var locked=PRO_CATS[c[0]]&&!pro;return '<div class="libGroup"><h3>'+esc(c[1])+' <span class="pill">'+o.res[c[0]].length+'</span>'+(PRO_CATS[c[0]]?' <span class="pill gold">Pro</span>':'')+'</h3>'+(locked?'<div class="empty" style="padding:18px"><b>🔒 Part of EduVerse Pro</b><span>Topical question banks and topic tests are included with EduVerse Pro. Sales have not opened yet; early-access Pro accounts keep their access.</span>'+(ST.profile?'':'<a class="btn gold sm" href="#signin">Sign in</a>')+'</div>':o.res[c[0]].map(EV.pdfRow).join(''))+'</div>';}).join('')+'</div>';
+  /* Only the topical material is Pro. Mock-style papers (yearly, mixed, full-syllabus, challenge mocks) are free. */
+  var pro=EVLive.isPro(),PRO_CATS={topical:1,compiled:1,tests:1},FREE_CATS={yearly:1,mixed:1,assess:1,mocks:1};
+  h+='<div class="stack" style="margin-top:20px;gap:26px">'+cats.map(function(c){var locked=PRO_CATS[c[0]]&&!pro;return '<div class="libGroup"><h3>'+esc(c[1])+' <span class="pill">'+o.res[c[0]].length+'</span>'+(PRO_CATS[c[0]]?' <span class="pill gold">Pro</span>':FREE_CATS[c[0]]?' <span class="pill ok">Free</span>':'')+'</h3>'+(locked?'<div class="empty" style="padding:18px"><b>🔒 Part of EduVerse Pro</b><span>Topical question banks, topical past papers and topic tests are part of EduVerse Pro. Pro is not on sale yet and nothing can be bought on this site. Mock papers are free.</span>'+(ST.profile?'':'<a class="btn gold sm" href="#signin">Sign in</a>')+'</div>':o.res[c[0]].map(EV.pdfRow).join(''))+'</div>';}).join('')+'</div>';
   b.innerHTML=h;
 };
 TAB.tools=function(o,b){

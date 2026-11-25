@@ -7,9 +7,16 @@
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:title" content="EduVerse — your whole syllabus, in orbit">
+<meta property="og:description" content="Revision for Cambridge O Level, IGCSE, A Level and Pearson Edexcel IAL, with Knovo, your study tutor.">
+<meta property="og:image" content="https://junaidbintahir1-lgtm.github.io/Edu-Verse/assets/eduverse-social.png">
+<meta property="og:type" content="website">
 <title>EduVerse</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=STIX+Two+Text:ital,wght@0,500;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=STIX+Two+Text:ital,wght@0,500;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Caveat:wght@500;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="lesson.css">
 <style>
 /* Layout: app shell (sticky bar + hash-routed views) on true black. One 3D moment per view.
    Palette from the two logos only: EduVerse gold + navy, Knovo teal. Gold = EduVerse actions, teal = Knovo. */
@@ -849,6 +856,8 @@ body.signedOut #nav,body.signedOut #subjPick,body.signedOut #dock,body.signedOut
 .mbox.won{border-color:var(--teal);background:linear-gradient(160deg,rgba(47,224,205,.16),rgba(255,255,255,.02));opacity:1}
 @media(max-width:560px){.mystery{grid-template-columns:1fr}}
 /* ---------- owner admin ---------- */
+.giftRow{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;gap:8px;align-items:center}
+@media(max-width:700px){.giftRow{grid-template-columns:minmax(0,1fr)}}
 .adminGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .adminGrid .cell{padding:16px;border:1px solid var(--rim);border-radius:16px;background:var(--deck)}
 .adminGrid .big{font-family:var(--display);font-size:1.8rem;font-weight:800}
@@ -891,7 +900,7 @@ body.signedOut #nav,body.signedOut #subjPick,body.signedOut #dock,body.signedOut
   <div class="in">
     <div class="stack" style="gap:8px">
       <a class="brand" href="#home"><img src="assets/eduverse-logo.png" alt=""><span>EduVerse</span></a>
-      <span>New design preview. The classic EduVerse site stays available while this design is tested.</span>
+      <span>Revision for Cambridge and Pearson Edexcel students. Launching January 2027.</span>
     </div>
     <nav aria-label="Footer">
       <a href="#about">About</a><a href="#qualifications">Choose qualification</a><a href="#technique">Exam technique</a><a href="#papers">Papers</a><a href="#ideas">What to add</a>
@@ -915,13 +924,13 @@ body.signedOut #nav,body.signedOut #subjPick,body.signedOut #dock,body.signedOut
     <div class="stack" style="gap:8px">
       <span class="eyebrow"><b class="k">✦ Knovo AI plans</b> · Global USD</span>
       <h2 id="plansT" style="font-size:clamp(1.7rem,3.6vw,2.6rem);font-weight:800;line-height:1.05">Study without the wait.</h2>
-      <p class="muted">More chats, more photo scans, unlimited follow-ups and Live Lessons through exam season. These are the planned Pro plans. Payment is not live yet, and these buttons never take payment.</p>
+      <p class="muted">More chats, more photo scans, unlimited follow-ups and Live Lessons through exam season. These are the planned Pro plans. <b>Nothing is on sale yet:</b> EduVerse takes no payments, so these plans cannot be bought.</p>
     </div>
     <div class="plans">
       <div class="plan"><span class="eyebrow">Knovo Free</span><b>Built-in tutor</b><div class="pr">Free</div><ul><li>Saved chats on this device</li><li>Photo and voice tools</li><li>20 messages + 5 photo scans per 3 hours</li></ul><a class="btn" href="#knovo" data-close>Use Knovo free</a></div>
-      <div class="plan"><span class="eyebrow">Monthly</span><b>Knovo Pro Monthly</b><div class="pr">$3.50 <small>/ month</small></div><span class="small muted">Standard later: $5.25/month</span><ul><li>2,000 messages per month</li><li>100 photo scans per month</li><li>Parallel replies and unlimited follow-ups</li><li>Planned mock review and essay feedback</li></ul><button class="btn" type="button" disabled>Coming soon</button></div>
-      <div class="plan best"><span class="eyebrow">4 months · Exam season</span><b>Exam Season Pass</b><div class="pr">$10.50 <small>one-time</small></div><span class="small muted">About $2.63/month · save 25%</span><ul><li>6,000 messages across the season</li><li>300 photo scans</li><li>No automatic renewal</li></ul><button class="btn" type="button" disabled>Coming soon</button></div>
-      <div class="plan"><span class="eyebrow">12 months · Best value</span><b>Knovo Pro Annual</b><div class="pr">$28 <small>/ year</small></div><span class="small muted">About $2.33/month · save 33%</span><ul><li>Unlimited fair-use messages</li><li>1,000 photo scans per year</li><li>One payment for the school year</li></ul><button class="btn" type="button" disabled>Coming soon</button></div>
+      <div class="plan"><span class="eyebrow">Monthly</span><b>Knovo Pro Monthly</b><div class="pr">$3.50 <small>/ month</small></div><span class="small muted">Standard later: $5.25/month</span><ul><li>2,000 messages per month</li><li>100 photo scans per month</li><li>Parallel replies and unlimited follow-ups</li><li>Planned mock review and essay feedback</li></ul><button class="btn" type="button" disabled>Not on sale yet</button></div>
+      <div class="plan best"><span class="eyebrow">4 months · Exam season</span><b>Exam Season Pass</b><div class="pr">$10.50 <small>one-time</small></div><span class="small muted">About $2.63/month · save 25%</span><ul><li>6,000 messages across the season</li><li>300 photo scans</li><li>No automatic renewal</li></ul><button class="btn" type="button" disabled>Not on sale yet</button></div>
+      <div class="plan"><span class="eyebrow">12 months · Best value</span><b>Knovo Pro Annual</b><div class="pr">$28 <small>/ year</small></div><span class="small muted">About $2.33/month · save 33%</span><ul><li>Unlimited fair-use messages</li><li>1,000 photo scans per year</li><li>One payment for the school year</li></ul><button class="btn" type="button" disabled>Not on sale yet</button></div>
     </div>
     <p class="small muted">Savings compare launch prices: 4 × $3.50 = $14 and 12 × $3.50 = $42. AI feedback is study guidance, not an official examination grade.</p>
   </div>
@@ -930,10 +939,19 @@ body.signedOut #nav,body.signedOut #subjPick,body.signedOut #dock,body.signedOut
 <div class="toast" id="toast" role="status"></div>
 
 <script src="vendor/three-r128.min.js"></script>
+<script src="data/site-data.js"></script>
+<script src="data/pastpapers.js"></script>
+<script src="data/extra.js"></script>
 <script src="live.js"></script>
 <script src="core.js"></script>
 <script src="hero.js"></script>
 <script src="views.js"></script>
 <script src="views2.js"></script>
+<script src="lesson.js"></script>
 <script src="menu.js"></script>
+<script>
+EV.boot(); /* every script above has loaded: build the page */
+/* Offline support and "install app". The worker always tries the network first, so updates show at once. */
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
+</script>
 </body></html>

@@ -1,15 +1,20 @@
 # EduVerse
 
 Revision for Cambridge O Level, IGCSE, A Level and Pearson Edexcel IAL: short notes, study books, flashcards,
-question practice, timed mocks and Knovo, the EduVerse study tutor. Launching January 2027.
+question practice, timed mocks, free mock papers and Knovo, the EduVerse study tutor. Launching January 2027.
 
 This repository is the static EduVerse website (no build step).
 
-- `index.html` — the EduVerse site (black 3D design). Students sign in to use it.
-- `classic.html` — the classic design. It also holds the study data that `index.html` reads.
+- `index.html` — the EduVerse site. Students sign in to use it.
+- `data/site-data.js` — all study content: subjects, notes, flashcards, questions and PDF lists.
+- `lesson.js` — the Live Lesson board, where Knovo teaches a topic with voice.
 - `resources/`, `notes/` — PDF study resources.
 - `HANDOFF.md` — how everything works, file by file.
-- `database-update.sql` and the `*-database-setup.txt` files — one-time Supabase setup.
+- `database-update.sql` — the one-time Supabase setup (Admin page → "Copy the setup code").
+- `ctrl-panel-x94k.html` and `admin-database-setup.txt` — the owner dashboard and its setup.
+
+Nothing is on sale on the site and it takes no payments. Topical past papers are EduVerse Pro, which only
+the owner can give (Admin → Gift EduVerse Pro).
 
 ## Open it
 

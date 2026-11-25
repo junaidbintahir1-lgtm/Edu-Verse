@@ -21,13 +21,13 @@ EV.renderDrawer=function(){
   '<section class="dSec"><h4>🧭 Everything on EduVerse</h4><div class="dGrid">'+LINKS.map(function(l){return '<a href="'+l[2]+'" data-dclose><span>'+l[0]+'</span>'+l[1]+'</a>';}).join('')+'</div>'+
     '<div class="dQuals">'+EV.LEVELS.map(function(L){var soon=L.subjects.every(function(o){return o.soon});return '<a href="#level-'+L.slug+'" data-dclose class="pill'+(soon?'':' gold')+'">'+esc(L.meta.short)+(soon?' · soon':'')+'</a>';}).join('')+'</div></section>'+
   '<section class="dSec"><h4>⚙️ Settings</h4><div class="dRow"><span>🔠 Text size</span><span class="row" style="gap:4px"><button class="btn sm" type="button" data-fs="-1" aria-label="Smaller text">A−</button><button class="btn sm" type="button" data-fs="0" aria-label="Default text size">A</button><button class="btn sm" type="button" data-fs="1" aria-label="Larger text">A+</button></span></div><div class="dRow"><span>🌗 Theme</span><span class="small muted">Black (this design)</span></div><div class="dRow"><span>🏆 Show me on the leaderboard</span><button class="btn sm'+(EVLive.lbOptIn()?' gold':'')+'" type="button" data-lb aria-pressed="'+EVLive.lbOptIn()+'">'+(EVLive.lbOptIn()?'✓ On':'Off')+'</button></div><div class="dRow"><span>🔔 Future-update alerts</span><button class="btn sm'+(ST.futureNotify?' teal':'')+'" type="button" data-notify>'+(ST.futureNotify?'✓ On':'Turn on')+'</button></div></section>'+
-  '<section class="dSec"><h4>✦ Knovo AI</h4><a class="btn teal" href="#knovo" data-dclose>Open Knovo workspace</a><button class="btn ghost sm" type="button" data-plans>See Knovo Pro plans</button></section>'+
+  '<section class="dSec"><h4>✦ Knovo AI</h4><a class="btn teal" href="#knovo" data-dclose>Open Knovo workspace</a><button class="btn" type="button" data-lesson="" data-dclose>✨ Start a Live Lesson</button><button class="btn ghost sm" type="button" data-plans>See Knovo Pro plans</button></section>'+
   '<section class="dSec"><h4>🏆 XP leaderboard</h4><a class="btn" href="#ranks" data-dclose>View genuine student rankings</a></section>'+
   '<section class="dSec"><h4>✦ Get to know us</h4><a class="btn" href="#about" data-dclose>About EduVerse &amp; our mission</a></section>'+
   '<section class="dSec"><h4>🌐 Community</h4><a class="btn" href="https://www.instagram.com/eduverse.27" target="_blank" rel="noopener">📸 Sneak peeks on Instagram · @eduverse.27</a><p class="dEmpty">New features, study tips and behind-the-scenes previews land on Instagram first. Discord: <b>to be added</b></p></section>'+
   (EVLive.isOwner()?'<section class="dSec"><h4>👑 Owner</h4><a class="btn gold" href="#admin" data-dclose>Open the EduVerse admin</a></section>':'')+
   '<section class="dSec">'+(p?'<button class="btn" type="button" id="dOut">🚪 Log out</button>':'<a class="btn gold" href="#signin" data-dclose>✦ Sign in / Join</a>')+'</section>'+
-  '<p class="dFoot">EDUVERSE · Study Platform · new design preview</p>';
+  '<p class="dFoot">EDUVERSE · Study Platform</p>';
   $('#drawer').innerHTML=h;
   var e=$('#dEdit');if(e)e.addEventListener('click',function(){$('#dEditRow').innerHTML='<form class="row" id="dEditF" style="width:100%"><label class="sr" for="dName">Display name</label><input class="inp grow" id="dName" maxlength="30" value="'+esc(p.name)+'"><button class="btn sm gold" type="submit">Save</button></form>';var i=$('#dName');i.focus();i.select();$('#dEditF').addEventListener('submit',function(ev){ev.preventDefault();var n=i.value.trim();if(!n)return;ST.profile.name=n;EV.save();EV.paintProfile();EV.renderDrawer();EV.toast('Profile updated');});});
   var o=$('#dOut');if(o)o.addEventListener('click',function(){EV.closeDrawer();EV.signOut();});
@@ -47,7 +47,7 @@ $('#drawer').addEventListener('click',function(e){
 /* ---------- notifications ---------- */
 EV.buildNotifs=function(){
   var list=[],t=EV.today(),sN=ST.streak.count||0,tq=ST.today.d===t?ST.today.q:0;
-  list.push({id:'future_updates',ic:'🔔',pin:true,notify:true,t:'Coming soon: new subject folders, more past-paper packs, checkout activation and Knovo Pro.',d:'Tap "Notify me" and we\'ll flag it here first.'});
+  list.push({id:'future_updates',ic:'🔔',pin:true,notify:true,t:'Coming soon: new subject folders, more past-paper packs and Knovo Pro.',d:'Tap "Notify me" and we\'ll flag it here first.'});
   list.push({id:'quiz_'+t,ic:'❓',t:'Your daily quiz is ready: 3 questions from 2 different subjects.',d:'Today',go:'#home'});
   if(sN>0)list.push({id:'streak_'+t,ic:'🔥',t:sN+'-day streak! '+Math.max(0,ST.goal-tq)+' more question'+(ST.goal-tq===1?'':'s')+' to reach today\'s goal.',d:'Today',go:'#dashboard'});
   var open=ST.mistakes.filter(function(m){return !m.resolved}).length;

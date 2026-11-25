@@ -1,5 +1,5 @@
-/* EduVerse new design — core: data, saved progress, XP, router, Knovo AI engine, 3D hero.
-   Real connections (sign-in, Knovo, XP, the live site's saved progress) come from live.js (window.EVLive).
+/* EduVerse — core: data, saved progress, XP, router, Knovo AI engine.
+   Real connections (sign-in, Knovo, XP, saved progress) come from live.js (window.EVLive).
    Design-only settings are saved under "ev_design_v1"; shared progress is kept in step with the
    live site's "ev_state_v1" so students keep their streaks, XP and mistakes on both designs. */
 (function(){
@@ -13,10 +13,8 @@ var esc=EV.esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,functi
 EV.strip=function(h){var d=document.createElement('div');d.innerHTML=String(h||'');return d.textContent||'';};
 
 /* ---------------- Where the site's files live ----------------
-   This design is the site's main page (index.html at the site root). The classic site is kept
-   beside it as classic.html and is still the single source of the study data (see EV.loadLive). */
+   This page is the site's index.html, so PDFs and data are beside it. */
 EV.SITE=(typeof window.EV_SITE_ROOT==='string')?window.EV_SITE_ROOT:'';
-EV.CLASSIC='classic.html';
 /* PDFs open from the same site with relative paths (resources/..., notes/...) */
 function encPath(p){return String(p).split('/').map(encodeURIComponent).join('/');}
 EV.pdfView=function(p){return EV.SITE+encPath(p);};
@@ -169,7 +167,9 @@ EV.syncToLive=function(){
 
 /* ---------------- Who is signed in (real Supabase session from live.js) ---------------- */
 EV.syncProfile=function(){var u=LV.user();if(!u){ST.profile=null;return;}var LS=LV.liveState();ST.profile={name:(ST.profile&&ST.profile.email===u.email&&ST.profile.name)||u.name||LS.profileName||u.email.split('@')[0]||'Student',email:u.email};};
-EV.planLabel=function(){return LV.isOwner()?'👑 Owner · unlimited':LV.isPro()?'⭐ Pro · early access':LV.isKnovoPro()?'✦ Knovo Pro':'🌱 Free plan';};
+EV.planLabel=function(){if(LV.isOwner())return '👑 Owner · unlimited';if(LV.isPro()){var u=LV.proUntil();return '⭐ EduVerse Pro'+(u?' · until '+new Date(u).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'');}return LV.isKnovoPro()?'✦ Knovo Pro':'🌱 Free plan';};
+/* read the account's plan from the server; say so when Pro has just arrived (a gift from the owner) */
+EV.refreshPlan=function(){return LV.loadPlan().then(function(p){EV.paintProfile();if(p.gained&&!LV.isOwner())EV.toast('🎁 You now have EduVerse Pro!');if(p.gained||/^(subject|knovo|papers|paperSubj)$/.test(EV.route.name||''))EV.render();return p;});};
 EV.signOut=function(){LV.signOut();ST.profile=null;EV.save();EV.paintProfile();EV.toast('Signed out. Your study progress stays saved on this device.');EV.render();};
 
 /* ---------------- Toast ---------------- */
@@ -187,34 +187,13 @@ var LEVEL_META={
 };
 EV.LEVEL_META=LEVEL_META;
 function slugify(s){return String(s).toLowerCase().replace(/[^a-z0-9]/g,'');}
-/* Live data: classic.html (the classic site) is the single source of truth. Its subject data
-   (EV_DB, EV_HUB, EV_HUB_DEEP and EV_RESOURCES) is written inside classic.html itself, so we read
-   that file and run ONLY those data blocks — none of the classic site's app code runs here. */
-function loadScript(src){return new Promise(function(ok,no){var el=document.createElement('script');el.src=src;el.onload=ok;el.onerror=function(){no(new Error('Could not load '+src));};document.head.appendChild(el);});}
-EV.loadLive=function(){
-  var papers=window.EV_PASTPAPERS?Promise.resolve():loadScript(EV.SITE+'pastpapers.js').catch(function(){window.EV_PASTPAPERS=[];});
-  var page=fetch(EV.SITE+EV.CLASSIC,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(EV.CLASSIC+' '+r.status);return r.text();});
-  return Promise.all([page,papers]).then(function(a){
-    var html=a[0],scripts=[],re=/<script(\s[^>]*)?>([\s\S]*?)<\/script>/gi,m;
-    while((m=re.exec(html))){if(m[1]&&/\bsrc\s*=/.test(m[1]))continue;scripts.push(m[2]);}
-    var first=-1,last=-1;
-    scripts.forEach(function(t,i){if(first<0&&t.indexOf('==== DATA 1 (embedded)')>=0)first=i;if(t.indexOf('==== DEEP NOTES (embedded)')>=0)last=i;});
-    var app=scripts.find(function(t){return t.indexOf('window.EV_RESOURCES = {')>=0;})||'';
-    var rs=app.indexOf('window.EV_RESOURCES = {'),re2=app.indexOf('function resFor(',rs);
-    if(first<0||last<first||rs<0||re2<0)throw new Error('The data blocks in '+EV.CLASSIC+' were not found');
-    (new Function(scripts.slice(first,last+1).join('\n;\n')+'\n;\n'+app.slice(rs,re2)))();
-    if(!window.EV_HUB||!window.EV_DB)throw new Error('Live data did not load');
-  });
-};
+/* Study data: index.html loads data/site-data.js (subjects, notes, questions, PDF lists),
+   data/pastpapers.js and data/extra.js before this file, so everything is already in memory.
+   Those three files are the single source of truth; edit content there. */
 EV.load=function(){
-  /* On the website the data is read live from classic.html. A page opened straight from a folder
-     (double-click, file://) cannot read other files, so there it uses the saved copy in
-     data/snapshot.js instead (refresh it with: node tools/make-snapshot.js). */
-  var useSnap=window.EV_SNAPSHOT?Promise.resolve(true):(location.protocol==='file:'?loadScript('data/snapshot.js').then(function(){return !!window.EV_SNAPSHOT;}).catch(function(){return false;}):Promise.resolve(false));
-  return useSnap.then(function(has){
-    var snap=has?window.EV_SNAPSHOT:null;
-    if(snap){['EV_DB','EV_HUB','EV_HUB_DEEP','EV_RESOURCES','EV_PASTPAPERS'].forEach(function(k){if(snap[k])window[k]=snap[k];});}
-    return Promise.all([snap?Promise.resolve():EV.loadLive(),snap&&snap.extra?Promise.resolve(snap.extra):fetch('data/extra.json').then(function(r){if(!r.ok)throw new Error('extra');return r.json();})]);
+  return new Promise(function(ok,no){
+    if(!window.EV_HUB||!window.EV_DB){no(new Error('data/site-data.js did not load'));return;}
+    ok([null,window.EV_EXTRA||{commands:[],faq:[]}]);
   }).then(function(a){
     EV.D={hub:window.EV_HUB,deep:window.EV_HUB_DEEP||{},resources:window.EV_RESOURCES||{},db:window.EV_DB,papers:window.EV_PASTPAPERS||[],extra:a[1]};
     Object.keys(EV.D.hub).forEach(function(lk){
@@ -408,7 +387,8 @@ EV.kSend=function(conv,text,img){
     return EV.knovoAsk(conv.turns,{mode:conv.mode,ctx:conv.ctx,signal:conv.ctl.signal,onText:function(e){md.innerHTML=EV.md(e.text);conv.log.scrollTop=conv.log.scrollHeight;}});
   }).then(function(r){md.innerHTML=EV.md(r.text);conv.turns.push({role:'assistant',content:r.text});
     var acts=document.createElement('div');acts.className='acts';
-    acts.innerHTML='<button type="button" data-k="Give me an exam-style answer to that, worth full marks.">Exam answer</button><button type="button" data-k="Test me with one quick question on this.">Test me</button><button type="button" data-kflash>Make flashcards</button>';
+    var asked='';for(var qi=conv.turns.length-2;qi>=0;qi--)if(conv.turns[qi].role==='user'){asked=String(conv.turns[qi].content).split('\n')[0].slice(0,160);break;}
+    acts.innerHTML='<button type="button" data-k="Give me an exam-style answer to that, worth full marks.">Exam answer</button><button type="button" data-k="Test me with one quick question on this.">Test me</button><button type="button" data-kflash>Make flashcards</button><button type="button" data-lesson="'+esc(asked)+'">✨ Live Lesson</button>';
     a.appendChild(acts);
   }).catch(function(e){
     if(asked)conv.turns.pop();
@@ -443,6 +423,7 @@ document.addEventListener('click',function(e){
   t=e.target.closest('[data-close]');if(t&&t.closest('.modal')){t.closest('.modal').hidden=true;return;}
   t=e.target.closest('[data-close-sheet]');if(t){EV.closeSheet();return;}
   t=e.target.closest('[data-ask]');if(t){e.preventDefault();EV.askKnovo(t.dataset.ask,t.dataset.askExtra);return;}
+  t=e.target.closest('[data-lesson]');if(t){e.preventDefault();EV.closeSheet();if(EV.openLesson)EV.openLesson(t.dataset.lesson||'');return;}
   t=e.target.closest('[data-k]');if(t){var conv=t.closest('#sheet')?SHEET:(EV.wsConv||SHEET);EV.kSend(conv,t.dataset.k);return;}
   t=e.target.closest('[data-kflash]');if(t){var conv2=t.closest('#sheet')?SHEET:(EV.wsConv||SHEET);EV.kFlash(conv2);return;}
 });
@@ -488,7 +469,7 @@ EV.boot=function(){
     /* confirm the session with Supabase (renewing it if needed), then check owner / Pro */
     LV.getSession().then(function(sess){
       if(!sess){if(ST.profile){ST.profile=null;EV.paintProfile();EV.render();}return;}
-      LV.checkOwner().then(function(){EV.paintProfile();if(EV.route.name==='subject'||EV.route.name==='knovo')EV.render();});
+      LV.checkOwner().then(function(){EV.paintProfile();if(/^(subject|knovo|papers|paperSubj|admin)$/.test(EV.route.name))EV.render();EV.refreshPlan();});
     });
     var sp=$('#subjPick');
     EV.LEVELS.forEach(function(L){var g=document.createElement('optgroup');g.label=L.title.replace(/<[^>]+>/g,'');L.subjects.filter(function(o){return !o.soon}).forEach(function(o){var op=document.createElement('option');op.value=o.ref;op.textContent=o.s.icon+' '+o.s.name+' '+o.s.code;g.appendChild(op);});if(g.children.length)sp.appendChild(g);});
