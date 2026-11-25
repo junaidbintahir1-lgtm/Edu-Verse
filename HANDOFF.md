@@ -74,6 +74,16 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   season standings. After a season ends, the top 3 by season XP each pick one of three mystery rewards that the
   owner sets in Admin. Server functions: `eduverse_season_board`, `eduverse_my_season_reward`,
   `eduverse_claim_season_reward`.
+- **Knovo credits:** free accounts get 100 credits a day (message 1, Live Lesson question 1, Live Lesson 10,
+  image 10, +1 for a very long message). The Knovo server counts them (`credits_used`,
+  `credits_window_start` in `user_limits`) and returns `usage.credits`; the numbers are constants at the top of
+  the edge function. Pro and the owner are not charged. If the two columns are missing the server falls back to
+  the old per-feature limits.
+- **Knovo attachments:** up to 5 photos, text files, or one zip, 10 MB at most (`EV.readAttachments` in
+  `core.js`). Photos are read with the in-browser scanner; a zip is opened in the browser and only its photos
+  and text files are used.
+- **Phone layout:** at 720 px and below the top menu row is replaced by a bottom tab bar (`#tabbar`), and the
+  floating Ask Knovo button is hidden because Knovo has its own tab.
 - **Knovo:** `EV.knovoAsk` calls the Supabase `Knovo` edge function with the student's Bearer token. The rules
   from `EV.knovoRules` go in `systemInstruction` (the server adds its own rules first and keeps up to 3,000
   characters of ours); the subject's EduVerse notes go in the first student message. 429 `LIMIT_REACHED` with

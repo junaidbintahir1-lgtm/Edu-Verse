@@ -275,7 +275,9 @@ L.sqlEditorUrl="https://supabase.com/dashboard/project/"+SUPA_URL.replace(/^http
 /* =============================== Knovo =============================== */
 function setChatBlocked(ms){lsSet("knovo_chat_blocked_until",String(Date.now()+Math.max(60000,ms||0)));}
 L.chatBlockedFor=function(){if(L.isKnovoPro())return 0;return Math.max(0,Number(lsGet("knovo_chat_blocked_until")||"0")-Date.now());};
-L.lastUsage=null; /* {plan, remaining} from the server's last reply */
+L.lastUsage=null; /* {plan, remaining, credits:{left,daily,cost,resetMs}} from the server's last reply */
+L.CREDIT_COSTS={chat:1,lesson_qa:1,whiteboard:10,image:10}; /* shown to students; the server decides the real cost */
+L.DAILY_CREDITS=100;
 function kErr(code,extra){var e=new Error(code);e.code=code;if(extra)for(var k in extra)e[k]=extra[k];return e;}
 function replyText(d){
   var parts=(d&&d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts)||[];
@@ -299,7 +301,10 @@ L.askKnovo=function(opts){
       clearTimeout(timer);
       return r.json().catch(function(){return null;}).then(function(d){
         if(r.status===401||r.status===403){clearAuth();throw kErr("auth");}
-        if(r.status===429&&d&&d.error==="LIMIT_REACHED"){var ms=Number(d.msLeft)||0;setChatBlocked(ms);throw kErr("limit",{msLeft:ms});}
+        if(r.status===429&&d&&d.error==="LIMIT_REACHED"){var ms=Number(d.msLeft)||0,cr=d.credits||null;
+          /* credits: a big action (a Live Lesson) can be refused while small ones still fit */
+          if(cr){L.lastUsage={plan:"free",remaining:cr.left,credits:{left:cr.left,daily:cr.daily,cost:0,resetMs:ms}};if(cr.left<1)setChatBlocked(ms);}else setChatBlocked(ms);
+          throw kErr("limit",{msLeft:ms,credits:cr});}
         if(!r.ok)throw kErr("server",{detail:(d&&d.error&&(d.error.message||d.error))||("HTTP "+r.status)});
         if(d&&d.usage)L.lastUsage=d.usage;
         var txt=replyText(d);if(!txt)throw kErr("empty");

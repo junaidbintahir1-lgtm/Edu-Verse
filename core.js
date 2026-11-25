@@ -251,7 +251,7 @@ EV.render=function(){
   var v=$('#view');v.classList.remove('enter');void v.offsetWidth;v.classList.add('enter');
   fn(v,r);
   var navKey=r.name==='paperSubj'?'papers':r.name;
-  $$('#nav a').forEach(function(a){a.classList.toggle('on',a.dataset.n===navKey)});
+  $$('#nav a,#tabbar a').forEach(function(a){a.classList.toggle('on',a.dataset.n===(a.parentNode.id==='tabbar'&&r.name==='home'?'home':navKey))});
   document.body.classList.toggle('inKnovo',r.name==='knovo');
   document.body.classList.toggle('inMock',r.name==='mock'&&EV.mockRunning);
   EV.paintCtx();
@@ -330,7 +330,61 @@ EV.knovoErr=function(e){
     scanner:'The photo scanner could not load. Check your connection, or type the question instead.'}[c]||'Knovo could not answer just now. Try again in a moment.';
 };
 /* Free allowance is enforced by the server (429 LIMIT_REACHED). This only reads what the server last told us. */
-EV.allowance=function(){var u=LV.lastUsage||{},unl=LV.isKnovoPro()||u.remaining==='unlimited';return {unlimited:unl,left:unl?null:(typeof u.remaining==='number'?u.remaining:null),blockedFor:LV.chatBlockedFor(),plan:u.plan||null};};
+/* ---- Knovo attachments: up to 5 photos, text files, or one zip (10 MB at most) ----
+   Photos are read in the browser (text scanner). A zip is opened in the browser too: its photos and
+   text files are used, everything else is skipped. Nothing is uploaded except the text Knovo reads. */
+EV.ATT={maxImages:5,maxBytes:10*1024*1024,maxChars:7600};
+var IMG_RE=/\.(png|jpe?g|webp|gif|bmp)$/i,TXT_RE=/\.(txt|md|csv|json|js|ts|py|java|c|cpp|h|cs|html?|css|sql|xml|ya?ml|tex)$/i;
+function mimeOf(n){n=n.toLowerCase();return /\.png$/.test(n)?'image/png':/\.webp$/.test(n)?'image/webp':/\.gif$/.test(n)?'image/gif':/\.bmp$/.test(n)?'image/bmp':'image/jpeg';}
+function inflate(u8){if(typeof DecompressionStream==='undefined')return Promise.reject(new Error('This browser cannot open zip files. Please update it, or send the files separately.'));
+  return new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer().then(function(b){return new Uint8Array(b);});}
+/* reads a zip: resolves [{name, bytes}] for the entries we can use (photos and text files) */
+function unzip(file){
+  return file.arrayBuffer().then(function(buf){
+    var dv=new DataView(buf),n=buf.byteLength,eo=-1;
+    for(var i=n-22;i>=Math.max(0,n-65558);i--){if(dv.getUint32(i,true)===0x06054b50){eo=i;break;}}
+    if(eo<0)throw new Error('That zip file could not be read.');
+    var count=dv.getUint16(eo+10,true),off=dv.getUint32(eo+16,true),td=new TextDecoder(),jobs=[],total=0,skipped=0;
+    for(var k=0;k<count&&off+46<=n;k++){
+      if(dv.getUint32(off,true)!==0x02014b50)break;
+      var flag=dv.getUint16(off+8,true),method=dv.getUint16(off+10,true),csize=dv.getUint32(off+20,true),usize=dv.getUint32(off+24,true),nl=dv.getUint16(off+28,true),el=dv.getUint16(off+30,true),cl=dv.getUint16(off+32,true),lo=dv.getUint32(off+42,true);
+      var name=td.decode(new Uint8Array(buf,off+46,nl));off+=46+nl+el+cl;
+      var base=name.split('/').pop();
+      if(!base||/^__MACOSX\//.test(name)||base.charAt(0)==='.')continue;
+      if(!(IMG_RE.test(base)||TXT_RE.test(base))||(flag&1)||(method!==0&&method!==8)||usize>12*1024*1024){skipped++;continue;}
+      total+=usize;if(total>40*1024*1024)throw new Error('That zip unpacks to more than 40 MB. Please send a smaller one.');
+      if(jobs.length>=40){skipped++;continue;}
+      (function(base,method,csize,lo){
+        var ln=dv.getUint16(lo+26,true),le=dv.getUint16(lo+28,true),raw=new Uint8Array(buf,lo+30+ln+le,csize);
+        jobs.push((method===0?Promise.resolve(raw):inflate(raw)).then(function(b){return {name:base,bytes:b};}));
+      })(base,method,csize,lo);
+    }
+    return Promise.all(jobs).then(function(list){return {list:list,skipped:skipped};});
+  });
+}
+/* files: FileList/array. Resolves {images:[File], texts:[{name,text}], notes:[string]} or rejects with a clear message. */
+EV.readAttachments=function(files,already){
+  files=Array.prototype.slice.call(files||[]);already=already||{images:[],texts:[]};
+  var out={images:already.images.slice(),texts:already.texts.slice(),notes:[]},size=0,zips=0;
+  for(var i=0;i<files.length;i++){size+=files[i].size;if(/\.zip$/i.test(files[i].name))zips++;}
+  if(size>EV.ATT.maxBytes)return Promise.reject(new Error('That is larger than 10 MB. Please send smaller files.'));
+  if(zips>1)return Promise.reject(new Error('Please send one zip at a time.'));
+  function addImage(f){if(out.images.length>=EV.ATT.maxImages){if(out.notes.indexOf('Only the first 5 photos were kept.')<0)out.notes.push('Only the first 5 photos were kept.');return;}out.images.push(f);}
+  function addText(name,text){text=String(text||'').replace(/\u0000/g,'').trim();if(text)out.texts.push({name:name,text:text});}
+  var chain=Promise.resolve();
+  files.forEach(function(f){chain=chain.then(function(){
+    if(/\.zip$/i.test(f.name))return unzip(f).then(function(z){
+      z.list.forEach(function(e){if(IMG_RE.test(e.name))addImage(new File([e.bytes],e.name,{type:mimeOf(e.name)}));else addText(e.name,new TextDecoder().decode(e.bytes));});
+      if(!z.list.length)out.notes.push('No photos or text files were found in the zip.');
+      else if(z.skipped)out.notes.push(z.skipped+' file'+(z.skipped>1?'s':'')+' in the zip could not be used (only photos and text files are read).');});
+    if(/^image\//.test(f.type)||IMG_RE.test(f.name)){addImage(f);return;}
+    if(/^text\//.test(f.type)||TXT_RE.test(f.name))return f.text().then(function(t){addText(f.name,t);});
+    out.notes.push('"'+f.name+'" is not a photo, a text file or a zip, so it was left out.');
+  });});
+  return chain.then(function(){return out;});
+};
+function attCount(att){return att?(att.images?att.images.length:0)+(att.texts?att.texts.length:0):0;}
+EV.allowance=function(){var u=LV.lastUsage||{},unl=LV.isKnovoPro()||u.remaining==='unlimited',c=u.credits||null;return {unlimited:unl,left:unl?null:(c?c.left:(typeof u.remaining==='number'?u.remaining:null)),daily:c?c.daily:LV.DAILY_CREDITS,credits:!!c,resetMs:c?c.resetMs:0,blockedFor:LV.chatBlockedFor(),plan:u.plan||null};};
 
 /* Safe Markdown → HTML for AI answers */
 EV.md=function(src){
@@ -363,24 +417,40 @@ EV.kBubble=function(log,role,html,raw){
   else{d.textContent=raw||'';}
   log.appendChild(d);log.scrollTop=log.scrollHeight;return d;
 };
-function limitBubble(log,ms){EV.kBubble(log,'sys','<b>Free Knovo limit reached.</b> Knovo unlocks again in <b>'+esc(LV.fmtWait(ms))+'</b>. Knovo Pro removes this wait. <div class="row" style="justify-content:center;margin-top:8px"><button class="btn sm teal" type="button" data-plans>See Knovo Pro</button></div>');}
+function limitBubble(log,ms,cr){EV.kBubble(log,'sys',(cr&&cr.left>0?'<b>Not enough credits for this.</b> It needs '+cr.need+' and you have '+cr.left+' left today.':'<b>You have used today\'s Knovo credits.</b>')+' Your credits refill in <b>'+esc(LV.fmtWait(ms))+'</b>. Knovo Pro has no credit limit. <div class="row" style="justify-content:center;margin-top:8px"><button class="btn sm teal" type="button" data-plans>See Knovo Pro</button></div>');}
 /* Send one message in a conversation.
-   conv: {turns:[], log:Element, mode?, onDone?}  text: string  img: File/Blob? (read with the in-browser scanner) */
-EV.kSend=function(conv,text,img){
-  text=String(text||'').trim();if(!text&&!img)return Promise.resolve();
+   conv: {turns:[], log:Element, mode?, onDone?}  text: string
+   att: {images:[File], texts:[{name,text}]} from EV.readAttachments, or one photo File */
+EV.kSend=function(conv,text,att){
+  if(att&&!att.images&&!att.texts)att={images:[att],texts:[]};
+  if(!attCount(att))att=null;
+  var img=att&&att.images.length?att.images[0]:null;
+  text=String(text||'').trim();if(!text&&!att)return Promise.resolve();
   if(conv.busy)return Promise.resolve();
   if(!ST.profile){EV.kBubble(conv.log,'sys','<b>Sign in to use Knovo.</b> Knovo is free for signed-in students. <div class="row" style="justify-content:center;margin-top:8px"><a class="btn sm gold" href="#signin" data-close-sheet>Sign in</a></div>');return Promise.resolve();}
   var wait=LV.chatBlockedFor();if(wait){limitBubble(conv.log,wait);return Promise.resolve();}
-  var u=EV.kBubble(conv.log,'u','',text||'(photo)');
-  if(img){var im=document.createElement('img');im.alt='Your photo';im.src=URL.createObjectURL(img);u.insertBefore(im,u.firstChild);}
-  var a=EV.kBubble(conv.log,'a','<span class="typing"><i></i><i></i><i></i></span> <span class="small muted">'+(img?'Reading your photo…':'Thinking…')+'</span>');
+  var u=EV.kBubble(conv.log,'u','',text||(att&&att.images.length?'('+att.images.length+' photo'+(att.images.length>1?'s':'')+')':'(files)'));
+  if(att){var strip=document.createElement('div');strip.className='attStrip';
+    att.images.forEach(function(f){var im=document.createElement('img');im.alt='Your photo';im.src=URL.createObjectURL(f);strip.appendChild(im);});
+    att.texts.forEach(function(t){var c=document.createElement('span');c.className='attChip';c.textContent='📄 '+t.name;strip.appendChild(c);});
+    u.insertBefore(strip,u.firstChild);}
+  var a=EV.kBubble(conv.log,'a','<span class="typing"><i></i><i></i><i></i></span> <span class="small muted">'+(img?'Reading your photo…':att?'Reading your files…':'Thinking…')+'</span>');
   var md=a.querySelector('.md');
   conv.busy=true;conv.ctl=new AbortController();if(conv.onBusy)conv.onBusy(true);
-  var prep=img?LV.ocr(img,function(p){var sm=md.querySelector('.small');if(sm)sm.textContent='Reading your photo… '+p+'%';}).then(function(t){
-      if(!t){var e=new Error('nothing read');e.code='noText';throw e;}
+  var prep=Promise.resolve(text);
+  if(att){
+    var parts=[],N=att.images.length,chainO=Promise.resolve();
+    att.images.forEach(function(f,ix){chainO=chainO.then(function(){
+      return LV.ocr(f,function(p){var sm=md.querySelector('.small');if(sm)sm.textContent='Reading photo '+(ix+1)+' of '+N+'… '+p+'%';}).then(function(t){if(t)parts.push((N>1?'Text read from photo '+(ix+1)+' of '+N:'Question text read from my photo')+' (the scanner can misread a few characters):\n'+t);},
+        function(e){if(e&&e.code)throw e;var x=new Error('scanner');x.code='scanner';throw x;});});});
+    prep=chainO.then(function(){
+      att.texts.forEach(function(t){parts.push('File "'+t.name+'":\n'+t.text);});
+      if(!parts.length){var e=new Error('nothing read');e.code='noText';throw e;}
       md.innerHTML='<span class="typing"><i></i><i></i><i></i></span> <span class="small muted">Thinking…</span>';
-      return (text?text+'\n\n':'')+'Question text read from my photo (the scanner can misread a few characters):\n'+t;
-    },function(e){if(e&&e.code)throw e;var x=new Error('scanner');x.code='scanner';throw x;}):Promise.resolve(text);
+      var body=(text?text+'\n\n':'')+parts.join('\n\n');
+      if(body.length>EV.ATT.maxChars)body=body.slice(0,EV.ATT.maxChars)+'\n\n[The rest was too long and was left out.]';
+      return body;});
+  }
   var asked=false;
   return prep.then(function(content){
     conv.turns.push({role:'user',content:content});asked=true;
@@ -393,8 +463,8 @@ EV.kSend=function(conv,text,img){
   }).catch(function(e){
     if(asked)conv.turns.pop();
     if(e&&e.code==='cancelled'){md.innerHTML='<span class="muted small">Stopped.</span>';return;}
-    if(e&&e.code==='noText'){md.innerHTML='<p class="muted small">No clear printed text was found in that photo. Try a sharper, well-lit photo of printed text, or type the question.</p>';return;}
-    if(e&&e.code==='limit'){a.remove();limitBubble(conv.log,e.msLeft||0);return;}
+    if(e&&e.code==='noText'){md.innerHTML='<p class="muted small">No clear printed text was found in what you sent. Try a sharper, well-lit photo of printed text, or type the question.</p>';return;}
+    if(e&&e.code==='limit'){a.remove();limitBubble(conv.log,e.msLeft||0,e.credits);return;}
     if(e&&e.code==='auth'){EV.syncProfile();EV.paintProfile();md.innerHTML='<p class="muted small">Your session has expired. <a href="#signin" data-close-sheet>Sign in again</a> to keep using Knovo.</p>';return;}
     md.innerHTML='<p class="muted small">'+esc(EV.knovoErr(e))+'</p>';})
   .then(function(){conv.busy=false;if(conv.onBusy)conv.onBusy(false);if(conv.onDone)conv.onDone();conv.log.scrollTop=conv.log.scrollHeight;});

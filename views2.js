@@ -276,7 +276,7 @@ EV.openLesson=openLesson;
 var MODES=[['chat','Chat'],['mark','Mark my answer'],['scan','Scan a question'],['lesson','Live lesson']];
 var STARTERS={chat:['Explain this topic simply, then test me','What do examiners look for in a 6-mark explain question?','Make me a 20-minute revision plan for tonight'],
   mark:['Question (6 marks): Explain how the structure of a leaf is adapted for photosynthesis.\nMy answer: Leaves are thin and have chlorophyll which absorbs light. They have stomata for gas exchange.'],
-  scan:['Attach a photo of a question with the 📷 button, then press Send.'],
+  scan:['Attach up to 5 photos of questions (or a zip) with the 📎 button, then press Send.'],
   lesson:['Teach me moments and the principle of moments','Teach me electrolysis of copper(II) sulfate','Teach me supply and demand diagrams']};
 V.knovo=function(el){
   if(!ST.profile){lockPage(el,'Knovo is members-only','Sign in to chat with Knovo, mark your answers, scan questions and start Live Lessons. Your free allowance is waiting.',
@@ -287,9 +287,9 @@ V.knovo=function(el){
   var h='<div class="in"><div class="kw"><aside class="kside" aria-label="Saved chats"><button class="btn teal" type="button" id="kNew" style="margin-bottom:6px">+ New chat</button><h4>Saved on this device</h4><div id="kList"></div></aside>'+
     '<div class="kmain"><div class="khead"><img src="assets/knovo-logo-sm.png" alt=""><div><b>Knovo</b><span class="s">EduVerse study tutor</span></div><div class="modes" id="kModes">'+MODES.map(function(m){return '<button type="button" data-mode="'+m[0]+'" class="'+(cur.mode===m[0]?'on':'')+'">'+m[1]+'</button>';}).join('')+'</div></div>'+
     '<div class="log" id="klog" aria-live="polite"></div>'+
-    '<div class="compose"><div class="pv" id="kPv" hidden></div><form id="kform" autocomplete="off"><button class="att" type="button" id="kAtt" title="Attach a photo" aria-label="Attach a photo">📷</button><input type="file" id="kFile" accept="image/*" hidden><label for="kq" class="sr">Message Knovo</label><textarea id="kq" rows="1" placeholder="Ask anything about your syllabus…"></textarea><button class="stop" type="button" id="kStop" hidden>Stop</button><button class="send" type="submit" id="kSend">Send</button></form></div></div>'+
+    '<div class="compose"><div class="kCred" id="kCred"></div><div class="pv" id="kPv" hidden></div><form id="kform" autocomplete="off"><button class="att" type="button" id="kAtt" title="Attach up to 5 photos, or a zip (10 MB at most)" aria-label="Attach photos or a zip">📎</button><input type="file" id="kFile" accept="image/*,.zip,.txt,.md,.csv" multiple hidden><label for="kq" class="sr">Message Knovo</label><textarea id="kq" rows="1" placeholder="Ask anything about your syllabus…"></textarea><button class="stop" type="button" id="kStop" hidden>Stop</button><button class="send" type="submit" id="kSend">Send</button></form></div></div>'+
     '<aside class="kctx" aria-label="Context"><h4>Knovo knows</h4><label class="field" for="kSub">Subject for this chat<select id="kSub">'+subOpts+'</select></label><div class="kv" id="kKnow"></div>'+
-    '<h4>Your Knovo access</h4><div class="kv" id="kAllow"></div><div class="mini"><small>Knovo Pro</small>More messages, photo scans and Live Lessons. <button class="btn sm teal" type="button" data-plans style="justify-self:start">See plans</button></div>'+
+    '<h4>Your Knovo access</h4><div class="kv" id="kAllow"></div><div class="mini"><small>Knovo Pro</small>No credit limit on messages, scans, images and Live Lessons. <button class="btn sm teal" type="button" data-plans style="justify-self:start">See plans</button></div>'+
     '<h4>Your Knovo deck</h4><div id="kDeck"></div><div class="aiNote" id="kAi"></div></aside></div></div>';
   el.innerHTML=h;
   var log=$('#klog'),conv={turns:cur.turns.slice(),log:log,mode:cur.mode,ctx:null};
@@ -308,24 +308,33 @@ V.knovo=function(el){
   function paintKnow(){var o=cur.ref?EV.BYREF[cur.ref]:null,acc=o?EV.accuracy(o.ref):null;$('#kKnow').innerHTML=o?'<div><span>Subject</span><b>'+esc(o.s.name)+'</b></div><div><span>Code</span><b class="code">'+esc(o.s.code)+'</b></div><div><span>Notes it reads</span><b>'+EV.notesOf(o).length+' sections</b></div><div><span>Your accuracy</span><b>'+(acc?acc.pct+'%':'—')+'</b></div>':'<p class="small muted">Choose a subject so Knovo reads its notes and paper pattern.</p>';}
   function paintAllow(){var a=EV.allowance();
     $('#kAllow').innerHTML='<div><span>Plan</span><b>'+esc(EV.planLabel())+'</b></div>'+
-      (a.unlimited?'<div><span>Messages</span><b>Unlimited</b></div>':
-       a.blockedFor?'<div><span>Messages</span><b style="color:var(--warn)">Unlocks in '+esc(EVLive.fmtWait(a.blockedFor))+'</b></div>':
-       '<div><span>Messages left</span><b>'+(a.left==null?'Shown after your first message':a.left)+'</b></div>')+
-      '<p class="small muted" style="margin:0">Free accounts get a set number of Knovo messages in each time window. EduVerse\'s server keeps count, so it is the same on every device.</p>';}
+      (a.unlimited?'<div><span>Credits</span><b>Unlimited</b></div>':
+       a.blockedFor?'<div><span>Credits</span><b style="color:var(--warn)">Refill in '+esc(EVLive.fmtWait(a.blockedFor))+'</b></div>':
+       '<div><span>Credits today</span><b>'+(a.left==null?a.daily+' a day':a.left+' / '+a.daily)+'</b></div>')+
+      (a.unlimited?'':'<div><span>Message</span><b>1 credit</b></div><div><span>Live Lesson</span><b>10 credits</b></div><div><span>Image</span><b>10 credits</b></div>')+
+      '<p class="small muted" style="margin:0">'+(a.unlimited?'Your plan has no credit limit.':'Free accounts get '+a.daily+' Knovo credits every day. EduVerse\'s server keeps count, so it is the same on every device.')+'</p>';
+    var cl=$('#kCred');if(cl)cl.textContent=a.unlimited?'':a.blockedFor?'Credits refill in '+EVLive.fmtWait(a.blockedFor):(a.left==null?a.daily+' credits a day':a.left+' of '+a.daily+' credits left today');}
   function paintDeck(){var d=ST.kdeck;$('#kDeck').innerHTML=d.length?'<div class="mini"><small>'+d.length+' cards</small><b>'+esc(d[d.length-1].q)+'</b><span class="muted">'+esc(d[d.length-1].a)+'</span></div><button class="btn sm" type="button" id="kPlay" style="justify-self:start">Practise deck</button>':'<p class="small muted">Press "Make flashcards" under any answer to save cards here.</p>';var p=$('#kPlay');if(p)p.addEventListener('click',function(){playDeck();});}
   function paintAi(){$('#kAi').innerHTML='Knovo is EduVerse\'s study tutor. It reads this subject\'s EduVerse notes and paper pattern, but it can make mistakes, so check important facts against your syllabus.';}
   function playDeck(){var host=document.createElement('div');log.innerHTML='';log.appendChild(host);EV.deck(host,ST.kdeck.map(function(c,i){return {q:c.q,a:c.a,key:'kn:'+c.t+'#'+i}}),'Knovo deck');var back=document.createElement('button');back.className='btn sm';back.type='button';back.textContent='← Back to chat';back.style.alignSelf='center';back.addEventListener('click',paintLog);log.appendChild(back);}
   EV.onDeckChange=paintDeck;EV.onKnovoUsage=function(){paintAllow();};
   paintLog();paintList();paintKnow();paintAllow();paintDeck();paintAi();
-  var img=null;
+  var att=null;
+  function paintAtt(notes){var pv=$('#kPv');if(!pv)return;var n=att?att.images.length+att.texts.length:0;
+    if(!n&&!(notes&&notes.length)){pv.hidden=true;pv.innerHTML='';return;}
+    pv.hidden=false;pv.innerHTML=(att?att.images.map(function(f){return '<img alt="Attached photo" src="'+URL.createObjectURL(f)+'">';}).join('')+att.texts.map(function(t){return '<span class="attChip">📄 '+esc(t.name)+'</span>';}).join(''):'')+
+      '<span class="grow">'+(n?(att.images.length?att.images.length+' of 5 photos':'')+(att.images.length&&att.texts.length?' · ':'')+(att.texts.length?att.texts.length+' file'+(att.texts.length>1?'s':''):''):'')+(notes&&notes.length?'<br><span style="color:var(--warn)">'+notes.map(esc).join(' ')+'</span>':'')+'</span>'+(n?'<button class="btn sm ghost" type="button" id="kRm">Remove</button>':'');
+    var rm=$('#kRm');if(rm)rm.addEventListener('click',function(){att=null;paintAtt();$('#kFile').value='';});}
   $('#kAtt').addEventListener('click',function(){$('#kFile').click();});
-  $('#kFile').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;img=f;var pv=$('#kPv');pv.hidden=false;pv.innerHTML='<img alt="Attached photo" src="'+URL.createObjectURL(f)+'"><span class="grow">'+esc(f.name)+'</span><button class="btn sm ghost" type="button" id="kRm">Remove</button>';$('#kRm').addEventListener('click',function(){img=null;pv.hidden=true;pv.innerHTML='';$('#kFile').value='';});
+  $('#kFile').addEventListener('change',function(){var fs=this.files;if(!fs||!fs.length)return;var inp=this;
+    EV.readAttachments(fs,att).then(function(r){att={images:r.images,texts:r.texts};paintAtt(r.notes);inp.value='';},function(e){paintAtt([e.message||'Those files could not be read.']);inp.value='';});
     if(conv.mode!=='scan'){conv.mode='scan';cur.mode='scan';$$('#kModes button').forEach(function(b){b.classList.toggle('on',b.dataset.mode==='scan')});}
   });
   var ta=$('#kq');
+  if(window.innerWidth<480)ta.placeholder='Ask Knovo…';
   ta.addEventListener('input',function(){EV.autoGrow(ta)});
   ta.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#kform').requestSubmit();}});
-  $('#kform').addEventListener('submit',function(e){e.preventDefault();if(conv.mode==='lesson'){openLesson(ta.value);ta.value='';EV.autoGrow(ta);return;}if(!conv.turns.length)log.innerHTML='';EV.kSend(conv,ta.value,img);ta.value='';EV.autoGrow(ta);img=null;var pv=$('#kPv');pv.hidden=true;pv.innerHTML='';$('#kFile').value='';});
+  $('#kform').addEventListener('submit',function(e){e.preventDefault();if(conv.mode==='lesson'){openLesson(ta.value);ta.value='';EV.autoGrow(ta);return;}if(!conv.turns.length)log.innerHTML='';EV.kSend(conv,ta.value,att);ta.value='';EV.autoGrow(ta);att=null;paintAtt();$('#kFile').value='';});
   $('#kStop').addEventListener('click',function(){if(conv.ctl)conv.ctl.abort();});
   $('#kModes').addEventListener('click',function(e){var b=e.target.closest('[data-mode]');if(!b)return;conv.mode=cur.mode=b.dataset.mode;$$('#kModes button').forEach(function(x){x.classList.toggle('on',x===b)});if(!conv.turns.length)paintLog();ta.placeholder={chat:'Ask anything about your syllabus…',mark:'Paste the question, marks and your answer…',scan:'Add a note about the photo (optional)…',lesson:'Name a topic, then press Send to open the board…'}[conv.mode];});
   $('#kSub').addEventListener('change',function(){cur.ref=this.value;EV.prevRef=this.value;conv.ctx=ctxFor();paintKnow();EV.toast(this.value?'Knovo is now reading '+EV.BYREF[this.value].s.name+' notes':'No subject selected');});
@@ -390,31 +399,7 @@ V.signin=function(el,r){
 };
 
 /* =================== WHAT TO ADD =================== */
-var IDEAS=[
-  ['quick','Exam countdown everywhere','Students set their first paper date once and see days left on the home page and each subject.','#home'],
-  ['quick','Flip-card daily quiz','Questions flip like flashcards, with "got it" and "missed it" feeding the Mistakes notebook.','#home'],
-  ['quick','Focus timer','A 25/5 study timer on the home page. Could award XP for completed sessions.','#home'],
-  ['quick','Knovo preview when signed out','A blurred sample chat instead of a padlock, so visitors see what Knovo does before signing up.','#knovo'],
-  ['mid','Syllabus star map','Each subject\'s notes sections as a constellation that lights up as students learn them.','#overview-olevelphys5054'],
-  ['mid','Grade target calculator','Uses each paper\'s real weighting to show the average needed on the remaining papers.','#tools-olevelphys5054'],
-  ['mid','Spaced-repetition flashcards','Cards come back just before students would forget them, using the level each card is on.',''],
-  ['mid','Examiner-report tips per topic','Short "where students lost marks" notes on each topic, written in your own words from public examiner reports.',''],
-  ['big','Study rooms and duels','Two friends answer the same 10 questions live, and the winner gets XP. Builds on your leaderboard.',''],
-  ['big','Automatic revision planner','Students enter exam dates and weak topics, and EduVerse builds a week-by-week plan that adjusts to their progress.',''],
-  ['big','Parent and teacher view','A read-only weekly progress link. Schools could use it with a whole class.',''],
-  ['big','Topic engines for every subject','Extend the full Maths 4024 engine (objectives, examples, mark schemes) to the sciences next.','#topics-olevelmath4024'],
-  ['knovo','Companion side panel','Knovo opens beside any page and already knows the subject. Try the "Ask Knovo" button.','#notes-olevelchem5070'],
-  ['knovo','Answer marking','Paste an answer and get point-by-point marks. Try "Mark my answer" in Knovo.','#knovo'],
-  ['knovo','Ctrl K / ⌘K shortcut','Open Knovo from anywhere with the keyboard. Press Ctrl K now.',''],
-  ['knovo','Voice mode in Urdu and English','Students ask out loud and Knovo explains in the language they think in.','']
-];
-var ITAG={quick:['Quick win','ok'],mid:['Medium','gold'],big:['Big bet',''],knovo:['Knovo','teal']};
-V.ideas=function(el){
-  var f=EV.ideaF||'all';
-  el.innerHTML='<div class="in page"><div class="pageHead"><span class="eyebrow">Roadmap ideas</span><h1>What you can add to EduVerse</h1><p class="sub">Features ranked by effort. The ones marked "In this test build" already work here, so you can try them.</p></div><div class="row" id="iF">'+[['all','All'],['quick','Quick wins'],['mid','Medium'],['big','Big bets'],['knovo','Knovo']].map(function(x){return '<button class="btn sm'+(f===x[0]?' gold':'')+'" type="button" data-if="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div><div class="ideas">'+
-  IDEAS.filter(function(d){return f==='all'||d[0]===f}).map(function(d){var t=ITAG[d[0]];return '<article class="idea"><div class="row"><span class="pill '+t[1]+'">'+t[0]+'</span>'+(d[3]?'<span class="pill">In this test build</span>':'')+'</div><h3>'+esc(d[1])+'</h3><p>'+esc(d[2])+'</p>'+(d[3]?'<a href="'+d[3]+'">Try it →</a>':'')+'</article>';}).join('')+'</div></div>';
-  $('#iF').addEventListener('click',function(e){var b=e.target.closest('[data-if]');if(!b)return;EV.ideaF=b.dataset.if;EV.render();});
-};
+
 
 /* Gate the side sheet like the live site: Knovo is for signed-in students */
 var openSheet=EV.openSheet;

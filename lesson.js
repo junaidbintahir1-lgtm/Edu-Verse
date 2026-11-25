@@ -319,7 +319,7 @@
       if(res.auth){clearInterval(tipInt);sessionExpired();return;}
       if(res.limit){
         clearInterval(tipInt);if(loading)loading.style.display="none";L.state="error";updateControls();setStatus("allowance used");
-        sub.innerHTML="<span class='klError'>⏳ Your Live Lesson allowance is used for now. "+(res.msLeft?"Please try again in <b>"+fmtWait(res.msLeft)+"</b>.":"Please retry shortly.")+" Knovo Pro includes unlimited lessons.</span>";return;
+        sub.innerHTML="<span class='klError'>⏳ "+(res.data&&res.data.credits?"A Live Lesson costs "+res.data.credits.need+" credits and you have "+res.data.credits.left+" left today. ":"Your Live Lesson allowance is used for now. ")+(res.msLeft?"Your credits refill in <b>"+fmtWait(res.msLeft)+"</b>.":"Please retry shortly.")+" Knovo Pro has no credit limit.</span>";return;
       }
       if(res.error){if(res.status&&window.console)console.warn("Knovo Live Lesson server error",res.status,res.error);lastErr=res.network?"net":res.status?"server":"garbled";L.serverDetail=res.status?String(res.error).slice(0,1500):"";if(res.network||res.status)break;continue;}
       try{lesson=parseLesson(res.text);}catch(e){lastErr="garbled";lesson=null;}
@@ -1286,7 +1286,7 @@
     if(res.auth){sessionExpired();return;}
     var say,board=null,action="wait",ok=false;
     if(res.limit){
-      say="You've used your free Knovo questions for now"+(res.msLeft?" — they unlock again in "+fmtWait(res.msLeft):"")+". The lesson itself can keep going, so tap Continue whenever you're ready.";
+      say="You've used today's Knovo credits"+(res.msLeft?" — they refill in "+fmtWait(res.msLeft):"")+". The lesson itself can keep going, so tap Continue whenever you're ready.";
     }else if(res.error){
       say="Sorry, I couldn't reach my notes just then. Tap Ask to try that question again, or Continue to carry on with the lesson.";
       if(inp&&!inp.value)inp.value=q;
