@@ -232,7 +232,7 @@ setInterval(function(){if(canSync())L.xpSync(false);},60000);
 document.addEventListener("visibilitychange",function(){if(!document.hidden&&canSync())L.xpSync(false);});
 
 /* ---- Seasons: every 6 months (January–June, July–December, UTC); the top 3 pick a mystery reward ----
-   Server functions come from new-design/database-update.sql. Until it is run, these report "setup". */
+   Server functions come from database-update.sql. Until it is run, these report "setup". */
 L.FIRST_SEASON=Date.UTC(2027,0,1); /* EduVerse launches in January 2027 */
 L.seasonOf=function(t){var d=new Date(t),y=d.getUTCFullYear(),h=d.getUTCMonth()<6?1:2;return {id:y+"-H"+h,start:Date.UTC(y,h===1?0:6,1),end:Date.UTC(h===1?y:y+1,h===1?6:0,1),label:(h===1?"January – June ":"July – December ")+y};};
 function setupAware(p){return p.catch(function(e){var missing=e.status===404||e.code==="PGRST202"||/could not find|schema cache|function.*not/i.test(e.message||"");var x=new Error(missing?"setup":(e.message||"error"));x.setup=missing;x.status=e.status;throw x;});}

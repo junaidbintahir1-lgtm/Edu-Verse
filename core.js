@@ -12,10 +12,11 @@ EV.fine=window.matchMedia('(pointer: fine)').matches;
 var esc=EV.esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 EV.strip=function(h){var d=document.createElement('div');d.innerHTML=String(h||'');return d.textContent||'';};
 
-/* ---------------- Where the live site lives ----------------
-   This design sits in /new-design, so the live site's files are one folder up.
-   When the design moves to the site root, set window.EV_SITE_ROOT='' before core.js loads. */
-EV.SITE=(typeof window.EV_SITE_ROOT==='string')?window.EV_SITE_ROOT:'../';
+/* ---------------- Where the site's files live ----------------
+   This design is the site's main page (index.html at the site root). The classic site is kept
+   beside it as classic.html and is still the single source of the study data (see EV.loadLive). */
+EV.SITE=(typeof window.EV_SITE_ROOT==='string')?window.EV_SITE_ROOT:'';
+EV.CLASSIC='classic.html';
 /* PDFs open from the same site with relative paths (resources/..., notes/...) */
 function encPath(p){return String(p).split('/').map(encodeURIComponent).join('/');}
 EV.pdfView=function(p){return EV.SITE+encPath(p);};
@@ -44,7 +45,7 @@ function dayDiff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12
    and not faster than one every 15 seconds), mastering a Maths topic (every question in it right),
    and finishing a timed mock seriously (at least half the time used and 40%+ scored, once per paper
    per week). Opening or ticking chapters, flipping flashcards and daily visits earn no XP.
-   The database update in new-design/database-update.sql makes the server enforce the same rules.
+   The database update in database-update.sql makes the server enforce the same rules.
    Every achievement is one ledger event with a unique key (topic:…, question:…, card:…, streak:<date>,
    mock:<time>), stored in the live site's ev_state_v1 and synced to the real leaderboard.
    The same achievement can never be counted twice, even across the old and new design. */
@@ -186,13 +187,13 @@ var LEVEL_META={
 };
 EV.LEVEL_META=LEVEL_META;
 function slugify(s){return String(s).toLowerCase().replace(/[^a-z0-9]/g,'');}
-/* Live data: the live index.html is the single source of truth. Its subject data
-   (EV_DB, EV_HUB, EV_HUB_DEEP and EV_RESOURCES) is written inside index.html itself, so we read
-   index.html and run ONLY those data blocks — none of the old site's app code runs here. */
+/* Live data: classic.html (the classic site) is the single source of truth. Its subject data
+   (EV_DB, EV_HUB, EV_HUB_DEEP and EV_RESOURCES) is written inside classic.html itself, so we read
+   that file and run ONLY those data blocks — none of the classic site's app code runs here. */
 function loadScript(src){return new Promise(function(ok,no){var el=document.createElement('script');el.src=src;el.onload=ok;el.onerror=function(){no(new Error('Could not load '+src));};document.head.appendChild(el);});}
 EV.loadLive=function(){
   var papers=window.EV_PASTPAPERS?Promise.resolve():loadScript(EV.SITE+'pastpapers.js').catch(function(){window.EV_PASTPAPERS=[];});
-  var page=fetch(EV.SITE+'index.html',{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error('index.html '+r.status);return r.text();});
+  var page=fetch(EV.SITE+EV.CLASSIC,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(EV.CLASSIC+' '+r.status);return r.text();});
   return Promise.all([page,papers]).then(function(a){
     var html=a[0],scripts=[],re=/<script(\s[^>]*)?>([\s\S]*?)<\/script>/gi,m;
     while((m=re.exec(html))){if(m[1]&&/\bsrc\s*=/.test(m[1]))continue;scripts.push(m[2]);}
@@ -200,16 +201,21 @@ EV.loadLive=function(){
     scripts.forEach(function(t,i){if(first<0&&t.indexOf('==== DATA 1 (embedded)')>=0)first=i;if(t.indexOf('==== DEEP NOTES (embedded)')>=0)last=i;});
     var app=scripts.find(function(t){return t.indexOf('window.EV_RESOURCES = {')>=0;})||'';
     var rs=app.indexOf('window.EV_RESOURCES = {'),re2=app.indexOf('function resFor(',rs);
-    if(first<0||last<first||rs<0||re2<0)throw new Error('The live index.html data blocks were not found');
+    if(first<0||last<first||rs<0||re2<0)throw new Error('The data blocks in '+EV.CLASSIC+' were not found');
     (new Function(scripts.slice(first,last+1).join('\n;\n')+'\n;\n'+app.slice(rs,re2)))();
     if(!window.EV_HUB||!window.EV_DB)throw new Error('Live data did not load');
   });
 };
 EV.load=function(){
-  /* A standalone copy ships its data in data/snapshot.js (window.EV_SNAPSHOT), so it also opens with a double-click */
-  var snap=window.EV_SNAPSHOT;
-  if(snap){['EV_DB','EV_HUB','EV_HUB_DEEP','EV_RESOURCES','EV_PASTPAPERS'].forEach(function(k){if(snap[k])window[k]=snap[k];});}
-  return Promise.all([snap?Promise.resolve():EV.loadLive(),snap&&snap.extra?Promise.resolve(snap.extra):fetch('data/extra.json').then(function(r){if(!r.ok)throw new Error('extra');return r.json();})]).then(function(a){
+  /* On the website the data is read live from classic.html. A page opened straight from a folder
+     (double-click, file://) cannot read other files, so there it uses the saved copy in
+     data/snapshot.js instead (refresh it with: node tools/make-snapshot.js). */
+  var useSnap=window.EV_SNAPSHOT?Promise.resolve(true):(location.protocol==='file:'?loadScript('data/snapshot.js').then(function(){return !!window.EV_SNAPSHOT;}).catch(function(){return false;}):Promise.resolve(false));
+  return useSnap.then(function(has){
+    var snap=has?window.EV_SNAPSHOT:null;
+    if(snap){['EV_DB','EV_HUB','EV_HUB_DEEP','EV_RESOURCES','EV_PASTPAPERS'].forEach(function(k){if(snap[k])window[k]=snap[k];});}
+    return Promise.all([snap?Promise.resolve():EV.loadLive(),snap&&snap.extra?Promise.resolve(snap.extra):fetch('data/extra.json').then(function(r){if(!r.ok)throw new Error('extra');return r.json();})]);
+  }).then(function(a){
     EV.D={hub:window.EV_HUB,deep:window.EV_HUB_DEEP||{},resources:window.EV_RESOURCES||{},db:window.EV_DB,papers:window.EV_PASTPAPERS||[],extra:a[1]};
     Object.keys(EV.D.hub).forEach(function(lk){
       var L=EV.D.hub[lk];var lv={lk:lk,slug:slugify(lk),title:L.title,sub:L.sub,meta:LEVEL_META[lk]||{},subjects:[]};
@@ -373,7 +379,7 @@ EV.md=function(src){
 /* ---------------- Knovo chat widget (used by the side sheet and the workspace) ---------------- */
 EV.kBubble=function(log,role,html,raw){
   var d=document.createElement('div');d.className='m '+role;
-  if(role==='a')d.innerHTML='<div class="who"><img src="assets/knovo-logo.png" alt="">Knovo</div><div class="md">'+html+'</div>';
+  if(role==='a')d.innerHTML='<div class="who"><img src="assets/knovo-logo-sm.png" alt="">Knovo</div><div class="md">'+html+'</div>';
   else if(role==='sys')d.innerHTML=html;
   else{d.textContent=raw||'';}
   log.appendChild(d);log.scrollTop=log.scrollHeight;return d;

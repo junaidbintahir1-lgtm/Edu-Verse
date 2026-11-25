@@ -1,30 +1,30 @@
-# EduVerse new design: handover guide
+# EduVerse: handover guide
 
-The new black 3D EduVerse design, **connected to the real backend**. It lives in `new-design/` on the
-branch `claude/new-design` and does not change the classic site (`index.html`, `signin.html`, data files, PDFs).
+This repository is the EduVerse website. **`index.html` is the new black 3D design**, connected to the real
+backend. The classic site is kept beside it as **`classic.html`** and still holds the study data.
+Work happens on the branch `claude/new-design`; `main` (the live site) changes only when the owner says so.
 EduVerse launches in **January 2027**.
 
 ---
 
 ## 1. Run it
 
-The design reads the live site's files from the folder above it, so serve the **repo root**:
-
 ```bash
-cd Edu-Verse            # the repo root, not new-design/
+cd Edu-Verse            # the repo root
 python3 -m http.server 8767
-# open http://localhost:8767/new-design/eduverse-app.html
+# open http://localhost:8767/index.html
 ```
 
-On GitHub Pages it works at `/new-design/eduverse-app.html` with no changes. All code is local, including
-Three.js r128 (`vendor/three-r128.min.js`, MIT licence). The only external requests are Supabase,
-Google Fonts, the contact-form service (formsubmit.co) and, for photo scans, Tesseract from jsDelivr.
+On GitHub Pages it works as is (static files, no build step). Double-clicking `index.html` also works: it then
+uses the saved data copy in `data/snapshot.js` and shows a flat Earth (browsers block 3D textures on `file://`).
+All code is local, including Three.js r128 (`vendor/three-r128.min.js`, MIT licence). The only external requests
+are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for photo scans, Tesseract from jsDelivr.
 
 ## 2. Files
 
 | File | What it holds |
 |---|---|
-| `eduverse-app.html` | Page shell and **all CSS** (design tokens on `:root`), top bar, ☰ drawer, bell, Knovo side sheet, Knovo plans modal |
+| `index.html` | The new design: page shell and **all CSS** (design tokens on `:root`), top bar, ☰ drawer, bell, Knovo side sheet, Knovo plans modal |
 | `live.js` | **Every real connection** (`window.EVLive`): Supabase sign-in / sign-up / refresh / sign-out, Knovo edge function, XP ledger + leaderboard sync, leaderboard choice, seasons, owner tools, photo text reader, the live site's saved progress |
 | `core.js` | `window.EV`: live data loading, saved progress + the bridge to the live site, effort-only XP, router + members-only gate, Knovo engine (`EV.knovoAsk`, `EV.kSend`, `EV.kFlash`), Markdown, side sheet, 3D hero |
 | `hero.js` | **Home hero**: 4-slide slideshow (`EV.heroHTML`), the real Earth in WebGL, floating formula / equation / quote / fact cards, ticker and stats band. Defines `EV.mountHero` |
@@ -33,19 +33,22 @@ Google Fonts, the contact-form service (formsubmit.co) and, for photo scans, Tes
 | `views2.js` | Dashboard, technique, mistakes, mock, papers, ranks + seasons, **admin**, Knovo workspace, about, sign in / create account, ideas |
 | `menu.js` | ☰ side menu (plan, leaderboard switch, Instagram sneak peeks, owner admin link), notifications bell, text size |
 | `data/extra.json` | Command-word table and FAQ (design copy; the FAQ says EduVerse is members-only) |
+| `data/snapshot.js` | Saved copy of the study data, used **only** for double-click (`file://`) viewing. Refresh with `node tools/make-snapshot.js` |
+| `tools/make-snapshot.js` | Rebuilds `data/snapshot.js` from `classic.html` |
+| `classic.html` | The classic site (was `index.html`). **Single source of the study data**: edit notes, questions and PDF lists here. Also has the rebuilt Live Lesson |
+| `signin.html`, `ctrl-panel-x94k.html`, `subject.html`, `xp-leaderboard.js`, `pastpapers.js` | Classic pages and scripts, unchanged. `signin.html` sends students to `index.html` after login |
 | `database-update.sql` | **Run once in Supabase**: effort-only XP rules, leaderboard choice, seasons, mystery rewards, owner tools |
 | `vendor/` | Three.js r128 and its licence |
-| `assets/` | EduVerse and Knovo logos |
+| `assets/` | Logos. The new design uses `eduverse-logo.png` and `knovo-logo-sm.png`; the others belong to the classic pages |
 
 ## 3. How it works
 
-- **Data:** the classic `index.html` is the single source of truth. Its subject data (`EV_DB`, `EV_HUB`,
-  `EV_HUB_DEEP`, `EV_RESOURCES`) is written *inside* `index.html` (the separate `data1-3.js` and `deep/*.js`
-  files are older copies that index.html does not load). `EV.loadLive()` fetches `index.html`, runs only the
+- **Data:** `classic.html` is the single source of truth. Its subject data (`EV_DB`, `EV_HUB`,
+  `EV_HUB_DEEP`, `EV_RESOURCES`) is written *inside* `classic.html` (the separate `data1-3.js` and `deep/*.js`
+  files are older copies that nothing loads). `EV.loadLive()` fetches `classic.html`, runs only the
   data blocks (from `==== DATA 1 (embedded)` to `==== DEEP NOTES (embedded)`, plus the `window.EV_RESOURCES = {`
-  section up to `function resFor(`) and loads `pastpapers.js`. If those markers are renamed in index.html,
-  update them in `EV.loadLive`. PDFs open with relative paths through `EV.pdfView` (`EV.SITE` = `'../'`;
-  set `window.EV_SITE_ROOT=''` before core.js if the design moves to the site root).
+  section up to `function resFor(`) and loads `pastpapers.js`. If those markers are renamed in classic.html,
+  update them in `EV.loadLive` and in `tools/make-snapshot.js`. PDFs open with relative paths through `EV.pdfView`.
 - **Members only:** `EV.render` shows the sign-in page for every route until a student is signed in, then
   returns them to the page they asked for. Top-bar navigation, Knovo and the menu are hidden while signed out.
 - **Sign-in:** same Supabase project and same localStorage keys as `signin.html` (`ev_auth_token`,
@@ -88,13 +91,14 @@ Google Fonts, the contact-form service (formsubmit.co) and, for photo scans, Tes
 
 ## 4. Owner checklist before launch
 
-1. In Supabase, run `new-design/database-update.sql` once (tested on PostgreSQL 16 against the leaderboard
+1. In Supabase, run `database-update.sql` once (tested on PostgreSQL 16 against the leaderboard
    setup; safe to run twice). Admin → "Server features" should then show ✓ On for all three.
 2. In Admin, set the three mystery rewards for Season 2027-H1 before it ends on 30 June 2027.
 3. Decide whether solved/practice **questions** should also be Pro (the classic site locks them; this design
    keeps them open because the Questions tab, daily quiz and mocks depend on them).
-4. When ready to make the new design the main site: copy `new-design/*` to the repo root (or point the root
-   `index.html` to it), set `window.EV_SITE_ROOT=''`, and keep the data in a shared file both pages load.
+4. To go live, merge `claude/new-design` into `main` (GitHub Pages serves `main`). Use "Squash and merge".
+5. `classic.html` is not linked for students but opens without sign-in for anyone who knows the address.
+   If the old design should be fully closed, add a redirect at its top or remove its app code (keep the data blocks).
 
 ## 5. Not connected yet / known limits
 
@@ -102,7 +106,7 @@ Google Fonts, the contact-form service (formsubmit.co) and, for photo scans, Tes
 |---|---|
 | Payments | "Coming soon" only, as on the classic site |
 | Light theme | Black only |
-| Service worker / PWA | Not included in this folder |
+| Service worker / PWA | `sw.js` and `manifest.webmanifest` exist but no page registers them |
 | Paid PDFs | Display lock only; real protection needs private storage (e.g. Cloudflare R2) and signed links |
 | Past-paper questions | `EV_PASTPAPERS` is still empty; Papers shows the empty state |
 | XP from Knovo marking | Not awarded (cannot be verified yet) |
