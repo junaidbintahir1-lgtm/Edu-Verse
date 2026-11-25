@@ -26,7 +26,7 @@ function jsonGet(k,def){try{var v=JSON.parse(lsGet(k)||"null");return v==null?de
 /* =============================== sign-in =============================== */
 function stored(){return {access:lsGet("ev_auth_token")||"",refresh:lsGet("ev_auth_refresh")||"",expires:Number(lsGet("ev_auth_expires")||"0")};}
 function jwtExp(t){try{var p=JSON.parse(atob(String(t).split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));return (Number(p.exp)||0)*1000;}catch(e){return 0;}}
-function clearAuth(){["ev_auth_token","ev_auth_refresh","ev_auth_expires","ev_auth_user"].forEach(lsDel);OWNER=null;}
+function clearAuth(){["ev_auth_token","ev_auth_refresh","ev_auth_expires","ev_auth_user","ev_educator"].forEach(lsDel);OWNER=null;}
 function storeSession(d,email){
   if(d.access_token)lsSet("ev_auth_token",d.access_token);
   if(d.refresh_token)lsSet("ev_auth_refresh",d.refresh_token);
@@ -98,7 +98,9 @@ L.usernameOk=function(u){
   return "";
 };
 L.signUp=function(f){
-  return authPost("/auth/v1/signup",{email:f.email,password:f.password,data:{full_name:f.name,user_role:f.role||"student",name:f.name,username:f.username,board:f.board,qualification:f.qualification}}).then(function(x){
+  return authPost("/auth/v1/signup",{email:f.email,password:f.password,data:Object.assign({full_name:f.name,user_role:f.role||"student",name:f.name,username:f.username,board:f.board,qualification:f.qualification},
+    /* an educator's request travels with the account; the server turns it into a verification request on first sign-in */
+    f.role==="teacher"&&f.teacher?{teacher_school:f.teacher.school,teacher_city:f.teacher.city,teacher_subjects:f.teacher.subjects,teacher_school_email:f.teacher.schoolEmail,teacher_contact_name:f.teacher.contactName,teacher_contact:f.teacher.contact}:{})}).then(function(x){
     if(x.ok&&x.d&&x.d.access_token){storeSession(x.d,f.email);OWNER=null;XP.status="idle";return {ok:true,user:L.user()};}
     if(x.ok)return {ok:true,needsConfirm:true};
     var raw=x.d&&(x.d.error_description||x.d.msg||x.d.message)||"";
@@ -265,6 +267,19 @@ L.adminProList=function(){return setupAware(rpc("eduverse_admin_pro_list",{}));}
 L.entryState=function(){return rpc("eduverse_admin_entry_state",{}).then(function(r){return String(Array.isArray(r)?r[0]:r);}).catch(function(e){if(e.status===404||e.code==="PGRST202"||/could not find|schema cache/i.test(e.message||""))return "setup";throw e;});};
 L.entryUnlock=function(pw){return rpc("eduverse_admin_unlock",{p_password:pw}).then(function(r){return r===true;});};
 L.entrySet=function(pw){return rpc("eduverse_admin_set_entry_password",{p_password:pw});};
+/* ---- Educator verification. Nothing is granted by choosing "Educator": the owner approves each request. ----
+   educatorStatus(): null (no request / not set up) or {status:"pending"|"approved"|"rejected", code, school, ..., verified_until} */
+L.SUPPORT_EMAIL="educationalverse2027@gmail.com";
+function eduCache(){var c=jsonGet("ev_educator",null),u=L.user();if(!c||!u||c.email!==u.email)return null;return c;}
+L.isEducator=function(){var c=eduCache();return !!(c&&c.status==="approved"&&(!c.until||c.until>Date.now()));};
+L.educatorStatus=function(){
+  return rpc("eduverse_teacher_status",{}).then(function(r){r=Array.isArray(r)?(r[0]||null):r;var u=L.user()||{};
+    if(r&&r.status)lsSet("ev_educator",JSON.stringify({email:u.email||"",status:r.status,until:r.verified_until?Date.parse(r.verified_until):0}));else lsDel("ev_educator");
+    return r&&r.status?r:null;});
+};
+L.educatorApply=function(f){return rpc("eduverse_teacher_apply",{p_school:f.school,p_city:f.city,p_subjects:f.subjects,p_school_email:f.schoolEmail,p_contact_name:f.contactName,p_contact:f.contact});};
+L.adminTeacherRequests=function(){return setupAware(rpc("eduverse_admin_teacher_requests",{}));};
+L.adminTeacherDecide=function(userId,approve,note,plan){return setupAware(rpc("eduverse_admin_teacher_decide",{p_user_id:userId,p_approve:!!approve,p_note:note||"",p_plan:plan||""}));};
 L.adminMakeCoowner=function(email){return setupAware(rpc("eduverse_admin_make_coowner",{p_email:email}));};
 /* students: list, wipe XP, co-owner role */
 L.adminStudents=function(){return setupAware(rpc("eduverse_admin_students_list",{}));};

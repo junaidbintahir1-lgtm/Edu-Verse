@@ -562,6 +562,7 @@ EV.boot=function(){
     LV.getSession().then(function(sess){
       if(!sess){if(ST.profile){ST.profile=null;EV.paintProfile();EV.render();}return;}
       LV.checkOwner().then(function(){EV.paintProfile();if(/^(subject|knovo|papers|paperSubj|admin)$/.test(EV.route.name))EV.render();EV.refreshPlan();});
+      var eu=LV.user();if(eu&&eu.role==='teacher')LV.educatorStatus().then(function(){if(EV.route.name==='educator')EV.render();}).catch(function(){});
     });
     var sp=$('#subjPick');
     EV.LEVELS.forEach(function(L){var g=document.createElement('optgroup');g.label=L.title.replace(/<[^>]+>/g,'');L.subjects.filter(function(o){return !o.soon}).forEach(function(o){var op=document.createElement('option');op.value=o.ref;op.textContent=o.s.icon+' '+o.s.name+' '+o.s.code;g.appendChild(op);});if(g.children.length)sp.appendChild(g);});
