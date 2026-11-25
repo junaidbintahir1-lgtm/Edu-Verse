@@ -52,6 +52,10 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   paths through `EV.pdfView`. `EV.boot()` is called at the bottom of `index.html`, after every script has loaded.
 - **Members only:** `EV.render` shows the sign-in page for every route until a student is signed in, then
   returns them to the page they asked for. Top-bar navigation, Knovo and the menu are hidden while signed out.
+- **Signed-out page:** besides the forms it shows a static "Take a look inside" preview (`peekHTML` in
+  `views2.js`): one real Physics note and flashcard read from `data/site-data.js`, and a fixed sample Knovo
+  exchange. It makes no network request and does not open the members-only gate. The header Sign in button is
+  hidden there (`body.onSignin`, set in `EV.render`).
 - **Sign-in:** Supabase email + password through `live.js`, stored under `ev_auth_token`, `ev_auth_refresh`,
   `ev_auth_expires` and `ev_auth_user`. Sign-up keeps the classic
   site's fields and username rules. Tokens renew silently.

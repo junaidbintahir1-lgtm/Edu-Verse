@@ -893,6 +893,27 @@ body.signedOut #nav,body.signedOut #subjPick,body.signedOut #dock,body.signedOut
   .tbl{font-size:.8rem}.tbl td,.tbl th{padding:9px 8px}
 }
 @media(max-width:380px){.tabbar a{font-size:.6rem}.brand span{font-size:1rem}}
+
+/* ---------- signed-out page: preview + no duplicate Sign in button ---------- */
+body.onSignin #signBtn{display:none}
+.signGrid{grid-template-areas:"intro form" "peek form";align-items:start}
+.signIntro{grid-area:intro}.signForm{grid-area:form;align-self:center}.peek{grid-area:peek}
+.peek{display:grid;gap:12px;min-width:0}
+.peekGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.peekCard{display:grid;gap:6px;align-content:start;text-align:left;padding:14px;border-radius:14px;border:1px solid var(--rim);background:var(--deck);color:var(--ivory);font:inherit;min-width:0}
+.peekCard small{font-size:.68rem;color:var(--dim);letter-spacing:.02em}
+.peekCard b{font-size:.92rem}
+.peekCard p{margin:0;font-size:.8rem;color:var(--dim);line-height:1.5}
+.peekFade{max-height:4.6em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 45%,transparent);mask-image:linear-gradient(#000 45%,transparent)}
+.peekFlip{cursor:pointer;min-height:112px;border-color:var(--goldline);background:var(--goldsoft)}
+.peekFlip:hover{border-color:var(--gold)}
+.peekFlip .pa{font-size:.84rem;line-height:1.5}
+.peekChat{grid-column:1/-1;border-color:var(--tealline)}
+.peekChat .pu{justify-self:end;max-width:88%;padding:8px 12px;border-radius:14px 14px 4px 14px;background:var(--deck2);color:var(--ivory)}
+.peekChat .pk{max-width:94%;padding:8px 12px;border-radius:14px 14px 14px 4px;background:var(--tealsoft);color:var(--ivory)}
+.peekChat .k{color:var(--teal)}
+@media(max-width:600px){.signGrid{grid-template-areas:"intro" "form" "peek"}.signForm{align-self:start}}
+@media(max-width:420px){.peekGrid{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>

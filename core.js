@@ -246,6 +246,8 @@ EV.render=function(){
   if(!ST.profile&&!EV.OPEN_ROUTES[r.name]){if(r.name!=='home'||location.hash)EV.afterSignin=(location.hash||'#home').slice(1);r={name:'signin',gated:true};}
   EV.route=r;
   document.body.classList.toggle('signedOut',!ST.profile);
+  /* the sign-in form is already on the page, so the header Sign in button would be a duplicate there */
+  document.body.classList.toggle('onSignin',r.name==='signin'&&!ST.profile);
   var fn=EV.views[r.name]||EV.views.home;
   if(EV.cleanup){try{EV.cleanup();}catch(e){}EV.cleanup=null;}
   var v=$('#view');v.classList.remove('enter');void v.offsetWidth;v.classList.add('enter');
