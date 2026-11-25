@@ -39,7 +39,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 | `data/extra.js` | `EV_EXTRA`: exam command words and the home-page FAQ |
 | `sw.js`, `manifest.webmanifest` | Offline support and "install app". The worker is **network-first**, so updates always show at once; bump `CACHE` in `sw.js` only if you change how it works |
 | `signin.html` | A small forwarder: old links land on the sign-in page inside `index.html` |
-| `admin-database-setup.txt` | One-time Supabase setup for the owner dashboard and the owner check (run before `database-update.sql`; already done on the live project) |
+| `admin-database-setup.txt` | One-time Supabase setup for the owner check (`eduverse_is_admin`) and the profiles table (run before `database-update.sql`; already done on the live project) |
 | `database-update.sql` | **The one database setup file. Run once in Supabase** (safe to run again): XP table and effort-only XP rules, leaderboard choice, seasons, mystery rewards, owner tools, and Gift Pro. Admin has a "Copy the setup code" button for it |
 | `vendor/` | Three.js r128 and its licence |
 | `assets/` | `eduverse-logo.png`, `knovo-logo-sm.png`, and `eduverse-social.png` (the picture shown when the site link is shared) |
@@ -55,7 +55,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 - **Members only:** `EV.render` shows the sign-in page for every route until a student is signed in, then
   returns them to the page they asked for. Top-bar navigation, Knovo and the menu are hidden while signed out.
 - **Sign-in:** Supabase email + password through `live.js`, stored under `ev_auth_token`, `ev_auth_refresh`,
-  `ev_auth_expires` and `ev_auth_user` (the owner dashboard reads the same keys). Sign-up keeps the classic
+  `ev_auth_expires` and `ev_auth_user`. Sign-up keeps the classic
   site's fields and username rules. Tokens renew silently.
 - **Saved progress:** design settings are in `localStorage["ev_design_v1"]`. Study progress is also kept in
   `ev_state_v1`, the key the classic site used, so students who studied on the old site keep everything
@@ -102,9 +102,8 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   the site (`EVLive.loadPlan` → `eduverse_my_plan`, cached in `ev_plan`). The same card lists every Pro
   account with a Remove button, and season winners have a one-press "Give Pro" button.
 - **Admin (`#admin`):** owner and co-owner only (checked on the server with `eduverse_is_admin`). Site counts,
-  Gift Pro, season reward options, winners and their choices (emails shown only after the owner dashboard's
-  two-step check), "mark delivered", leaderboard snapshot, messages, a link to the owner dashboard, and
-  **Server features**: four lines (XP leaderboard, seasons and rewards, leaderboard choice, Gift Pro) that
+  Gift Pro, season reward options, winners and their choices, "mark delivered", the Students list, leaderboard snapshot, messages, and
+  **Server features**: five lines (XP leaderboard, seasons and rewards, leaderboard choice, Gift Pro, students and roles) that
   show ✓ On once `database-update.sql` has been run. Until then the card shows the steps with two buttons:
   "Copy the setup code" and "Open Supabase".
 - **Owner security:** the Admin page and every owner server function need two things: the owner (or
