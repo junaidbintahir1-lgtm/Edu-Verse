@@ -206,7 +206,10 @@ EV.loadLive=function(){
   });
 };
 EV.load=function(){
-  return Promise.all([EV.loadLive(),fetch('data/extra.json').then(function(r){if(!r.ok)throw new Error('extra');return r.json();})]).then(function(a){
+  /* A standalone copy ships its data in data/snapshot.js (window.EV_SNAPSHOT), so it also opens with a double-click */
+  var snap=window.EV_SNAPSHOT;
+  if(snap){['EV_DB','EV_HUB','EV_HUB_DEEP','EV_RESOURCES','EV_PASTPAPERS'].forEach(function(k){if(snap[k])window[k]=snap[k];});}
+  return Promise.all([snap?Promise.resolve():EV.loadLive(),snap&&snap.extra?Promise.resolve(snap.extra):fetch('data/extra.json').then(function(r){if(!r.ok)throw new Error('extra');return r.json();})]).then(function(a){
     EV.D={hub:window.EV_HUB,deep:window.EV_HUB_DEEP||{},resources:window.EV_RESOURCES||{},db:window.EV_DB,papers:window.EV_PASTPAPERS||[],extra:a[1]};
     Object.keys(EV.D.hub).forEach(function(lk){
       var L=EV.D.hub[lk];var lv={lk:lk,slug:slugify(lk),title:L.title,sub:L.sub,meta:LEVEL_META[lk]||{},subjects:[]};
