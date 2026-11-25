@@ -266,104 +266,18 @@ EV.seasonCard=function(host){
 };
 
 /* =================== ADMIN (owner and co-owner only) =================== */
-/* The Admin page opens only after the owner entry password is typed (checked on the server, once per sign-in). */
-var ADMIN_OPEN=false;
-function adminCodeLock(el){
-  if(ADMIN_OPEN)return false;
-  el.innerHTML='<div class="in page"><div class="pageHead"><span class="eyebrow"><b>EduVerse</b> · Owner admin</span><h1>Owner entry</h1><p class="sub">This area needs a second password, the <b>owner entry password</b>. Your normal sign-in password alone is not enough.</p></div><div class="card stack" id="ocBox" style="max-width:540px"><p class="small muted">Checking your account…</p></div></div>';
-  var box=$('#ocBox');
-  function show(st){
-    if(st==='open'||st==='setup'){ADMIN_OPEN=true;EV.render();return;}
-    if(st==='wait'){box.innerHTML='<h3>Not ready yet</h3><p class="small muted" style="margin:0">The owner has not created the entry password yet. Ask the owner to open Admin first.</p>';return;}
-    if(st!=='locked'&&st!=='unset'){box.innerHTML='<b>This page is for the EduVerse owner</b>';return;}
-    var set=st==='unset';
-    box.innerHTML=(set?'<h3>Create the owner entry password (one time)</h3><p class="small muted" style="margin:0">Type a long password (12 characters or more) that you use nowhere else. You and your developers will type it every time you open Admin. Write it down somewhere safe: it cannot be shown again.</p>':'<h3>🔐 Enter the owner entry password</h3>')+
-      '<form id="ocForm" class="stack" style="gap:10px"><label class="field" for="ocPw">Owner entry password<input id="ocPw" type="password" autocomplete="off" required minlength="'+(set?12:1)+'"></label>'+(set?'<label class="field" for="ocPw2">Type it again<input id="ocPw2" type="password" autocomplete="off" required></label>':'')+'<label class="row small" style="gap:8px"><input type="checkbox" id="ocShow"> Show password</label><button class="btn gold" type="submit" id="ocBtn" style="justify-self:start">'+(set?'Save and open Admin':'Unlock')+'</button></form><p class="small" id="ocMsg" role="alert" style="margin:0;color:var(--bad)"></p>';
-    $('#ocShow').addEventListener('change',function(){var t=this.checked?'text':'password';$('#ocPw').type=t;if($('#ocPw2'))$('#ocPw2').type=t;});
-    $('#ocForm').addEventListener('submit',function(e){e.preventDefault();var pw=$('#ocPw').value,m=$('#ocMsg'),btn=$('#ocBtn');m.textContent='';
-      if(set){if(pw.length<12){m.textContent='Use at least 12 characters.';return;}if(pw!==$('#ocPw2').value){m.textContent='The two passwords are not the same.';return;}}
-      btn.disabled=true;
-      (set?EVLive.entrySet(pw).then(function(){return true;}):EVLive.entryUnlock(pw)).then(function(ok){
-        if(ok){ADMIN_OPEN=true;EV.toast(set?'🔐 Entry password saved':'🔓 Owner area unlocked');EV.render();}
-        else{btn.disabled=false;$('#ocPw').value='';m.textContent='Wrong password. After 5 wrong tries the entry locks for 15 minutes.';}
-      }).catch(function(x){btn.disabled=false;m.textContent=x.message||'Could not check the password.';});});
-    $('#ocPw').focus();
-  }
-  EVLive.entryState().then(show).catch(function(x){box.innerHTML='<b>Could not check the owner entry</b><p class="small muted">'+esc(x.message||'')+'</p><button class="btn sm" type="button" id="ocRetry">Try again</button>';$('#ocRetry').addEventListener('click',function(){EV.render();});});
-  return true;
-}
+/* The owner's Admin is a separate file (admin.js). Students never download it: it is fetched only
+   after the server confirms this account is the owner or a developer. */
 V.admin=function(el){
   if(!EVLive.isOwner()){el.innerHTML='<div class="in page"><div class="empty" style="margin-top:30px"><b>This page is for the EduVerse owner</b><span>Owner access is checked on the server for your account.</span><a class="btn gold sm" href="#home">Back to home</a></div></div>';
     EVLive.checkOwner().then(function(o){if(o&&EV.route.name==='admin')EV.render();});return;}
-  if(adminCodeLock(el))return;
-  var pdfs=0,notes=0,live=0;EV.SUBJ.forEach(function(o){if(!o.soon)live++;pdfs+=EV.pdfCount(o);notes+=EV.notesOf(o).length;});
-  var S=EVLive.seasonOf(Math.max(Date.now(),EVLive.FIRST_SEASON)),X=EVLive.XP;
-  el.innerHTML='<div class="in page"><div class="pageHead"><span class="eyebrow"><b>EduVerse</b> · owner admin</span><h1>Admin</h1><p class="sub">Your control room: season rewards, gifts, rankings, messages and site content. It opens only with the owner entry password.</p></div>'+
-  '<div class="adminGrid"><div class="cell"><span class="eyebrow">Live subjects</span><div class="big">'+live+'</div></div><div class="cell"><span class="eyebrow">Note sections</span><div class="big">'+notes+'</div></div><div class="cell"><span class="eyebrow">PDFs</span><div class="big">'+pdfs+'</div></div><div class="cell"><span class="eyebrow">Ranked students</span><div class="big">'+(X.status==='ready'?X.leaders.length:'—')+'</div></div></div>'+
-  '<section class="sect" style="padding-top:26px"><div class="card stack"><h3>🎁 Season rewards · '+esc(S.id)+' ('+esc(S.label)+')</h3><p class="small muted">Set the three mystery rewards for this season. Winners only see what is inside after they choose. Payments are not live, so pick rewards you can deliver yourself (for example a Knovo Pro month once plans open, a certificate, or an Instagram shout-out).</p><div class="stack" id="optRows">'+[1,2,3].map(function(k){return '<div class="optRow"><b>Mystery '+k+'</b><input class="inp" id="ot'+k+'" maxlength="60" placeholder="Reward title"><input class="inp" id="od'+k+'" maxlength="200" placeholder="Details the winner sees"><button class="btn sm gold" type="button" data-save="'+k+'">Save</button></div>';}).join('')+'</div><p class="small" id="optNote"></p>'+
-  '<h3 style="margin-top:10px">Winners and their choices</h3><div id="claims"><p class="small muted">Loading…</p></div></div></section>'+
-  '<section class="sect" style="padding-top:26px"><div class="card stack"><h3>🎁 Gift EduVerse Pro</h3><p class="small muted">Give any student Pro by their account email: the Papers section, all topical PDFs and no Knovo limits. They must already have an EduVerse account. They see it the next time they open the site.</p>'+
-  '<form class="giftRow" id="giftForm" novalidate><label class="sr" for="gEmail">Student email</label><input class="inp" id="gEmail" type="email" placeholder="student@email.com" autocomplete="off"><label class="sr" for="gDays">How long</label><select class="inp" id="gDays"><option value="30">1 month</option><option value="90">3 months</option><option value="180">6 months</option><option value="365">1 year</option><option value="0">Until I remove it</option></select><button class="btn gold" type="submit" id="gBtn">🎁 Gift Pro</button></form><p class="small" id="gNote" role="status" aria-live="polite"></p>'+
-  '<h3 style="margin-top:6px">Accounts with Pro</h3><div id="proList"><p class="small muted">Loading…</p></div></div></section>'+
-  '<section class="sect" style="padding-top:26px"><div class="grid g2"><div class="card stack" style="align-content:start"><h3>🏆 Leaderboard right now</h3><div id="lbNow"></div><button class="btn sm" type="button" id="lbSync" style="justify-self:start">↻ Sync &amp; refresh</button></div>'+
-  '<div class="card stack"><h3>✉️ Messages</h3><p class="small muted">The home-page contact form sends every message to <b>educationalverse2027@gmail.com</b>.</p><a class="btn sm" href="https://mail.google.com/" target="_blank" rel="noopener" style="justify-self:start">Open Gmail</a>'+
-  '<h3 style="margin-top:10px">🗂 Study content</h3><p class="small muted">Subjects, notes, flashcards, questions and PDF lists live in <span class="code">data/site-data.js</span>. Past-paper questions go in <span class="code">data/pastpapers.js</span>, and the FAQ in <span class="code">data/extra.js</span>.</p></div></div></section>'+
-  '<section class="sect" style="padding-top:26px"><div class="card stack"><h3>👥 Students <span class="pill" id="stN">…</span></h3><p class="small muted">Every EduVerse account. Reset XP if someone cheats, or make a trusted helper a developer (they open this Admin page with the entry password you give them, but cannot change roles or see your details).</p><form class="giftRow" id="coForm" novalidate><label class="sr" for="coEmail">Email of the new developer</label><input class="inp" id="coEmail" type="email" placeholder="helper@email.com" autocomplete="off"><button class="btn" type="submit" id="coBtn">＋ Make developer</button></form><p class="small" id="coNote" style="margin:0"></p><label class="sr" for="stQ">Search students</label><input class="inp" id="stQ" type="search" placeholder="Search by name or email" autocomplete="off" style="max-width:340px"><div id="stList"><p class="small muted">Loading…</p></div></div></section>'+
-  '<section class="sect" style="padding-top:26px"><div class="card stack"><h3>🧩 Server features</h3><div id="feat" class="stack"></div><div id="setupHelp" hidden class="stack" style="border-top:1px solid var(--rim);padding-top:14px"><b>Switch these on (one time, about a minute)</b><ol class="small muted" style="margin:0;padding-left:20px;display:grid;gap:4px"><li>Press <b>Copy the setup code</b>.</li><li>Press <b>Open Supabase</b>. It opens a new, empty query.</li><li>Paste the code there and press <b>Run</b>.</li><li>Come back here and reload this page. Everything above should say ✓ On.</li></ol><div class="row"><button class="btn gold" type="button" id="cpSql">📋 Copy the setup code</button><a class="btn" id="openSql" target="_blank" rel="noopener">Open Supabase ↗</a></div><p class="small" id="cpNote" role="status" aria-live="polite" style="margin:0"></p></div></div></section></div>';
-  function lbPaint(){var b=$('#lbNow');if(!b)return;b.innerHTML=X.status==='ready'?(X.leaders.slice(0,10).map(function(r,i){return '<div class="row" style="justify-content:space-between"><span>'+(i+1)+'. '+esc(r.display_name)+'</span><b>'+Number(r.total_xp).toLocaleString('en-US')+' XP</b></div>';}).join('')||'<p class="small muted">No ranked students yet.</p>'):'<p class="small muted">'+esc(X.status==='setup'?'The leaderboard switches on after the database setup at the bottom of this page.':X.status==='loading'?'Loading…':X.message||'Press Sync & refresh.')+'</p>';}
-  lbPaint();$('#lbSync').addEventListener('click',function(){EVLive.xpSync(true).then(lbPaint);});
-  function claims(){EVLive.adminSeasonRewards().then(function(rows){
-      rows=rows||[];var cur=rows.filter(function(r){return r.kind==='option'&&r.season===S.id;});
-      cur.forEach(function(r){var t=$('#ot'+r.slot),d=$('#od'+r.slot);if(t&&!t.value)t.value=r.title||'';if(d&&!d.value)d.value=r.details||'';});
-      var won=rows.filter(function(r){return r.kind==='claim';});
-      $('#claims').innerHTML=won.length?'<div class="scrollx"><table class="tbl"><thead><tr><th>Season</th><th>Rank</th><th>Student</th><th>Email</th><th>Chose</th><th>Delivered</th></tr></thead><tbody>'+won.map(function(r){return '<tr><td>'+esc(r.season)+'</td><td>#'+r.rank+'</td><td>'+esc(r.display_name||'')+'</td><td class="code">'+esc(r.email||'')+'</td><td>'+esc(r.title||('Mystery '+r.slot))+'</td><td><div class="row" style="gap:6px"><button class="btn sm" type="button" data-giftw="'+r.id+'" title="Gives this winner Pro for the time chosen in the gift box">🎁 Gift Pro</button><button class="btn sm'+(r.delivered?' ok':'')+'" type="button" data-deliv="'+r.id+'" data-on="'+(r.delivered?1:0)+'">'+(r.delivered?'✓ Delivered':'Mark delivered')+'</button></div></td></tr>';}).join('')+'</tbody></table></div>':'<p class="small muted">No winners yet. The first season ends on 30 June 2027.</p>';
-      $$('[data-deliv]').forEach(function(b){b.addEventListener('click',function(){EVLive.adminMarkDelivered(+b.dataset.deliv,b.dataset.on!=='1').then(claims);});});
-      $$('[data-giftw]').forEach(function(b){b.addEventListener('click',function(){var d=+$('#gDays').value;b.disabled=true;EVLive.adminGiftWinner(+b.dataset.giftw,d).then(function(name){EV.toast('🎁 Pro gifted to '+(name||'the winner'));proList();}).catch(function(e){EV.toast(e.setup?'Run the database setup first.':e.message);}).then(function(){b.disabled=false;});});});
-    }).catch(function(e){$('#claims').innerHTML='<p class="small muted">'+(e.setup?'Seasons and rewards switch on after the database setup at the bottom of this page.':esc(e.message))+'</p>';});}
-  claims();
-  /* students: search, wipe XP, co-owner role, quick gift */
-  var STU=[];
-  function stPaint(){var b=$('#stList');if(!b)return;var q=$('#stQ').value.trim().toLowerCase(),rows=STU.filter(function(r){return !q||((r.display_name||'')+' '+(r.student_email||'')).toLowerCase().indexOf(q)>=0;});
-    $('#stN').textContent=STU.length;
-    b.innerHTML=rows.length?'<div class="scrollx"><table class="tbl"><thead><tr><th>Student</th><th>Email</th><th>Role</th><th>XP</th><th>Plan</th><th>Joined</th><th></th></tr></thead><tbody>'+rows.slice(0,200).map(function(r){var role=r.student_role||'student';
-      return '<tr><td>'+esc(r.display_name||'Student')+'</td><td class="code" style="word-break:break-all">'+esc(r.student_email||'')+'</td><td>'+(role==='owner'?'<span class="pill gold">Owner</span>':role==='co-owner'?'<span class="pill teal">Developer</span>':'Student')+'</td><td>'+Number(r.total_xp||0).toLocaleString('en-US')+'</td><td>'+(r.student_plan==='pro'?'<span class="pill gold">Pro</span>':'Free')+'</td><td>'+(r.joined?new Date(r.joined).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'')+'</td><td>'+(r.student_email==='hidden'?'':'<div class="row" style="gap:6px;flex-wrap:nowrap">'+(r.student_plan==='pro'?'':'<button class="btn sm" type="button" data-stgift="'+esc(r.student_email||'')+'">🎁 Pro</button>')+'<button class="btn sm" type="button" data-stxp="'+esc(r.student_id)+'" data-n="'+esc(r.display_name||'this student')+'">Reset XP</button>'+(role==='owner'?'':'<button class="btn sm" type="button" data-strole="'+esc(r.student_id)+'" data-to="'+(role==='co-owner'?'student':'co-owner')+'" data-n="'+esc(r.display_name||'this student')+'">'+(role==='co-owner'?'Remove developer':'Make developer')+'</button>')+'</div>')+'</td></tr>';}).join('')+'</tbody></table></div>'+(rows.length>200?'<p class="small muted" style="margin:0">Showing the first 200. Search to find others.</p>':''):'<p class="small muted">'+(STU.length?'No student matches that search.':'No accounts yet.')+'</p>';
-    $$('[data-stgift]',b).forEach(function(x){x.addEventListener('click',function(){$('#gEmail').value=x.dataset.stgift;$('#giftForm').scrollIntoView({block:'center'});$('#gDays').focus();});});
-    $$('[data-stxp]',b).forEach(function(x){x.addEventListener('click',function(){if(!confirm('Reset all XP for '+x.dataset.n+'? This cannot be undone.'))return;EVLive.adminResetXp(x.dataset.stxp).then(function(){EV.toast('XP reset');students();}).catch(function(e){EV.toast(e.message);});});});
-    $$('[data-strole]',b).forEach(function(x){x.addEventListener('click',function(){var to=x.dataset.to;if(!confirm(to==='co-owner'?'Make '+x.dataset.n+' a developer? They will be able to open this Admin page.':'Remove developer access from '+x.dataset.n+'?'))return;EVLive.adminSetRole(x.dataset.strole,to).then(function(){EV.toast(to==='co-owner'?'Developer added':'Developer removed');students();}).catch(function(e){EV.toast(e.message);});});});
-  }
-  function students(){EVLive.adminStudents().then(function(rows){STU=rows||[];stPaint();}).catch(function(e){var b=$('#stList');if(b)b.innerHTML='<p class="small muted">'+(e.setup?'The student list switches on after the database setup below.':esc(e.message))+'</p>';var n=$('#stN');if(n)n.textContent='—';});}
-  students();$('#stQ').addEventListener('input',stPaint);
-  $('#coForm').addEventListener('submit',function(e){e.preventDefault();var em=$('#coEmail').value.trim(),n=$('#coNote'),btn=$('#coBtn');
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){n.style.color='var(--warn)';n.textContent='Type the helper\'s account email first.';return;}
-    if(!confirm('Make '+em+' a developer? They will be able to open Admin once you give them the entry password.'))return;
-    btn.disabled=true;n.style.color='';n.textContent='Saving…';
-    EVLive.adminMakeCoowner(em).then(function(name){n.style.color='var(--teal)';n.textContent='✓ '+(name||'That account')+' is now a developer. Give them the owner entry password privately.';$('#coEmail').value='';students();})
-      .catch(function(x){n.style.color='var(--warn)';n.textContent=x.setup?'This switches on after the database setup below.':x.message;}).then(function(){btn.disabled=false;});});
-  /* gift Pro by email + the list of Pro accounts */
-  function fmtUntil(u){return u?'until '+new Date(u).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'until you remove it';}
-  function proList(){EVLive.adminProList().then(function(rows){rows=rows||[];var b=$('#proList');if(!b)return;
-      b.innerHTML=rows.length?'<div class="scrollx"><table class="tbl"><thead><tr><th>Student</th><th>Email</th><th>Pro</th><th></th></tr></thead><tbody>'+rows.map(function(r){return '<tr><td>'+esc(r.display_name||'Student')+'</td><td class="code">'+esc(r.student_email||'')+'</td><td>'+esc(fmtUntil(r.until))+'</td><td><button class="btn sm" type="button" data-unpro="'+esc(r.student_id)+'">Remove</button></td></tr>';}).join('')+'</tbody></table></div><p class="small muted" style="margin:0">Only you can see this list.</p>':'<p class="small muted">No account has Pro yet.</p>';
-      $$('[data-unpro]',b).forEach(function(x){x.addEventListener('click',function(){if(!confirm('Remove Pro from this account?'))return;EVLive.adminRemovePro(x.dataset.unpro).then(function(){EV.toast('Pro removed');proList();}).catch(function(e){EV.toast(e.message);});});});
-    }).catch(function(e){var b=$('#proList');if(b)b.innerHTML='<p class="small muted">'+(e.setup?'Gifting switches on after the database setup below.':esc(e.message))+'</p>';});}
-  proList();
-  $('#giftForm').addEventListener('submit',function(e){e.preventDefault();var em=$('#gEmail').value.trim(),n=$('#gNote'),btn=$('#gBtn');
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){n.textContent='Type the student\'s account email first.';n.style.color='var(--warn)';return;}
-    btn.disabled=true;n.style.color='';n.textContent='Gifting…';
-    EVLive.adminGiftPro(em,+$('#gDays').value).then(function(name){n.style.color='var(--teal)';n.textContent='🎁 '+(name||'The student')+' now has EduVerse Pro '+fmtUntil(+$('#gDays').value?Date.now()+(+$('#gDays').value)*864e5:0)+'.';$('#gEmail').value='';proList();})
-      .catch(function(err){n.style.color='var(--warn)';n.textContent=err.setup?'Gifting switches on after the database setup below.':err.message;})
-      .then(function(){btn.disabled=false;});});
-  $('#optRows').addEventListener('click',function(e){var b=e.target.closest('[data-save]');if(!b)return;var k=+b.dataset.save,t=$('#ot'+k).value.trim(),d=$('#od'+k).value.trim(),n=$('#optNote');
-    if(!t){n.textContent='Give the reward a title first.';n.style.color='var(--warn)';return;}
-    EVLive.adminSetRewardOption(S.id,k,t,d).then(function(){n.textContent='Mystery '+k+' saved.';n.style.color='var(--teal)';}).catch(function(err){n.textContent=err.setup?'Run the database update first.':err.message;n.style.color='var(--warn)';});});
-  /* which server features are switched on */
-  var F=[['XP leaderboard','eduverse_my_xp'],['Seasons and rewards','eduverse_season_board'],['Leaderboard choice','eduverse_set_leaderboard_visibility'],['Gift Pro','eduverse_admin_pro_list'],['Students and roles','eduverse_admin_students_list']];
-  $('#openSql').href=EVLive.sqlEditorUrl;
-  $('#cpSql').addEventListener('click',function(){var n=$('#cpNote');n.style.color='';n.textContent='Copying…';
-    fetch(EV.SITE+'database-update.sql',{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(t){return navigator.clipboard.writeText(t);})
-      .then(function(){n.style.color='var(--teal)';n.textContent='Copied. Now press "Open Supabase", paste, and press Run.';})
-      .catch(function(){n.style.color='var(--warn)';n.innerHTML='Could not copy automatically. <a href="'+EV.SITE+'database-update.sql" target="_blank" rel="noopener">Open the setup code</a>, select all of it and copy it.';});});
-  $('#feat').innerHTML=F.map(function(f,i){return '<div class="row" style="justify-content:space-between"><span>'+f[0]+'</span><span class="pill" id="f'+i+'">Checking…</span></div>';}).join('');
-  F.forEach(function(f,i){var body=f[1]==='eduverse_set_leaderboard_visibility'?{p_show:EVLive.lbOptIn()}:{};EVLive.rpc(f[1],body).then(function(){var p=$('#f'+i);if(p){p.textContent='✓ On';p.className='pill ok';}}).catch(function(e){var p=$('#f'+i);if(!p)return;var miss=e.status===404||e.code==='PGRST202'||/could not find|schema cache/i.test(e.message);p.textContent=miss?'Not set up yet':'Error';p.className='pill bad';if(miss){var sh=$('#setupHelp');if(sh)sh.hidden=false;}});});
+  if(EV.adminView){EV.adminView(el);return;}
+  el.innerHTML='<div class="in page"><p class="small muted" style="margin-top:30px">Opening the owner area…</p></div>';
+  if(EV.adminLoading)return;EV.adminLoading=true;
+  var s=document.createElement('script');s.src=EV.SITE+'admin.js';
+  s.onload=function(){if(EV.route.name==='admin')EV.render();};
+  s.onerror=function(){EV.adminLoading=false;el.innerHTML='<div class="in page"><div class="empty" style="margin-top:30px"><b>The owner area could not load</b><span>Check your internet and try again.</span><a class="btn gold sm" href="#home">Back to home</a></div></div>';};
+  document.head.appendChild(s);
 };
 
 /* =================== KNOVO WORKSPACE =================== */

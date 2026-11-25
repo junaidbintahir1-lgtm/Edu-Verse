@@ -32,6 +32,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 | `tex/` | Earth textures used by `hero.js` (see the licence note in section 8) |
 | `views.js` | Home (with the Contact section), qualification shelves, level pages, subject hub tabs (PDF library with the Pro lock on topical material), Maths topic engine |
 | `views2.js` | Dashboard, technique, mistakes, **mock area (free mock papers)**, **papers (topical, Pro only)**, ranks + seasons, **admin** (rewards, Gift Pro, database setup helper), Knovo workspace, about, sign in / create account, ideas |
+| `admin.js`, `admin.html` | **The owner's Admin, kept apart from the student site.** `index.html` does not load `admin.js`; it is downloaded only after the server confirms the account is the owner or a developer (`V.admin` in `views2.js`). `admin.html` is the owner's bookmark address and only forwards to `index.html#admin` |
 | `menu.js` | ☰ side menu (plan, leaderboard switch, Start a Live Lesson, Instagram sneak peeks, owner admin link), notifications bell, text size |
 | `lesson.js`, `lesson.css` | **Live Lesson board**: Knovo teaches a topic on a board with voice (`window.knovoLiveLesson(topic)`). Opened from Knovo's "Live lesson" mode, the ☰ menu, and the "✨ Live Lesson" button under any Knovo answer. Start screen (a lesson only starts after the student types a topic and presses Start), sentence-by-sentence voice engine, neat boards (tables and statements, working, graphs, flows, timelines, code, points), raise-hand questions with lesson memory |
 | `data/site-data.js` | **All study content, the single source of truth**: `EV_DB` (Maths topic engine), `EV_HUB` (every subject: papers, notes, flashcards, questions), `EV_HUB_DEEP` (longer notes), `EV_RESOURCES` (PDF lists). Edit content here |
@@ -111,7 +112,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   per sign-in. The owner creates it the first time they open Admin and shares it privately with co-owners.
   Only a scrambled copy is stored (`admin_entry`); it is never in this repository or in the browser. Five
   wrong tries lock that account's entry for 15 minutes; the pass lasts 12 hours and is tied to one sign-in.
-  `adminCodeLock` in `views2.js` is the screen; `eduverse_admin_code_ok()` in `database-update.sql` enforces
+  `adminCodeLock` in `admin.js` is the screen; `eduverse_admin_code_ok()` in `database-update.sql` enforces
   it on the server. Admin also holds the **Students** list (search, Reset XP, make a developer (stored as `co-owner`) by email or
   from the list). Only the owner can change roles or the entry password; nobody can be made a second owner;
   co-owners never see the owner's or other co-owners' names and emails.
