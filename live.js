@@ -162,15 +162,12 @@ function cleanKey(k){return String(k||"").replace(/[^a-zA-Z0-9_:\/.@-]/g,"_").sl
 function weekStart(){var d=new Date(),day=d.getUTCDay(),diff=(day+6)%7;return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-diff*864e5;}
 /* the same ledger xp-leaderboard.js builds: one event per achievement, never counted twice */
 function ledger(s){
-  if(Array.isArray(s.xpLedger))return s.xpLedger;
-  var ev=[],seen={};
-  function add(a,k,ok,ts){k=cleanKey(k);if(!k||seen[k])return;seen[k]=true;ev.push({action:a,event_key:k,correct:!!ok,ts:Number(ts)||0});}
-  s.topicsDone.forEach(function(id){add("topic","topic:"+id,false,0);});
-  s.attempts.forEach(function(a,i){add("question","question:"+(a.qid||"unknown")+":"+(a.t||("legacy-"+i)),!!a.ok,a.t||0);});
-  s.cardsSeen.forEach(function(u){add("card","card:"+u,false,0);});
-  for(var i=1;i<=((s.streak&&s.streak.count)||0);i++)add("streak","streak:legacy-"+i,false,0);
-  s.mocks.forEach(function(m,i){add("mock","mock:"+(m.ts||("legacy-"+i)),false,m.ts||0);});
-  s.xpLedger=ev;return ev;
+  /* XP comes only from real effort in this design: a correct answer (q:), a mastered topic (mastery:)
+     and a passed timed mock (exam:). Nothing is given for old visits, streaks, ticked topics or cards,
+     so a new account always starts at 0. Older entries of those kinds are dropped. */
+  if(!Array.isArray(s.xpLedger))s.xpLedger=[];
+  if(s.xpLedger.some(function(e){return !/^(q|mastery|exam):/.test(String(e&&e.event_key||""));}))s.xpLedger=s.xpLedger.filter(function(e){return /^(q|mastery|exam):/.test(String(e&&e.event_key||""));});
+  return s.xpLedger;
 }
 /* Turn the classic site's past progress into its XP ledger once, exactly as xp-leaderboard.js does,
    BEFORE this design changes anything (otherwise today's streak would be counted as old XP). */

@@ -40,7 +40,7 @@ function dayDiff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12
 
 /* ---------------- XP: earned only through real knowledge and effort ----------------
    XP comes ONLY from: a question answered correctly (once per question, never for a wrong answer,
-   and not faster than one every 15 seconds), mastering a Maths topic (every question in it right),
+   and not faster than one every 15 seconds), completing a topic with every question right,
    and finishing a timed mock seriously (at least half the time used and 40%+ scored, once per paper
    per week). Opening or ticking chapters, flipping flashcards and daily visits earn no XP.
    The server enforces the same rules.
