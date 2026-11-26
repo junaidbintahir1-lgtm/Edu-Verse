@@ -127,7 +127,8 @@ L.updatePassword=function(pw){
    that repository. If the function is not set up yet, the private Supabase Storage bucket is tried next.
    path: "paid/<folder>/<file>.pdf" as written in data/site-data.js. Resolves a Blob.
    Rejects with code: auth | refused (no plan) | missing | network. */
-L.PAPERS_FN=SUPA_URL+"/functions/v1/Papers";
+/* The function is shown as "Paper" in Supabase; its address there is "smooth-processor". */
+L.PAPERS_FN=SUPA_URL+"/functions/v1/smooth-processor";
 L.PAID_BUCKET="paid-papers";
 L.isPaidPath=function(p){return /^paid\//.test(String(p||""));};
 L.paidBlob=function(path){

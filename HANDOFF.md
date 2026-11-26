@@ -79,7 +79,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 - **Paid papers are private:** every paid PDF (topical banks, topical past papers, topic tests) has a path that
   starts with `paid/` in `data/site-data.js`. `EV.pdfRow` draws buttons for them and `EV.openPaid` fetches the
   file with the student's session (`EVLive.paidBlob`). The file comes from the **Papers** Supabase edge function
-  (`/functions/v1/Papers?path=…`), which checks the account (owner, developer or an active plan, and not banned)
+  (shown as "Paper" in Supabase; its address is `/functions/v1/smooth-processor?path=…`, set in `EVLive.PAPERS_FN`), which checks the account (owner, developer or an active plan, and not banned)
   and then reads the PDF from a **private GitHub repository** named in its secrets (`PAPERS_REPO`,
   `PAPERS_TOKEN`). If that function is not connected, the private Supabase Storage bucket `paid-papers` is tried
   (read rule: `eduverse_can_read_paid`). The `paid/` folder in this public repository is only a hand-over copy:
