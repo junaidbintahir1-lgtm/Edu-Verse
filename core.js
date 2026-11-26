@@ -535,8 +535,18 @@ document.addEventListener('click',function(e){
 /* Prices: rupees for visitors in Pakistan (browser time zone Asia/Karachi, or Urdu as the language), US dollars elsewhere. */
 EV.inPakistan=function(){try{var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';if(tz==='Asia/Karachi')return true;}catch(e){}
   var l=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'']);for(var i=0;i<l.length;i++)if(/^ur\b/i.test(l[i]||''))return true;return false;};
-EV.paintPrices=function(pk){pk=pk==null?EV.inPakistan():pk;$$('[data-pkr]').forEach(function(e){e.textContent=pk?e.dataset.pkr:e.dataset.usd;});var c=$('#plansCur');if(c)c.textContent=pk?'Prices in Pakistani rupees':'Prices in US dollars';
+/* Prices are in US dollars for everyone by default. Rupees show only if paintPrices(true) is called. */
+EV.paintPrices=function(pk){pk=pk===true;$$('[data-pkr]').forEach(function(e){e.textContent=pk?e.dataset.pkr:e.dataset.usd;});var c=$('#plansCur');if(c)c.textContent=pk?'Prices in Pakistani rupees':'Prices in US dollars';
   $$('[data-cur]').forEach(function(b){b.classList.toggle('on',(b.dataset.cur==='pkr')===pk);});};
+/* A small pop-up for extra details. Closes with the X, the Close button, Escape or a click outside. */
+EV.info=function(title,html){
+  var m=$('#infoPop'),from=document.activeElement;
+  if(!m){m=document.createElement('div');m.className='modal';m.id='infoPop';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-labelledby','infoT');document.body.appendChild(m);
+    m.addEventListener('click',function(e){if(e.target===m||e.target.closest('[data-close]'))EV.closeInfo();});}
+  m.innerHTML='<div class="modalBox infoBox"><button class="x" type="button" data-close aria-label="Close">×</button><h2 id="infoT">'+title+'</h2>'+html+'<div class="row"><button class="btn gold" type="button" data-close>Close</button></div></div>';
+  m.hidden=false;EV.infoFrom=from;m.querySelector('.x').focus();
+};
+EV.closeInfo=function(){var m=$('#infoPop');if(m&&!m.hidden){m.hidden=true;if(EV.infoFrom&&EV.infoFrom.focus)EV.infoFrom.focus();}};
 EV.openPlans=function(){EV.paintPrices();var m=$('#plans');m.hidden=false;var x=m.querySelector('.x');if(x)x.focus();};
 $('#plans').addEventListener('click',function(e){if(e.target.id==='plans')e.currentTarget.hidden=true;});
 
@@ -564,7 +574,7 @@ $('#sq').addEventListener('input',function(){autoGrow(this);});
 $('#sq').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#sform').requestSubmit();}});
 $('#sform').addEventListener('submit',function(e){e.preventDefault();var i=$('#sq');EV.kSend(SHEET,i.value);i.value='';autoGrow(i);});
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){EV.closeSheet();$('#plans').hidden=true;}
+  if(e.key==='Escape'){EV.closeSheet();$('#plans').hidden=true;EV.closeInfo();}
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();EV.openSheet();}
 });
 sheetInit();
