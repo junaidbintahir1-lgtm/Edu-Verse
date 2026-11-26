@@ -2,7 +2,7 @@
    Strategy: ALWAYS try the network first, so students see updates at once; the saved copy is only
    used when they are offline. Pictures and fonts are served from the saved copy and refreshed in the
    background. PDFs and anything on another website (Supabase, fonts, Knovo) are never touched. */
-const CACHE = "eduverse-v42";
+const CACHE = "eduverse-v43";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/favicon-32.png",
                "assets/eduverse-logo.png", "assets/knovo-logo-sm.png"];
 

@@ -228,10 +228,9 @@ V.subject=function(el,r){
   var o=r.o,s=o.s,tab=r.tab;
   if(o.soon){EV.go('level-'+o.level.slug);return;}
   if(tab==='topics'&&!o.db)tab='overview';
-  if(tab==='classroom'&&!EV.classOf(o))tab='overview';
   EV.touchRecent(o.ref);
   var fav=ST.favs.indexOf(o.ref)>=0;
-  var tabs=EV.TABS.filter(function(t){return t==='topics'?o.db:t==='classroom'?EV.classOf(o):true});
+  var tabs=EV.TABS.filter(function(t){return t!=='topics'||o.db});
   var h='<div class="sHead"><div class="in"><a class="crumb" href="#level-'+o.level.slug+'">← '+esc(o.level.meta.short)+'</a>'+
     '<h1><span aria-hidden="true">'+s.icon+'</span>'+esc(s.name)+'<span class="code">'+esc(s.code)+'</span></h1>'+
     '<p class="tagline">'+esc(s.board)+' · '+esc(s.tag||'')+'</p>'+
@@ -337,14 +336,17 @@ TAB.technique=function(o,b){
 };
 /* A teacher's classroom: their notes and recorded lessons together. Free first, plan holders' below. */
 TAB.classroom=function(o,b){
-  var vd=EV.classOf(o),t=vd.teacher||{},free=vd.free||[],paid=vd.paid||[],pro=EVLive.isPro();
+  var vd=EV.classOf(o);
+  if(!vd){b.innerHTML='<h2 class="h2" style="margin:0;font-size:1.7rem">'+esc(o.s.name)+' classroom</h2><p class="sub">Notes and recorded lessons from teachers for '+esc(o.s.name)+' '+esc(o.s.code)+'.</p>'+
+    '<div class="empty" style="margin-top:20px"><b>A teacher\'s classroom for this subject is being prepared</b><span>Their notes and recorded lessons will appear here. The EduVerse notes, flashcards and questions are ready now.</span><a class="btn gold sm" href="#notes-'+o.slug+'">Open notes</a></div>';return;}
+  var t=vd.teacher||{},free=vd.free||[],paid=vd.paid||[],pro=EVLive.isPro();
   function row(it,locked){
     if(locked)return EV.pdfLockRow(it,t.photo);
     return '<div class="pdf"><div class="ico'+(t.photo?' ph':'')+'" aria-hidden="true">'+(t.photo?'<img src="'+esc(t.photo)+'" alt="" loading="lazy">':'▶')+'</div><div><b>'+esc(it.t)+'</b><span>'+esc(it.d||'')+'</span></div><div class="acts">'+
       (it.url?'<a class="btn sm gold" href="'+esc(it.url)+'" target="_blank" rel="noopener">Open</a>':'<span class="pill">Being added</span>')+'</div></div>';
   }
   var h='<h2 class="h2" style="margin:0;font-size:1.7rem">'+esc(o.s.name)+' classroom</h2><p class="sub">Notes and recorded lessons from your teacher for '+esc(o.s.name)+' '+esc(o.s.code)+'.</p>';
-  if(t.name)h+='<div class="teach"><img src="'+esc(t.photo||'')+'" alt="'+esc(t.name)+'" width="72" height="72"><div><small>Your teacher</small><b>'+esc(t.name)+'</b><span>'+esc(t.line||'')+'</span></div></div>';
+  if(t.name)h+='<div class="teach"><img src="'+esc(t.photo||'')+'" alt="'+esc(t.name)+'" width="72" height="72"><div><small>Your teacher</small><b>'+esc(t.name)+'</b><span>'+esc(t.line||'')+'</span></div>'+(t.whatsapp?'<a class="teachWa" href="https://wa.me/'+esc(String(t.whatsapp).replace(/\D/g,''))+'" target="_blank" rel="noopener"><small>For further details</small><b>WhatsApp '+esc(t.whatsapp)+'</b></a>':'')+'</div>';
   if(free.length)h+='<div class="libGroup" style="margin-top:18px"><h3>🎓 Free notes and lessons <span class="pill ok">Free</span></h3>'+free.map(function(it){return row(it,false);}).join('')+'</div>';
   if(paid.length)h+='<div class="libGroup premBox" id="paidClass" style="margin-top:18px"><h3>⭐ Full course: notes and recordings <span class="pill">'+paid.length+'</span></h3>'+
     (pro?'':'<p class="premSay">These are for plan holders. Plans are not on sale yet, so nothing can be bought here.</p>')+

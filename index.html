@@ -667,6 +667,10 @@ footer nav a:hover{color:var(--ivory)}
 .teach img{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);flex:0 0 auto;background:#0a0a0c}
 .teach small{display:block;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:700}
 .teach b{display:block;font-size:1.1rem}.teach span{display:block;font-size:.8rem;color:var(--dim)}
+.teach>div{flex:1;min-width:0}
+.teachWa{flex:0 0 auto;text-decoration:none;text-align:right;padding:10px 14px;border-radius:12px;border:1px solid var(--rim);background:var(--deck2)}
+.teachWa:hover{border-color:var(--goldline)}.teachWa small{color:var(--dim)}.teachWa b{font-size:.92rem;white-space:nowrap}
+@media(max-width:640px){.teach{flex-wrap:wrap}.teachWa{flex:1 1 100%;text-align:left}}
 .premBox{padding:16px;border-radius:var(--r);border:1px solid var(--goldline);background:linear-gradient(180deg,rgba(240,180,41,.05),transparent)}
 .premSay{font-size:.8rem;color:var(--dim);margin:0;max-width:70ch}
 @media(max-width:600px){.pdf{grid-template-columns:auto minmax(0,1fr)}.pdf .acts{grid-column:1/-1;justify-content:flex-start}}

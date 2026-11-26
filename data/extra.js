@@ -89,14 +89,14 @@ window.EV_EXTRA={
 };
 
 /* EduVerse — a teacher's classroom (their notes and recorded lessons together), per subject.
-   A subject gets a "Classroom" tab only when it is listed here.
-   teacher: name, line (one honest line), photo.
+   Every subject has a Classroom tab; a subject not listed here shows "being prepared".
+   teacher: name, line (one honest line), photo, whatsapp (shown on the card for further details; leave out to hide).
    free: notes and lessons for everyone  { t: title, d: description, url: link }
    paid: notes and lessons for plan holders  { t: title, d: description }
          Never put the link of a paid item in this file: this file is public. */
 window.EV_CLASSROOM={
  "olevel/pak2059": {
-  "teacher": {"name": "Sir Alam", "line": "Pakistan Studies 2059 · O Level", "photo": "assets/teachers/sir-alam.jpg"},
+  "teacher": {"name": "Sir Alam", "line": "Pakistan Studies 2059 · O Level", "photo": "assets/teachers/sir-alam.jpg", "whatsapp": "+92 302 5559170"},
   "free": [],
   "paid": [
    {"t": "Pakistan Studies 2059: notes and recorded lessons", "d": "Sir Alam's notes together with his recorded lessons for O Level Pakistan Studies"}
