@@ -195,7 +195,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @media(max-width:820px){.bellDrop{top:calc(110px + env(safe-area-inset-top,0px))}}
 .eduChip{display:flex;align-items:center;gap:6px;font-size:.74rem;font-weight:700;color:#111;padding:6px 10px;border-radius:999px;background:var(--gold);text-decoration:none;white-space:nowrap}
 .eduChip[hidden]{display:none}
-@media(max-width:1280px){.eduChip span{display:none}}
+/* the badge must never push a menu link out: full text only on wide screens (where the bar is given more room), icon only below that, and on narrow laptops it lives in the ☰ menu */
+@media(min-width:1440px){.topbar .in{max-width:1340px}}
+@media(max-width:1439px){.eduChip span{display:none}.eduChip{padding:6px 9px}}
+@media(max-width:1140px) and (min-width:901px){.eduChip{display:none}}
 body.signedOut #eduChip{display:none!important}
 @media(max-width:480px){.xpChip{display:none}.brand span{font-size:1.05rem}.topbar .in{gap:8px}}
 
