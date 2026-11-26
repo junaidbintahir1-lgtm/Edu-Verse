@@ -163,8 +163,8 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   files are encrypted behind an access password, then it asks for the EduVerse sign-in, then the owner
   entry password. This repository holds no Admin page and no database setup files; `#admin` here shows
   "Page not found". The database still checks every owner action (role + entry password,
-  `eduverse_admin_code_ok()`). The last public copy of the Admin source and SQL is in Git history at
-  commit `cee4888`; the owner keeps the current files privately.
+  `eduverse_admin_code_ok()`). The Admin source and the database setup are not in this repository or its
+  history; the owner keeps the current files privately.
 - **Contact:** the home page ends with the Contact EduVerse section. It sends through formsubmit.co to
   educationalverse2027@gmail.com, with an email-app fallback.
 
@@ -186,7 +186,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 |---|---|
 | Payments | Switched off on purpose (no payment account is linked). No checkout code exists; plans and top-ups are given only by the owner |
 | Light theme | Black only |
-| Paid PDFs | Private (see above). Copies that were public before 26 Nov 2026 remain in this repository's Git history until that history is rewritten |
+| Paid PDFs | Private (see above). The history of this repository was rewritten on 26 Nov 2026 to remove every old copy of the paid PDFs, the Admin page, the database setup files and the Knovo server code |
 | Past-paper questions | `EV_PASTPAPERS` (interactive past-paper questions) is still empty; Papers shows the topical PDF papers only |
 | XP from Knovo marking | Not awarded (cannot be verified yet) |
 
