@@ -1017,7 +1017,13 @@ body.onSignin #signBtn,body.signedOut #signBtn{display:none} /* members-only sit
 <script src="lesson.js"></script>
 <script src="menu.js"></script>
 <script>
-EV.boot(); /* every script above has loaded: build the page */
+/* If the visitor arrived from an EduVerse email (confirm email / reset password), sign them in first. */
+EVLive.adoptLink().catch(function(){return null;}).then(function(r){
+  if(r&&!r.ok)EV.banMsg=r.error;
+  if(r&&r.ok)EV.syncProfile();
+  EV.boot(); /* every script above has loaded: build the page */
+  if(r&&r.ok)setTimeout(function(){EV.toast(r.type==='recovery'?'Choose your new password':'✓ Email confirmed. Welcome to EduVerse!');},900);
+});
 /* Offline support and "install app". The worker always tries the network first, so updates show at once. */
 if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
 </script>

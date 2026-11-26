@@ -70,6 +70,20 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 - **Banned accounts:** the owner site can ban an account. When the site opens it calls
   `eduverse_account_state` (`EVLive.accountState`); a banned account is signed out and the sign-in page shows
   the reason and the support email. Sign-in is refused the same way, and Knovo answers `ACCOUNT_SUSPENDED`.
+- **Email links:** `EVLive.adoptLink()` runs before the page is built (bottom of `index.html`). A link from a
+  Supabase email (confirm email, reset password) carries the session in the address, as `#access_token=…` or
+  `?token_hash=…&type=…`. It signs the visitor in, cleans the address, and for a reset opens `#newpassword`
+  (`V.newpassword`, `EVLive.updatePassword`). Expired links show a message on the sign-in page. Sign-up and
+  "Forgot your password?" ask Supabase to send people back to `EVLive.siteUrl()`; that address must be in
+  Supabase → Authentication → URL Configuration.
+- **Paid papers are private:** every paid PDF (topical banks, topical past papers, topic tests) has a path that
+  starts with `paid/` in `data/site-data.js`. Those files are served from the private Supabase Storage bucket
+  `paid-papers` (same path without `paid/`), which only the owner, developers and active plan holders can
+  read (`eduverse_can_read_paid`). `EV.pdfRow` draws buttons for them and `EV.openPaid` fetches the file with
+  the student's session (`EVLive.paidBlob`). Files over 45 MB were split into two parts, because the free
+  Supabase plan refuses uploads over 50 MB. The `paid/` folder in this repository is only a hand-over copy:
+  once the owner has uploaded it to the bucket it is deleted here. New paid papers go straight into the
+  bucket and get an entry in `site-data.js`; they are never added to this repository.
 - **Sign-in:** Supabase email + password through `live.js`, stored under `ev_auth_token`, `ev_auth_refresh`,
   `ev_auth_expires` and `ev_auth_user`. Sign-up keeps the classic
   site's fields and username rules. Tokens renew silently.
@@ -170,9 +184,8 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 | Item | Status |
 |---|---|
 | Payments | Switched off on purpose (no payment account is linked). No checkout code exists; plans and top-ups are given only by the owner |
-| Email links | After a student confirms their email or asks for a password reset, Supabase sends them back to the site with a token in the address. Nothing reads that token yet, so they must sign in by hand, and a reset password cannot be set on the site |
 | Light theme | Black only |
-| Paid PDFs | Display lock only; real protection needs private storage (e.g. Cloudflare R2) and signed links |
+| Paid PDFs | Served from private storage. Until the owner confirms the upload, a copy is still in `paid/` here; older copies also remain in the Git history |
 | Past-paper questions | `EV_PASTPAPERS` (interactive past-paper questions) is still empty; Papers shows the topical PDF papers only |
 | XP from Knovo marking | Not awarded (cannot be verified yet) |
 

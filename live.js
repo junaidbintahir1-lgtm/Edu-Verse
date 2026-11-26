@@ -92,6 +92,48 @@ L.signIn=function(email,password){
   });
 };
 /* ---- Suspended accounts. The owner (or a developer) can ban an account in the owner site. ---- */
+/* ---- Links from EduVerse emails (confirm your email, reset your password) ----
+   Supabase sends the visitor back to this page with the session in the address. adoptLink() reads it,
+   signs them in and cleans the address. Resolves null when the address carries no such link,
+   otherwise {type:"recovery"|"signup"|..., ok:true} or {ok:false, error}. */
+L.siteUrl=function(){return location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html";};
+function params(str){var o={};String(str||"").replace(/^[#?]/,"").split("&").forEach(function(kv){var i=kv.indexOf("=");if(i>0){try{o[decodeURIComponent(kv.slice(0,i))]=decodeURIComponent(kv.slice(i+1).replace(/\+/g," "));}catch(e){}}});return o;}
+L.adoptLink=function(){
+  var h=params(location.hash),q=params(location.search),clean=function(hash){try{history.replaceState(null,"",location.pathname+(hash||""));}catch(e){}};
+  var err=h.error_description||q.error_description||h.error||q.error;
+  if(err&&!h.access_token){clean("#signin");return Promise.resolve({ok:false,error:/expired|invalid/i.test(err)?"That email link has expired or was already used. Ask for a new one below.":String(err)});}
+  function finish(d,type){
+    storeSession(d);OWNER=null;
+    return fetch(SUPA_URL+"/auth/v1/user",{headers:{apikey:SUPA_KEY,Authorization:"Bearer "+d.access_token}}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+      .then(function(u){if(u&&u.email)storeSession({user:u},u.email);else if(d.user)storeSession({user:d.user},d.user.email);clean(type==="recovery"?"#newpassword":"#home");return {ok:true,type:type||"signup"};});
+  }
+  if(h.access_token&&h.refresh_token)return finish({access_token:h.access_token,refresh_token:h.refresh_token,expires_in:h.expires_in},h.type);
+  if(q.token_hash&&q.type)return authPost("/auth/v1/verify",{type:q.type,token_hash:q.token_hash}).then(function(x){
+    if(x.ok&&x.d&&x.d.access_token)return finish(x.d,q.type);
+    clean("#signin");return {ok:false,error:"That email link has expired or was already used. Ask for a new one below."};});
+  return Promise.resolve(null);
+};
+/* set a new password for the signed-in account (used after a reset link) */
+L.updatePassword=function(pw){
+  return L.getSession().then(function(s){if(!s)return {ok:false,error:"Your reset link has expired. Ask for a new one."};
+    return fetch(SUPA_URL+"/auth/v1/user",{method:"PUT",headers:{apikey:SUPA_KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:JSON.stringify({password:String(pw||"")})})
+      .then(function(r){return r.json().catch(function(){return null;}).then(function(d){if(r.ok)return {ok:true};var raw=d&&(d.msg||d.message||d.error_description)||"";
+        return {ok:false,error:/different from the old/i.test(raw)?"Choose a password you have not used before.":/at least|weak/i.test(raw)?"Please choose a longer password.":friendlyAuth(raw)};});})
+      .catch(function(){return {ok:false,error:"Could not connect. Check your internet and try again."};});});
+};
+/* ---- Paid papers live in private storage, not in the website's public files. ----
+   The storage server gives a file only to the owner, developers and accounts with a paid plan.
+   path: "paid/<folder>/<file>.pdf" as written in data/site-data.js. Resolves a Blob. */
+L.PAID_BUCKET="paid-papers";
+L.isPaidPath=function(p){return /^paid\//.test(String(p||""));};
+L.paidBlob=function(path){
+  var key=String(path).replace(/^paid\//,"").split("/").map(encodeURIComponent).join("/");
+  return L.getSession().then(function(s){if(!s){var e=new Error("auth");e.code="auth";throw e;}
+    return fetch(SUPA_URL+"/storage/v1/object/authenticated/"+L.PAID_BUCKET+"/"+key,{headers:{apikey:SUPA_KEY,Authorization:"Bearer "+s.access_token}})
+      .catch(function(){var e=new Error("network");e.code="network";throw e;})
+      .then(function(r){if(!r.ok){var e=new Error("refused");e.code="refused";e.status=r.status;throw e;}return r.blob();})
+      .then(function(b){return b.type==="application/pdf"?b:new Blob([b],{type:"application/pdf"});});});
+};
 L.banText=function(reason){return "This account has been suspended"+(reason?": "+reason:".")+" If you think this is a mistake, write to "+(L.SUPPORT_EMAIL||"educationalverse2027@gmail.com")+".";};
 /* {banned, reason} for the signed-in account, or null when it cannot be checked (offline, or not set up yet) */
 L.accountState=function(){if(!L.hasSession())return Promise.resolve(null);
@@ -107,7 +149,7 @@ L.usernameOk=function(u){
   return "";
 };
 L.signUp=function(f){
-  return authPost("/auth/v1/signup",{email:f.email,password:f.password,data:Object.assign({full_name:f.name,user_role:f.role||"student",name:f.name,username:f.username,board:f.board,qualification:f.qualification},
+  return authPost("/auth/v1/signup?redirect_to="+encodeURIComponent(L.siteUrl()),{email:f.email,password:f.password,data:Object.assign({full_name:f.name,user_role:f.role||"student",name:f.name,username:f.username,board:f.board,qualification:f.qualification},
     /* an educator's request travels with the account; the server turns it into a verification request on first sign-in */
     f.role==="teacher"&&f.teacher?{teacher_school:f.teacher.school,teacher_city:f.teacher.city,teacher_subjects:f.teacher.subjects,teacher_school_email:f.teacher.schoolEmail,teacher_contact_name:f.teacher.contactName,teacher_contact:f.teacher.contact}:{})}).then(function(x){
     if(x.ok&&x.d&&x.d.access_token){storeSession(x.d,f.email);OWNER=null;XP.status="idle";return {ok:true,user:L.user()};}
@@ -119,7 +161,7 @@ L.signUp=function(f){
   });
 };
 L.recover=function(email){
-  return authPost("/auth/v1/recover",{email:String(email||"").trim()}).then(function(x){return x.ok?{ok:true}:{ok:false,error:friendlyAuth(x.d&&(x.d.error_description||x.d.msg))};});
+  return authPost("/auth/v1/recover?redirect_to="+encodeURIComponent(L.siteUrl()),{email:String(email||"").trim()}).then(function(x){return x.ok?{ok:true}:{ok:false,error:friendlyAuth(x.d&&(x.d.error_description||x.d.msg))};});
 };
 L.signOut=function(){
   var a=stored();

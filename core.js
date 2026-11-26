@@ -19,6 +19,19 @@ EV.SITE=(typeof window.EV_SITE_ROOT==='string')?window.EV_SITE_ROOT:'';
 function encPath(p){return String(p).split('/').map(encodeURIComponent).join('/');}
 EV.pdfView=function(p){return EV.SITE+encPath(p);};
 EV.pdfRaw=EV.pdfView;
+/* Open or download a paid paper from private storage. A blank tab is opened at once (so the browser does
+   not block it) and filled when the file arrives. While a file is still also in the public folder
+   (before the owner has finished moving it), that copy is used as a fallback. */
+EV.openPaid=function(path,download){
+  var name=String(path).split('/').pop(),w=download?null:window.open('','_blank');
+  if(w){try{w.document.title='Opening…';w.document.body.innerHTML='<p style="font:16px system-ui;padding:24px">Opening your paper… large papers can take a moment.</p>';}catch(e){}}
+  EV.toast(download?'Preparing your download…':'Opening your paper…');
+  function show(url){if(download){var a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();}else if(w)w.location.href=url;else location.href=url;}
+  return LV.paidBlob(path).then(function(b){show(URL.createObjectURL(b));},function(e){
+    if(e&&e.code==='auth'){if(w)w.close();EV.toast('Please sign in again to open this paper.');return;}
+    return fetch(EV.pdfView(path),{method:'HEAD'}).then(function(r){if(r.ok){show(EV.pdfView(path));return;}throw 0;}).catch(function(){
+      if(w)w.close();EV.toast(e&&e.code==='network'?'Could not connect. Check your internet and try again.':'This paper could not be opened. It is part of EduVerse Pro; if you have a plan, sign out and in again.');});});
+};
 
 /* ---------------- Saved progress ---------------- */
 var KEY='ev_design_v1';var LV=window.EVLive;
@@ -508,6 +521,7 @@ EV.kFlash=function(conv){
 /* Delegated clicks for Knovo actions anywhere on the page */
 document.addEventListener('click',function(e){
   var t=e.target.closest('[data-plans]');if(t){e.preventDefault();EV.openPlans();return;}
+  t=e.target.closest('[data-paid]');if(t){e.preventDefault();EV.openPaid(t.dataset.paid,t.dataset.dl==='1');return;}
   t=e.target.closest('[data-cur]');if(t){e.preventDefault();EV.paintPrices(t.dataset.cur==='pkr');return;}
   t=e.target.closest('[data-close]');if(t&&t.closest('.modal')){t.closest('.modal').hidden=true;return;}
   t=e.target.closest('[data-close-sheet]');if(t){EV.closeSheet();return;}

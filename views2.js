@@ -372,6 +372,16 @@ V.about=function(el){
 };
 
 /* =================== SIGN IN =================== */
+/* ---------- Choose a new password (reached from the reset link in the email) ---------- */
+V.newpassword=function(el){
+  el.innerHTML='<div class="in page"><div class="card stack" style="max-width:480px;margin:30px auto"><span class="eyebrow"><b>EduVerse</b> · your account</span><h2 class="h2" style="margin:0">Choose a new password</h2><p class="small muted" style="margin:0">You are signed in'+(ST.profile&&ST.profile.email?' as <b>'+esc(ST.profile.email)+'</b>':'')+'. Type the password you want to use from now on.</p><form id="npForm" class="stack" style="gap:12px" novalidate><label class="field" for="np1">New password<input id="np1" type="password" autocomplete="new-password" placeholder="At least 8 characters" required></label><label class="field" for="np2">Type it again<input id="np2" type="password" autocomplete="new-password" placeholder="Type it again" required></label><button class="btn gold" type="submit" id="npBtn">Save my new password</button><p class="small" id="npNote" role="status" aria-live="polite" style="margin:0"></p></form></div></div>';
+  $('#npForm').addEventListener('submit',function(e){e.preventDefault();var a=$('#np1').value,b=$('#np2').value,n=$('#npNote'),btn=$('#npBtn');
+    var bad=(a.length<8||!/[A-Za-z]/.test(a)||!/\d/.test(a))?'Use at least 8 characters, with letters and numbers.':a!==b?'The two passwords do not match.':'';
+    if(bad){n.style.color='var(--warn)';n.textContent=bad;return;}
+    btn.disabled=true;n.style.color='';n.textContent='Saving…';
+    EVLive.updatePassword(a).then(function(x){btn.disabled=false;if(!x.ok){n.style.color='var(--warn)';n.textContent=x.error;return;}EV.toast('✓ Password changed');EV.go('home');});});
+  $('#np1').focus();
+};
 /* ---------- Educators: sign-up fields and the verification page ----------
    Choosing "Educator" only sends a request. The owner checks each one by hand before anything is given.
    Every request has its own code that must appear in the proof, so an old or ready-made picture cannot be reused. */

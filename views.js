@@ -14,7 +14,7 @@ EV.subjCard=function(o,extra){
 };
 function pdfLabel(f){var m=String(f).match(/^resources\/[A-Za-z]+_(OLevel|IGCSE|Shared)(?:_(\d{4}))?\//);if(!m)return '';return m[1]==='Shared'?'Shared folder':(m[1]==='OLevel'?'O Level':'IGCSE')+(m[2]?' '+m[2]:'');}
 EV.pdfRow=function(it){var lb=pdfLabel(it.f);
-  return '<div class="pdf"><div class="ico">PDF</div><div><b>'+esc(it.t)+(lb?' <span class="pill" style="vertical-align:middle">'+esc(lb)+'</span>':'')+'</b><span>'+esc(it.d||'')+'</span></div><div class="acts"><a class="btn sm gold" href="'+EV.pdfView(it.f)+'" target="_blank" rel="noopener">Open</a><a class="btn sm" href="'+EV.pdfRaw(it.f)+'" target="_blank" rel="noopener">Download</a></div></div>';
+  return '<div class="pdf"><div class="ico">PDF</div><div><b>'+esc(it.t)+(lb?' <span class="pill" style="vertical-align:middle">'+esc(lb)+'</span>':'')+'</b><span>'+esc(it.d||'')+'</span></div><div class="acts">'+(EVLive.isPaidPath(it.f)?'<button class="btn sm gold" type="button" data-paid="'+esc(it.f)+'">Open</button><button class="btn sm" type="button" data-paid="'+esc(it.f)+'" data-dl="1">Download</button>':'<a class="btn sm gold" href="'+EV.pdfView(it.f)+'" target="_blank" rel="noopener">Open</a><a class="btn sm" href="'+EV.pdfRaw(it.f)+'" target="_blank" rel="noopener">Download</a>')+'</div></div>';
 };
 var DIFF={0:'Easy',1:'Medium',2:'Hard'};
 EV.qCard=function(q,n){
