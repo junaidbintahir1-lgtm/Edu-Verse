@@ -238,8 +238,8 @@ EV.allQuestions=function(o){
 };
 
 /* ---------------- Router ---------------- */
-EV.TABS=['overview','notes','topics','questions','cards','technique','library','tools','videos'];
-EV.videosOf=function(o){var v=(window.EV_VIDEOS||{})[o.ref];return v&&((v.free||[]).length||(v.paid||[]).length)?v:null;};
+EV.TABS=['overview','notes','topics','questions','cards','technique','library','tools','classroom'];
+EV.classOf=function(o){var v=(window.EV_CLASSROOM||{})[o.ref];return v&&((v.free||[]).length||(v.paid||[]).length)?v:null;};
 EV.route={name:'home'};
 EV.parse=function(){
   var h=(location.hash||'').slice(1)||'home';

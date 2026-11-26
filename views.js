@@ -222,16 +222,16 @@ V.level=function(el,r){
 };
 
 /* =================== SUBJECT HUB =================== */
-var TABNAME={overview:'Overview',notes:'Notes',topics:'Topics',questions:'Questions',cards:'Flashcards',technique:'Exam technique',library:'PDF library',tools:'Study tools',videos:'Videos'};
+var TABNAME={overview:'Overview',notes:'Notes',topics:'Topics',questions:'Questions',cards:'Flashcards',technique:'Exam technique',library:'PDF library',tools:'Study tools',classroom:'Classroom'};
 var RESCAT=[['detailed','Study books · detailed notes'],['premium','Premium notes'],['quickref','Quick reference sheets'],['topical','Topical question banks'],['compiled','Compiled topical papers'],['tests','Topic tests'],['mixed','Mixed-topic tests'],['yearly','Yearly practice papers'],['assess','Full-syllabus assessment'],['mocks','Challenge mocks + marking guides']];
 V.subject=function(el,r){
   var o=r.o,s=o.s,tab=r.tab;
   if(o.soon){EV.go('level-'+o.level.slug);return;}
   if(tab==='topics'&&!o.db)tab='overview';
-  if(tab==='videos'&&!EV.videosOf(o))tab='overview';
+  if(tab==='classroom'&&!EV.classOf(o))tab='overview';
   EV.touchRecent(o.ref);
   var fav=ST.favs.indexOf(o.ref)>=0;
-  var tabs=EV.TABS.filter(function(t){return t==='topics'?o.db:t==='videos'?EV.videosOf(o):true});
+  var tabs=EV.TABS.filter(function(t){return t==='topics'?o.db:t==='classroom'?EV.classOf(o):true});
   var h='<div class="sHead"><div class="in"><a class="crumb" href="#level-'+o.level.slug+'">← '+esc(o.level.meta.short)+'</a>'+
     '<h1><span aria-hidden="true">'+s.icon+'</span>'+esc(s.name)+'<span class="code">'+esc(s.code)+'</span></h1>'+
     '<p class="tagline">'+esc(s.board)+' · '+esc(s.tag||'')+'</p>'+
@@ -335,18 +335,18 @@ TAB.technique=function(o,b){
   h+='<section class="sect" style="padding-top:26px"><h3 style="font-size:1.15rem">📈 Answer-style ladder</h3><p class="sub">How the same 8-mark question climbs from weak to A*.</p><div style="margin-top:12px">'+EV.ladderHTML()+'</div></section>';
   b.innerHTML=h;
 };
-/* Recorded lessons. Free ones first, the ones for plan holders below. */
-TAB.videos=function(o,b){
-  var vd=EV.videosOf(o),t=vd.teacher||{},free=vd.free||[],paid=vd.paid||[],pro=EVLive.isPro();
+/* A teacher's classroom: their notes and recorded lessons together. Free first, plan holders' below. */
+TAB.classroom=function(o,b){
+  var vd=EV.classOf(o),t=vd.teacher||{},free=vd.free||[],paid=vd.paid||[],pro=EVLive.isPro();
   function row(it,locked){
     if(locked)return EV.pdfLockRow(it,t.photo);
     return '<div class="pdf"><div class="ico'+(t.photo?' ph':'')+'" aria-hidden="true">'+(t.photo?'<img src="'+esc(t.photo)+'" alt="" loading="lazy">':'▶')+'</div><div><b>'+esc(it.t)+'</b><span>'+esc(it.d||'')+'</span></div><div class="acts">'+
-      (it.url?'<a class="btn sm gold" href="'+esc(it.url)+'" target="_blank" rel="noopener">Watch</a>':'<span class="pill">Being added</span>')+'</div></div>';
+      (it.url?'<a class="btn sm gold" href="'+esc(it.url)+'" target="_blank" rel="noopener">Open</a>':'<span class="pill">Being added</span>')+'</div></div>';
   }
-  var h='<h2 class="h2" style="margin:0;font-size:1.7rem">'+esc(o.s.name)+' videos</h2><p class="sub">Recorded lessons for '+esc(o.s.name)+' '+esc(o.s.code)+'.</p>';
+  var h='<h2 class="h2" style="margin:0;font-size:1.7rem">'+esc(o.s.name)+' classroom</h2><p class="sub">Notes and recorded lessons from your teacher for '+esc(o.s.name)+' '+esc(o.s.code)+'.</p>';
   if(t.name)h+='<div class="teach"><img src="'+esc(t.photo||'')+'" alt="'+esc(t.name)+'" width="72" height="72"><div><small>Your teacher</small><b>'+esc(t.name)+'</b><span>'+esc(t.line||'')+'</span></div></div>';
-  if(free.length)h+='<div class="libGroup" style="margin-top:18px"><h3>🎬 Free lessons <span class="pill ok">Free</span></h3>'+free.map(function(it){return row(it,false);}).join('')+'</div>';
-  if(paid.length)h+='<div class="libGroup premBox" id="paidVideos" style="margin-top:18px"><h3>⭐ Full recorded lessons <span class="pill">'+paid.length+'</span></h3>'+
+  if(free.length)h+='<div class="libGroup" style="margin-top:18px"><h3>🎓 Free notes and lessons <span class="pill ok">Free</span></h3>'+free.map(function(it){return row(it,false);}).join('')+'</div>';
+  if(paid.length)h+='<div class="libGroup premBox" id="paidClass" style="margin-top:18px"><h3>⭐ Full course: notes and recordings <span class="pill">'+paid.length+'</span></h3>'+
     (pro?'':'<p class="premSay">These are for plan holders. Plans are not on sale yet, so nothing can be bought here.</p>')+
     paid.map(function(it){return row(it,!pro);}).join('')+(pro?'':'<div class="row"><button class="btn sm" type="button" data-plans>See the plans</button></div>')+'</div>';
   b.innerHTML=h;
