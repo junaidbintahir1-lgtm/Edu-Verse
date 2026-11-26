@@ -14,8 +14,8 @@ EV.subjCard=function(o,extra){
 };
 function pdfLabel(f){var m=String(f).match(/^resources\/[A-Za-z]+_(OLevel|IGCSE|Shared)(?:_(\d{4}))?\//);if(!m)return '';return m[1]==='Shared'?'Shared folder':(m[1]==='OLevel'?'O Level':'IGCSE')+(m[2]?' '+m[2]:'');}
 /* A paid file shown to someone without a plan: the name and what it is, but no way to open it. */
-EV.pdfLockRow=function(it){
-  return '<div class="pdf lock"><div class="ico" aria-hidden="true">🔒</div><div><b>'+esc(it.t)+'</b><span>'+esc(it.d||'')+'</span></div><div class="acts"><span class="pill gold">Plan holders</span></div></div>';
+EV.pdfLockRow=function(it,photo){
+  return '<div class="pdf lock"><div class="ico'+(photo?' ph':'')+'" aria-hidden="true">'+(photo?'<img src="'+esc(photo)+'" alt="" loading="lazy">':'🔒')+'</div><div><b>'+esc(it.t)+'</b><span>'+esc(it.d||'')+'</span></div><div class="acts"><span class="pill gold">Plan holders</span></div></div>';
 };
 EV.pdfRow=function(it){var lb=pdfLabel(it.f);
   return '<div class="pdf"><div class="ico">PDF</div><div><b>'+esc(it.t)+(lb?' <span class="pill" style="vertical-align:middle">'+esc(lb)+'</span>':'')+'</b><span>'+esc(it.d||'')+'</span></div><div class="acts">'+(EVLive.isPaidPath(it.f)?'<button class="btn sm gold" type="button" data-paid="'+esc(it.f)+'">Open</button><button class="btn sm" type="button" data-paid="'+esc(it.f)+'" data-dl="1">Download</button>':'<a class="btn sm gold" href="'+EV.pdfView(it.f)+'" target="_blank" rel="noopener">Open</a><a class="btn sm" href="'+EV.pdfRaw(it.f)+'" target="_blank" rel="noopener">Download</a>')+'</div></div>';
@@ -222,15 +222,16 @@ V.level=function(el,r){
 };
 
 /* =================== SUBJECT HUB =================== */
-var TABNAME={overview:'Overview',notes:'Notes',topics:'Topics',questions:'Questions',cards:'Flashcards',technique:'Exam technique',library:'PDF library',tools:'Study tools'};
+var TABNAME={overview:'Overview',notes:'Notes',topics:'Topics',questions:'Questions',cards:'Flashcards',technique:'Exam technique',library:'PDF library',tools:'Study tools',videos:'Videos'};
 var RESCAT=[['detailed','Study books · detailed notes'],['premium','Premium notes'],['quickref','Quick reference sheets'],['topical','Topical question banks'],['compiled','Compiled topical papers'],['tests','Topic tests'],['mixed','Mixed-topic tests'],['yearly','Yearly practice papers'],['assess','Full-syllabus assessment'],['mocks','Challenge mocks + marking guides']];
 V.subject=function(el,r){
   var o=r.o,s=o.s,tab=r.tab;
   if(o.soon){EV.go('level-'+o.level.slug);return;}
   if(tab==='topics'&&!o.db)tab='overview';
+  if(tab==='videos'&&!EV.videosOf(o))tab='overview';
   EV.touchRecent(o.ref);
   var fav=ST.favs.indexOf(o.ref)>=0;
-  var tabs=EV.TABS.filter(function(t){return t!=='topics'||o.db});
+  var tabs=EV.TABS.filter(function(t){return t==='topics'?o.db:t==='videos'?EV.videosOf(o):true});
   var h='<div class="sHead"><div class="in"><a class="crumb" href="#level-'+o.level.slug+'">← '+esc(o.level.meta.short)+'</a>'+
     '<h1><span aria-hidden="true">'+s.icon+'</span>'+esc(s.name)+'<span class="code">'+esc(s.code)+'</span></h1>'+
     '<p class="tagline">'+esc(s.board)+' · '+esc(s.tag||'')+'</p>'+
@@ -279,9 +280,9 @@ TAB.notes=function(o,b){
   /* Premium notes sit directly under the free study book. Shown only when a subject has some. */
   var prem=o.res&&o.res.premium&&o.res.premium.length?o.res.premium:null;
   if(prem){var pro=EVLive.isPro();
-    h+='<div class="libGroup premBox" id="premNotes" style="margin-top:18px"><h3>⭐ Premium notes <span class="pill gold">Pro</span><span class="pill">'+prem.length+'</span></h3>'+
+    h+='<div class="libGroup premBox" id="premNotes" style="margin-top:18px"><h3>⭐ Premium notes <span class="pill">'+prem.length+'</span></h3>'+
       (pro?'':'<p class="premSay">These are for plan holders. Plans are not on sale yet, so nothing can be bought here. Everything above and below stays free.</p>')+
-      prem.map(pro?EV.pdfRow:EV.pdfLockRow).join('')+
+      prem.map(function(it){return pro?EV.pdfRow(it):EV.pdfLockRow(it);}).join('')+
       (pro?'':'<div class="row"><button class="btn sm" type="button" data-plans>See the plans</button></div>')+'</div>';}
   h+='<div class="stack" style="margin-top:20px">'+notes.map(function(nt,i){var k=o.ref+'#n'+i,dn=ST.topicsDone.indexOf(k)>=0;return '<details class="note'+(dn?' done':'')+'" data-n="'+i+'"'+(i===openI?' open':'')+'><summary><span class="nn">'+String(i+1).padStart(2,'0')+'</span><b>'+esc(EV.strip(nt.t))+'</b>'+(dn?'<span class="pill ok">Learned</span>':'')+'<span class="chev" aria-hidden="true">›</span></summary><div class="nb"><div class="rich">'+nt.b+'</div><div class="row"><button class="btn sm '+(dn?'ok':'gold')+'" type="button" data-learn="'+i+'">'+(dn?'✓ Learned':'Mark as learned')+'</button><button class="btn sm teal" type="button" data-nask="'+i+'">Ask Knovo about this section</button></div></div></details>';}).join('')+'</div>';
   b.innerHTML=h;
@@ -332,6 +333,22 @@ TAB.technique=function(o,b){
   if(t.examinerTips&&t.examinerTips.length)h+='<section class="sect" style="padding-top:26px"><h3>🏆 Examiner tips</h3><div class="okb" style="margin-top:12px"><ul class="tlist">'+t.examinerTips.map(function(m){return '<li>'+esc(m)+'</li>';}).join('')+'</ul></div></section>';
   h+='<section class="sect" style="padding-top:26px"><h3 style="font-size:1.15rem">🗣 Command words: the universal contract</h3><div style="margin-top:12px">'+EV.commandsTable()+'</div></section>';
   h+='<section class="sect" style="padding-top:26px"><h3 style="font-size:1.15rem">📈 Answer-style ladder</h3><p class="sub">How the same 8-mark question climbs from weak to A*.</p><div style="margin-top:12px">'+EV.ladderHTML()+'</div></section>';
+  b.innerHTML=h;
+};
+/* Recorded lessons. Free ones first, the ones for plan holders below. */
+TAB.videos=function(o,b){
+  var vd=EV.videosOf(o),t=vd.teacher||{},free=vd.free||[],paid=vd.paid||[],pro=EVLive.isPro();
+  function row(it,locked){
+    if(locked)return EV.pdfLockRow(it,t.photo);
+    return '<div class="pdf"><div class="ico'+(t.photo?' ph':'')+'" aria-hidden="true">'+(t.photo?'<img src="'+esc(t.photo)+'" alt="" loading="lazy">':'▶')+'</div><div><b>'+esc(it.t)+'</b><span>'+esc(it.d||'')+'</span></div><div class="acts">'+
+      (it.url?'<a class="btn sm gold" href="'+esc(it.url)+'" target="_blank" rel="noopener">Watch</a>':'<span class="pill">Being added</span>')+'</div></div>';
+  }
+  var h='<h2 class="h2" style="margin:0;font-size:1.7rem">'+esc(o.s.name)+' videos</h2><p class="sub">Recorded lessons for '+esc(o.s.name)+' '+esc(o.s.code)+'.</p>';
+  if(t.name)h+='<div class="teach"><img src="'+esc(t.photo||'')+'" alt="'+esc(t.name)+'" width="72" height="72"><div><small>Your teacher</small><b>'+esc(t.name)+'</b><span>'+esc(t.line||'')+'</span></div></div>';
+  if(free.length)h+='<div class="libGroup" style="margin-top:18px"><h3>🎬 Free lessons <span class="pill ok">Free</span></h3>'+free.map(function(it){return row(it,false);}).join('')+'</div>';
+  if(paid.length)h+='<div class="libGroup premBox" id="paidVideos" style="margin-top:18px"><h3>⭐ Full recorded lessons <span class="pill">'+paid.length+'</span></h3>'+
+    (pro?'':'<p class="premSay">These are for plan holders. Plans are not on sale yet, so nothing can be bought here.</p>')+
+    paid.map(function(it){return row(it,!pro);}).join('')+(pro?'':'<div class="row"><button class="btn sm" type="button" data-plans>See the plans</button></div>')+'</div>';
   b.innerHTML=h;
 };
 TAB.library=function(o,b){

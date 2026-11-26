@@ -661,6 +661,12 @@ footer nav a:hover{color:var(--ivory)}
 .pdf .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .pdf.lock{background:linear-gradient(160deg,rgba(240,180,41,.06),transparent 60%),var(--deck);border-color:var(--goldline)}
 .pdf.lock .ico{font-size:1.05rem}
+.pdf .ico.ph{width:48px;height:48px;border-radius:50%;overflow:hidden;padding:0;background:#0a0a0c}
+.pdf .ico.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.teach{display:flex;gap:16px;align-items:center;margin-top:18px;padding:16px;border-radius:var(--r);background:var(--deck);border:1px solid var(--rim)}
+.teach img{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);flex:0 0 auto;background:#0a0a0c}
+.teach small{display:block;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.teach b{display:block;font-size:1.1rem}.teach span{display:block;font-size:.8rem;color:var(--dim)}
 .premBox{padding:16px;border-radius:var(--r);border:1px solid var(--goldline);background:linear-gradient(180deg,rgba(240,180,41,.05),transparent)}
 .premSay{font-size:.8rem;color:var(--dim);margin:0;max-width:70ch}
 @media(max-width:600px){.pdf{grid-template-columns:auto minmax(0,1fr)}.pdf .acts{grid-column:1/-1;justify-content:flex-start}}
@@ -906,7 +912,8 @@ body.signedOut #nav,body.signedOut #subjPick,body.signedOut #dock,body.signedOut
 body.onSignin #signBtn,body.signedOut #signBtn{display:none} /* members-only site: a signed-out visitor is always on the sign-in form */
 .signGrid{grid-template-areas:"intro form" "peek form";align-items:start}
 .signIntro{grid-area:intro}.signForm{grid-area:form;align-self:center}.peek{grid-area:peek}
-.peek{display:grid;gap:12px;min-width:0}
+.peek{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0}
+.peek>.btn{white-space:normal;text-align:center;height:auto;min-height:44px;padding-block:10px}
 .peekGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .peekCard{display:grid;gap:6px;align-content:start;text-align:left;padding:14px;border-radius:14px;border:1px solid var(--rim);background:var(--deck);color:var(--ivory);font:inherit;min-width:0}
 .peekCard small{font-size:.68rem;color:var(--dim);letter-spacing:.02em}

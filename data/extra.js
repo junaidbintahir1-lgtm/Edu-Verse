@@ -87,3 +87,18 @@ window.EV_EXTRA={
   }
  ]
 };
+
+/* EduVerse — recorded lessons, per subject. A subject gets a "Videos" tab only when it is listed here.
+   teacher: name, line (one honest line), photo.
+   free: lessons everyone can watch  { t: title, d: description, url: link }
+   paid: lessons for plan holders    { t: title, d: description }
+         Never put the link of a paid lesson in this file: this file is public. */
+window.EV_VIDEOS={
+ "olevel/pak2059": {
+  "teacher": {"name": "Sir Alam", "line": "Pakistan Studies 2059 · O Level", "photo": "assets/teachers/sir-alam.jpg"},
+  "free": [],
+  "paid": [
+   {"t": "Pakistan Studies 2059: recorded lessons", "d": "Recorded lessons by Sir Alam for O Level Pakistan Studies"}
+  ]
+ }
+};
