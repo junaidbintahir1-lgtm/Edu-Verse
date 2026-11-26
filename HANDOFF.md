@@ -82,9 +82,9 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   (shown as "Paper" in Supabase; its address is `/functions/v1/smooth-processor?path=…`, set in `EVLive.PAPERS_FN`), which checks the account (owner, developer or an active plan, and not banned)
   and then reads the PDF from a **private GitHub repository** named in its secrets (`PAPERS_REPO`,
   `PAPERS_TOKEN`). If that function is not connected, the private Supabase Storage bucket `paid-papers` is tried
-  (read rule: `eduverse_can_read_paid`). The `paid/` folder in this public repository is only a hand-over copy:
-  once the owner has put the papers in the private store it is deleted here. New paid papers go into the
-  private repository and get an entry in `site-data.js`; they are never added to this repository.
+  (read rule: `eduverse_can_read_paid`). **No paid PDF is in this public repository**: the private repository
+  is `junaidbintahir1-lgtm/eduverse-papers`, with the same folder and file names as the `paid/…` paths. To add
+  a paid paper, upload it there and add its entry to `site-data.js`; never add it to this repository.
 - **Sign-in:** Supabase email + password through `live.js`, stored under `ev_auth_token`, `ev_auth_refresh`,
   `ev_auth_expires` and `ev_auth_user`. Sign-up keeps the classic
   site's fields and username rules. Tokens renew silently.
@@ -186,7 +186,7 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
 |---|---|
 | Payments | Switched off on purpose (no payment account is linked). No checkout code exists; plans and top-ups are given only by the owner |
 | Light theme | Black only |
-| Paid PDFs | Served from private storage. Until the owner confirms the upload, a copy is still in `paid/` here; older copies also remain in the Git history |
+| Paid PDFs | Private (see above). Copies that were public before 26 Nov 2026 remain in this repository's Git history until that history is rewritten |
 | Past-paper questions | `EV_PASTPAPERS` (interactive past-paper questions) is still empty; Papers shows the topical PDF papers only |
 | XP from Knovo marking | Not awarded (cannot be verified yet) |
 
