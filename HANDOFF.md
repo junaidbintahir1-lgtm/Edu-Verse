@@ -215,3 +215,8 @@ season-end test with the clock set to August 2027 and the gift functions (give, 
 - **Accuracy rule:** quotes must be word-for-word with a named source; facts and equations must be checkable.
 - **Fallbacks:** without WebGL the page shows a flat CSS Earth. With reduced-motion settings there is no autoplay.
 - **Earth image licence — confirm before launch:** the four files in `tex/` came from the open-source three-globe package and look like NASA Blue Marble data, but their original licence was not confirmed. Before launch, re-download the originals from NASA Visible Earth (public domain), replace the files in `tex/`, and update the footer credit.
+
+## Premium notes and the syllabus map (26 Nov 2026, work branch)
+
+- **Premium notes** sit directly under the free "Full study book" on a subject's Notes tab. They appear only when the subject has a `premium` list in `data/site-data.js` (same shape as `detailed`, with `paid/...` paths, so the files live in the private papers store). Without a plan the files are listed with a lock and no Open button; with a plan they open through the Paper function. The PDF library locks the same list. No subject has premium notes yet, so nothing shows on the site today.
+- **Syllabus map** (Overview tab): sections now run down two arcs, each on its own row, so labels cannot overlap and every dot sits on its line. The box grows taller for subjects with many sections.

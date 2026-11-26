@@ -13,6 +13,10 @@ EV.subjCard=function(o,extra){
   return '<a class="subj" href="#overview-'+o.slug+'"><button class="fav'+(fav?' on':'')+'" type="button" data-fav="'+o.ref+'" aria-label="'+(fav?'Remove from':'Add to')+' favourites" aria-pressed="'+fav+'">'+(fav?'♥':'♡')+'</button><span class="ic">'+s.icon+'</span><b>'+esc(s.name)+' <span class="code muted">'+esc(s.code)+'</span></b><span>'+esc(s.board)+(acc?' · '+acc.pct+'% accuracy':'')+'</span>'+(extra?'<p>'+esc(extra)+'</p>':'')+'</a>';
 };
 function pdfLabel(f){var m=String(f).match(/^resources\/[A-Za-z]+_(OLevel|IGCSE|Shared)(?:_(\d{4}))?\//);if(!m)return '';return m[1]==='Shared'?'Shared folder':(m[1]==='OLevel'?'O Level':'IGCSE')+(m[2]?' '+m[2]:'');}
+/* A paid file shown to someone without a plan: the name and what it is, but no way to open it. */
+EV.pdfLockRow=function(it){
+  return '<div class="pdf lock"><div class="ico" aria-hidden="true">🔒</div><div><b>'+esc(it.t)+'</b><span>'+esc(it.d||'')+'</span></div><div class="acts"><span class="pill gold">Plan holders</span></div></div>';
+};
 EV.pdfRow=function(it){var lb=pdfLabel(it.f);
   return '<div class="pdf"><div class="ico">PDF</div><div><b>'+esc(it.t)+(lb?' <span class="pill" style="vertical-align:middle">'+esc(lb)+'</span>':'')+'</b><span>'+esc(it.d||'')+'</span></div><div class="acts">'+(EVLive.isPaidPath(it.f)?'<button class="btn sm gold" type="button" data-paid="'+esc(it.f)+'">Open</button><button class="btn sm" type="button" data-paid="'+esc(it.f)+'" data-dl="1">Download</button>':'<a class="btn sm gold" href="'+EV.pdfView(it.f)+'" target="_blank" rel="noopener">Open</a><a class="btn sm" href="'+EV.pdfRaw(it.f)+'" target="_blank" rel="noopener">Download</a>')+'</div></div>';
 };
@@ -219,7 +223,7 @@ V.level=function(el,r){
 
 /* =================== SUBJECT HUB =================== */
 var TABNAME={overview:'Overview',notes:'Notes',topics:'Topics',questions:'Questions',cards:'Flashcards',technique:'Exam technique',library:'PDF library',tools:'Study tools'};
-var RESCAT=[['detailed','Study books · detailed notes'],['quickref','Quick reference sheets'],['topical','Topical question banks'],['compiled','Compiled topical papers'],['tests','Topic tests'],['mixed','Mixed-topic tests'],['yearly','Yearly practice papers'],['assess','Full-syllabus assessment'],['mocks','Challenge mocks + marking guides']];
+var RESCAT=[['detailed','Study books · detailed notes'],['premium','Premium notes'],['quickref','Quick reference sheets'],['topical','Topical question banks'],['compiled','Compiled topical papers'],['tests','Topic tests'],['mixed','Mixed-topic tests'],['yearly','Yearly practice papers'],['assess','Full-syllabus assessment'],['mocks','Challenge mocks + marking guides']];
 V.subject=function(el,r){
   var o=r.o,s=o.s,tab=r.tab;
   if(o.soon){EV.go('level-'+o.level.slug);return;}
@@ -254,16 +258,31 @@ TAB.overview=function(o,b){
   b.innerHTML=h;
   /* constellation of notes sections */
   var n=notes.length,pts=[],sky=$('#skyIn');
-  for(var i=0;i<n;i++){var a=i/n*Math.PI*2+.3,rad=30+((i*37)%14);pts.push({x:50+Math.cos(a)*rad*(i%2?1:.82),y:50+Math.sin(a)*rad*.78*(i%2?.9:1),d:((i*53)%90)-45});}
-  var svg='<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="'+pts.concat(pts.slice(0,1)).map(function(p){return p.x.toFixed(1)+','+p.y.toFixed(1)}).join(' ')+'" fill="none" stroke="rgba(240,180,41,.28)" stroke-width=".35"/></svg>';
-  sky.innerHTML=svg+notes.map(function(nt,i){var k=o.ref+'#n'+i,st=ST.topicsDone.indexOf(k)>=0?'done':ST.notesSeen.indexOf(k)>=0?'seen':'';var p=pts[i];return '<a class="star '+st+'" href="#notes-'+o.slug+'" data-open="'+i+'" style="--x:'+p.x+'%;--y:'+p.y+'%;--d:'+p.d+'px" title="'+esc(EV.strip(nt.t))+'"><i></i><span>'+esc(EV.strip(nt.t).replace(/^\d+\.\s*/,''))+'</span></a>';}).join('');
+  /* Two arcs: the first half of the sections runs down the left, the rest down the right.
+     Every section gets its own row, so labels can never sit on top of each other. */
+  var nL=Math.ceil(n/2),nR=n-nL,rows=Math.max(nL,nR,1),skyH=Math.max(400,rows*36+110);
+  $('#sky').style.height=skyH+'px';
+  var top=34/skyH*100,bot=(skyH-70)/skyH*100;
+  for(var i=0;i<n;i++){var L=i<nL,k=L?i:i-nL,m=L?nL:nR,t=m>1?k/(m-1):.5,bulge=Math.sin(Math.PI*t)*7;
+    /* the right-hand rows sit half a step lower than the left, so two labels never meet in the middle */
+    pts.push({x:L?13-bulge:87+bulge,y:top+(bot-top)*(k/rows)+(L?0:(bot-top)/(2*rows)),side:L?'l':'r'});}
+  function arc(a){return a.length>1?'<polyline points="'+a.map(function(p){return p.x.toFixed(1)+','+p.y.toFixed(1)}).join(' ')+'" fill="none" stroke="rgba(240,180,41,.28)" stroke-width=".35"/>':'';}
+  var svg='<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+arc(pts.slice(0,nL))+arc(pts.slice(nL))+'</svg>';
+  sky.innerHTML=svg+notes.map(function(nt,i){var k=o.ref+'#n'+i,st=ST.topicsDone.indexOf(k)>=0?'done':ST.notesSeen.indexOf(k)>=0?'seen':'';var p=pts[i];return '<a class="star '+p.side+' '+st+'" href="#notes-'+o.slug+'" data-open="'+i+'" style="--x:'+p.x+'%;--y:'+p.y+'%" title="'+esc(EV.strip(nt.t))+'"><i></i><span>'+esc(EV.strip(nt.t).replace(/^\d+\.\s*/,''))+'</span></a>';}).join('');
   sky.addEventListener('click',function(e){var a=e.target.closest('[data-open]');if(a)EV.openNote=+a.dataset.open;});
-  var skyB=$('#sky');if(EV.fine&&!EV.reduce){skyB.addEventListener('mousemove',function(e){var r=skyB.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;sky.style.transform='rotateY('+(x*16)+'deg) rotateX('+(-y*12)+'deg)';});skyB.addEventListener('mouseleave',function(){sky.style.transform='';});}
+  var skyB=$('#sky');if(EV.fine&&!EV.reduce){skyB.addEventListener('mousemove',function(e){var r=skyB.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;sky.style.transform='rotateY('+(x*8)+'deg) rotateX('+(-y*6)+'deg)';});skyB.addEventListener('mouseleave',function(){sky.style.transform='';});}
 };
 TAB.notes=function(o,b){
   var notes=EV.notesOf(o),openI=EV.openNote!=null?EV.openNote:0;EV.openNote=null;
   var h='<div class="hd"><div><h2 class="h2" style="margin:0;font-size:1.7rem">'+esc(o.s.name)+' notes</h2><p class="sub" style="margin-top:6px">'+(o.deep?'Expanded edition: '+notes.length+' detailed sections.':notes.length+' short-note sections covering the syllabus.')+' Mark a section as learned when you could teach it back from memory.</p></div><span class="pill ok">Free</span></div>';
-  if(o.res&&o.res.detailed)h+='<div class="libGroup" style="margin-top:18px"><h3>📚 Full study book</h3>'+o.res.detailed.map(EV.pdfRow).join('')+'</div>';
+  if(o.res&&o.res.detailed)h+='<div class="libGroup" style="margin-top:18px"><h3>📚 Full study book <span class="pill ok">Free</span></h3>'+o.res.detailed.map(EV.pdfRow).join('')+'</div>';
+  /* Premium notes sit directly under the free study book. Shown only when a subject has some. */
+  var prem=o.res&&o.res.premium&&o.res.premium.length?o.res.premium:null;
+  if(prem){var pro=EVLive.isPro();
+    h+='<div class="libGroup premBox" id="premNotes" style="margin-top:18px"><h3>⭐ Premium notes <span class="pill gold">Pro</span><span class="pill">'+prem.length+'</span></h3>'+
+      (pro?'':'<p class="premSay">These are for plan holders. Plans are not on sale yet, so nothing can be bought here. Everything above and below stays free.</p>')+
+      prem.map(pro?EV.pdfRow:EV.pdfLockRow).join('')+
+      (pro?'':'<div class="row"><button class="btn sm" type="button" data-plans>See the plans</button></div>')+'</div>';}
   h+='<div class="stack" style="margin-top:20px">'+notes.map(function(nt,i){var k=o.ref+'#n'+i,dn=ST.topicsDone.indexOf(k)>=0;return '<details class="note'+(dn?' done':'')+'" data-n="'+i+'"'+(i===openI?' open':'')+'><summary><span class="nn">'+String(i+1).padStart(2,'0')+'</span><b>'+esc(EV.strip(nt.t))+'</b>'+(dn?'<span class="pill ok">Learned</span>':'')+'<span class="chev" aria-hidden="true">›</span></summary><div class="nb"><div class="rich">'+nt.b+'</div><div class="row"><button class="btn sm '+(dn?'ok':'gold')+'" type="button" data-learn="'+i+'">'+(dn?'✓ Learned':'Mark as learned')+'</button><button class="btn sm teal" type="button" data-nask="'+i+'">Ask Knovo about this section</button></div></div></details>';}).join('')+'</div>';
   b.innerHTML=h;
   function seen(i){var k=o.ref+'#n'+i;if(ST.notesSeen.indexOf(k)<0){ST.notesSeen.push(k);EV.save();}}
@@ -321,7 +340,7 @@ TAB.library=function(o,b){
   var cats=RESCAT.filter(function(c){return o.res[c[0]]&&o.res[c[0]].length});
   Object.keys(o.res).forEach(function(k){if(!RESCAT.some(function(c){return c[0]===k}))cats.push([k,k]);});
   /* Only the topical material is Pro. Mock-style papers (yearly, mixed, full-syllabus, challenge mocks) are free. */
-  var pro=EVLive.isPro(),PRO_CATS={topical:1,compiled:1,tests:1},FREE_CATS={yearly:1,mixed:1,assess:1,mocks:1};
+  var pro=EVLive.isPro(),PRO_CATS={premium:1,topical:1,compiled:1,tests:1},FREE_CATS={detailed:1,quickref:1,yearly:1,mixed:1,assess:1,mocks:1};
   h+='<div class="stack" style="margin-top:20px;gap:26px">'+cats.map(function(c){var locked=PRO_CATS[c[0]]&&!pro;return '<div class="libGroup"><h3>'+esc(c[1])+' <span class="pill">'+o.res[c[0]].length+'</span>'+(PRO_CATS[c[0]]?' <span class="pill gold">Pro</span>':FREE_CATS[c[0]]?' <span class="pill ok">Free</span>':'')+'</h3>'+(locked?'<div class="empty" style="padding:18px"><b>🔒 Part of EduVerse Pro</b><span>Topical question banks, topical past papers and topic tests are part of EduVerse Pro. Pro is not on sale yet and nothing can be bought on this site. Mock papers are free.</span>'+(ST.profile?'':'<a class="btn gold sm" href="#signin">Sign in</a>')+'</div>':o.res[c[0]].map(EV.pdfRow).join(''))+'</div>';}).join('')+'</div>';
   b.innerHTML=h;
 };
