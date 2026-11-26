@@ -338,7 +338,15 @@ L.entrySet=function(pw){return rpc("eduverse_admin_set_entry_password",{p_passwo
    educatorStatus(): null (no request / not set up) or {status:"pending"|"approved"|"rejected", code, school, ..., verified_until} */
 L.SUPPORT_EMAIL="educationalverse2027@gmail.com";
 function eduCache(){var c=jsonGet("ev_educator",null),u=L.user();if(!c||!u||c.email!==u.email)return null;return c;}
-L.isEducator=function(){var c=eduCache();return !!(c&&c.status==="approved"&&(!c.until||c.until>Date.now()));};
+L.isEducator=function(){var c=eduCache();return !!(c&&c.status==="approved");}; /* no end date: verified until the owner removes it */
+/* A short record for the owner, once per browser session: device type and time zone. Never blocks anything. */
+L.educatorSeen=function(){
+  if(!L.isEducator())return;var u=L.user()||{},k="ev_edu_seen";try{if(sessionStorage.getItem(k)===u.email)return;sessionStorage.setItem(k,u.email||"1");}catch(e){}
+  var ua=navigator.userAgent||"",br=/Edg\//.test(ua)?"Edge":/OPR\//.test(ua)?"Opera":/Firefox\//.test(ua)?"Firefox":/Chrome\//.test(ua)?"Chrome":/Safari\//.test(ua)?"Safari":"Browser",
+      os=/Android/.test(ua)?"Android":/iPhone|iPad|iPod/.test(ua)?"iPhone or iPad":/Windows/.test(ua)?"Windows":/Mac OS X/.test(ua)?"Mac":/Linux/.test(ua)?"Linux":"device",tz="";
+  try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||"";}catch(e){}
+  rpc("eduverse_teacher_seen",{p_device:br+" on "+os,p_timezone:tz}).catch(function(){});
+};
 L.educatorStatus=function(){
   return rpc("eduverse_teacher_status",{}).then(function(r){r=Array.isArray(r)?(r[0]||null):r;var u=L.user()||{};
     if(r&&r.status)lsSet("ev_educator",JSON.stringify({email:u.email||"",status:r.status,until:r.verified_until?Date.parse(r.verified_until):0}));else lsDel("ev_educator");

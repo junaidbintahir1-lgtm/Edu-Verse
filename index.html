@@ -193,6 +193,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .bItem a,.bItem .lnk{display:inline-block;margin-top:5px;font-size:.74rem;font-weight:700;color:var(--gold);text-decoration:none;border:0;background:none;padding:0}
 .bItem .btn{flex:0 0 auto}
 @media(max-width:820px){.bellDrop{top:calc(110px + env(safe-area-inset-top,0px))}}
+.eduChip{display:flex;align-items:center;gap:6px;font-size:.74rem;font-weight:700;color:#111;padding:6px 10px;border-radius:999px;background:var(--gold);text-decoration:none;white-space:nowrap}
+.eduChip[hidden]{display:none}
+@media(max-width:1280px){.eduChip span{display:none}}
+body.signedOut #eduChip{display:none!important}
 @media(max-width:480px){.xpChip{display:none}.brand span{font-size:1.05rem}.topbar .in{gap:8px}}
 
 /* ---------- Views ---------- */
@@ -968,6 +972,7 @@ body.onSignin #signBtn,body.signedOut #signBtn{display:none} /* members-only sit
     </nav>
     <div class="tbR">
       <button class="bellBtn" id="bellBtn" type="button" aria-label="Notifications" aria-controls="bellDrop" aria-expanded="false"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="bellBadge" id="bellBadge" hidden>0</span></button>
+      <a class="eduChip" href="#educator" id="eduChip" hidden title="Your educator account is verified">🎓 <span>Verified Educator</span></a>
       <a class="xpChip" href="#dashboard" id="xpChip" title="Your XP">⭐ <span id="xpNum">0 XP</span></a>
       <button class="proBtn" type="button" data-plans>✦ Knovo Plus</button>
       <a class="btn gold sm" href="#signin" id="signBtn">Sign in</a>

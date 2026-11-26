@@ -273,6 +273,12 @@ EV.render=function(){
   document.body.classList.toggle('inMock',r.name==='mock'&&EV.mockRunning);
   EV.paintCtx();
   var sp=$('#subjPick');if(sp)sp.value=(r.o&&r.o.ref)||(r.name==='topic'?'olevel/math4024':'');
+  EV.paintEdu();
+};
+/* The gold "Verified Educator" badge in the top bar, and a one-time welcome the first time it appears. */
+EV.paintEdu=function(fresh){
+  var on=!!(ST.profile&&EVLive.isEducator()),ch=$('#eduChip');if(ch)ch.hidden=!on;
+  if(on&&fresh){var k='ev_edu_welcomed',em=(EVLive.user()||{}).email||'';try{if(localStorage.getItem(k)!==em){localStorage.setItem(k,em);EV.toast('🎓 You are now a Verified Educator');if(EV.paintDrawer)EV.paintDrawer();}}catch(e){}}
 };
 EV.go=function(h){if(location.hash==='#'+h)EV.render();else location.hash=h;};
 window.addEventListener('hashchange',function(){var q=location.hash==='#qualifications';EV.render();if(!q)window.scrollTo(0,0);});
@@ -592,7 +598,7 @@ EV.boot=function(){
       LV.checkOwner().then(function(){EV.paintProfile();if(/^(subject|knovo|papers|paperSubj|admin)$/.test(EV.route.name))EV.render();EV.refreshPlan();});
       /* a suspended account is signed out wherever it is still open */
       LV.accountState().then(function(st){if(st&&st.banned){EV.banMsg=LV.banText(st.reason);LV.signOut();ST.profile=null;EV.save();EV.paintProfile();EV.render();}});
-      var eu=LV.user();if(eu&&eu.role==='teacher')LV.educatorStatus().then(function(){if(EV.route.name==='educator')EV.render();}).catch(function(){});
+      var eu=LV.user();if(eu&&eu.role==='teacher')LV.educatorStatus().then(function(){EV.paintEdu(true);LV.educatorSeen();if(EV.route.name==='educator')EV.render();}).catch(function(){});
     });
     var sp=$('#subjPick');
     EV.LEVELS.forEach(function(L){var g=document.createElement('optgroup');g.label=L.title.replace(/<[^>]+>/g,'');L.subjects.filter(function(o){return !o.soon}).forEach(function(o){var op=document.createElement('option');op.value=o.ref;op.textContent=o.s.icon+' '+o.s.name+' '+o.s.code;g.appendChild(op);});if(g.children.length)sp.appendChild(g);});
