@@ -121,18 +121,33 @@ L.updatePassword=function(pw){
         return {ok:false,error:/different from the old/i.test(raw)?"Choose a password you have not used before.":/at least|weak/i.test(raw)?"Please choose a longer password.":friendlyAuth(raw)};});})
       .catch(function(){return {ok:false,error:"Could not connect. Check your internet and try again."};});});
 };
-/* ---- Paid papers live in private storage, not in the website's public files. ----
-   The storage server gives a file only to the owner, developers and accounts with a paid plan.
-   path: "paid/<folder>/<file>.pdf" as written in data/site-data.js. Resolves a Blob. */
+/* ---- Paid papers are private: they are not in the website's public files. ----
+   The website asks the "Papers" server function, which checks the account (owner, developer or an active
+   plan, and not banned) and then fetches the PDF from a private GitHub repository. Students never see
+   that repository. If the function is not set up yet, the private Supabase Storage bucket is tried next.
+   path: "paid/<folder>/<file>.pdf" as written in data/site-data.js. Resolves a Blob.
+   Rejects with code: auth | refused (no plan) | missing | network. */
+L.PAPERS_FN=SUPA_URL+"/functions/v1/Papers";
 L.PAID_BUCKET="paid-papers";
 L.isPaidPath=function(p){return /^paid\//.test(String(p||""));};
 L.paidBlob=function(path){
-  var key=String(path).replace(/^paid\//,"").split("/").map(encodeURIComponent).join("/");
-  return L.getSession().then(function(s){if(!s){var e=new Error("auth");e.code="auth";throw e;}
-    return fetch(SUPA_URL+"/storage/v1/object/authenticated/"+L.PAID_BUCKET+"/"+key,{headers:{apikey:SUPA_KEY,Authorization:"Bearer "+s.access_token}})
-      .catch(function(){var e=new Error("network");e.code="network";throw e;})
-      .then(function(r){if(!r.ok){var e=new Error("refused");e.code="refused";e.status=r.status;throw e;}return r.blob();})
-      .then(function(b){return b.type==="application/pdf"?b:new Blob([b],{type:"application/pdf"});});});
+  var rel=String(path).replace(/^paid\//,""),key=rel.split("/").map(encodeURIComponent).join("/");
+  function err(c){var e=new Error(c);e.code=c;return e;}
+  function pdf(r){return r.blob().then(function(b){return b.type==="application/pdf"?b:new Blob([b],{type:"application/pdf"});});}
+  return L.getSession().then(function(s){if(!s)throw err("auth");
+    var H={apikey:SUPA_KEY,Authorization:"Bearer "+s.access_token};
+    function fromBucket(){return fetch(SUPA_URL+"/storage/v1/object/authenticated/"+L.PAID_BUCKET+"/"+key,{headers:H}).catch(function(){throw err("network");})
+      .then(function(r){if(!r.ok)throw err("missing");return pdf(r);});}
+    return fetch(L.PAPERS_FN+"?path="+encodeURIComponent(rel),{headers:H}).catch(function(){throw err("network");}).then(function(r){
+      if(r.ok)return pdf(r);
+      if(r.status===401)throw err("auth");
+      return r.json().catch(function(){return null;}).then(function(d){
+        var code=d&&d.error;
+        if(r.status===403&&(code==="PLAN_REQUIRED"||code==="ACCOUNT_SUSPENDED"))throw err("refused");
+        return fromBucket(); /* function not deployed, not connected, or the file is not in that store */
+      });
+    });
+  });
 };
 L.banText=function(reason){return "This account has been suspended"+(reason?": "+reason:".")+" If you think this is a mistake, write to "+(L.SUPPORT_EMAIL||"educationalverse2027@gmail.com")+".";};
 /* {banned, reason} for the signed-in account, or null when it cannot be checked (offline, or not set up yet) */

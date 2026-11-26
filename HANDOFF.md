@@ -77,13 +77,14 @@ are Supabase, Google Fonts, the contact-form service (formsubmit.co) and, for ph
   "Forgot your password?" ask Supabase to send people back to `EVLive.siteUrl()`; that address must be in
   Supabase → Authentication → URL Configuration.
 - **Paid papers are private:** every paid PDF (topical banks, topical past papers, topic tests) has a path that
-  starts with `paid/` in `data/site-data.js`. Those files are served from the private Supabase Storage bucket
-  `paid-papers` (same path without `paid/`), which only the owner, developers and active plan holders can
-  read (`eduverse_can_read_paid`). `EV.pdfRow` draws buttons for them and `EV.openPaid` fetches the file with
-  the student's session (`EVLive.paidBlob`). Files over 45 MB were split into two parts, because the free
-  Supabase plan refuses uploads over 50 MB. The `paid/` folder in this repository is only a hand-over copy:
-  once the owner has uploaded it to the bucket it is deleted here. New paid papers go straight into the
-  bucket and get an entry in `site-data.js`; they are never added to this repository.
+  starts with `paid/` in `data/site-data.js`. `EV.pdfRow` draws buttons for them and `EV.openPaid` fetches the
+  file with the student's session (`EVLive.paidBlob`). The file comes from the **Papers** Supabase edge function
+  (`/functions/v1/Papers?path=…`), which checks the account (owner, developer or an active plan, and not banned)
+  and then reads the PDF from a **private GitHub repository** named in its secrets (`PAPERS_REPO`,
+  `PAPERS_TOKEN`). If that function is not connected, the private Supabase Storage bucket `paid-papers` is tried
+  (read rule: `eduverse_can_read_paid`). The `paid/` folder in this public repository is only a hand-over copy:
+  once the owner has put the papers in the private store it is deleted here. New paid papers go into the
+  private repository and get an entry in `site-data.js`; they are never added to this repository.
 - **Sign-in:** Supabase email + password through `live.js`, stored under `ev_auth_token`, `ev_auth_refresh`,
   `ev_auth_expires` and `ev_auth_user`. Sign-up keeps the classic
   site's fields and username rules. Tokens renew silently.

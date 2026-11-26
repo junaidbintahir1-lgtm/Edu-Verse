@@ -29,6 +29,7 @@ EV.openPaid=function(path,download){
   function show(url){if(download){var a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();}else if(w)w.location.href=url;else location.href=url;}
   return LV.paidBlob(path).then(function(b){show(URL.createObjectURL(b));},function(e){
     if(e&&e.code==='auth'){if(w)w.close();EV.toast('Please sign in again to open this paper.');return;}
+    if(e&&e.code==='refused'){if(w)w.close();EV.toast('This paper is part of EduVerse Pro.');return;}
     return fetch(EV.pdfView(path),{method:'HEAD'}).then(function(r){if(r.ok){show(EV.pdfView(path));return;}throw 0;}).catch(function(){
       if(w)w.close();EV.toast(e&&e.code==='network'?'Could not connect. Check your internet and try again.':'This paper could not be opened. It is part of EduVerse Pro; if you have a plan, sign out and in again.');});});
 };
